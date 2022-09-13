@@ -15,7 +15,7 @@ module.exports.loop = function () {
     structSpawn.run();
     // run towers
     structTower.run();
-    
+
     // run creeps
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
@@ -48,7 +48,7 @@ module.exports.loop = function () {
             roleClaimer.run(creep, false);
         }
     }
-    
+
     // clear memory
     for(var i in Memory.creeps) {
         if(!Game.creeps[i]) {
