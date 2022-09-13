@@ -10,3 +10,10 @@ Tutorial für Grunt:
   https://docs.screeps.com/commit.html
 Tutorial für Autocomplete:
   https://www.youtube.com/watch?v=edBMmOAfJ-Q
+
+Command commit to screeps:
+  grunt screeps
+
+Command commit to GitHub
+  git commit -m "Message"
+  git push
