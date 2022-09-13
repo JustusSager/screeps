@@ -12,7 +12,7 @@ module.exports = function() {
             for (let i = 0; i < number_of_parts; i++) {
                 body.push(MOVE);
             }
-            
+
             return this.spawnCreep(body, role + Game.time, { memory: {
                 role: role,
                 working: true,

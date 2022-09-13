@@ -8,3 +8,5 @@ Der Code ist eine Mischung aus:
 Tutorial für Grunt:
   Grunt.js Tutorial For Beginners: https://www.youtube.com/watch?v=3Xem8LgoIMw
   https://docs.screeps.com/commit.html
+Tutorial für Autocomplete:
+  https://www.youtube.com/watch?v=edBMmOAfJ-Q
