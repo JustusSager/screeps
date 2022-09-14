@@ -6,8 +6,13 @@ module.exports = {
             for (var i in towers) {
                 if (towers[i]) {
                     var closest_hostile = towers[i].pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-                    var closest_damaged_creep = towers[i].pos.findClosestByRange(FIND_MY_CREEPS, { filter: (creep) => {return ( creep.hits < creep.hitsMax );}})
-                    var closest_damaged_structure = towers[i].pos.findClosestByRange(FIND_STRUCTURES, {filter: (s) => s.hits < s.hitsMax});
+                    var closest_damaged_creep = towers[i].pos.findClosestByRange(FIND_MY_CREEPS, { 
+                        filter: (creep) => {return ( creep.hits < creep.hitsMax );
+                    }})
+                    var closest_damaged_structure = towers[i].pos.findClosestByRange(FIND_STRUCTURES, {
+                        filter: (s) => s.hits < s.hitsMax && 
+                            s.structureType != STRUCTURE_WALL
+                    });
                     
                     if(closest_hostile) {
                         console.log('Warning! Hostile spotted at' + towers[i].room.name);
