@@ -12,27 +12,21 @@ module.exports = {
 
         // if creep is supposed to transfer energy to the spawn
         if (creep.memory.working == true) {
-            var extension_target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+            var target = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_EXTENSION ||
+                    return (structure.structureType == STRUCTURE_SPAWN ||
+                            structure.structureType == STRUCTURE_EXTENSION ||
                             structure.structureType == STRUCTURE_TOWER) &&
                             structure.energy < structure.energyCapacity &&
                             structure.room == creep.room;
                 }
-            });
+            })[0];
             // try to transfer energy, if the target is not in range
-            if (creep.room.find(FIND_MY_SPAWNS)[0].energy < 300) {
-                if(speak){creep.say('Spawn');}
-                if (creep.transfer(Game.spawns.Spawn1, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    // move towards the spawn
-                    creep.moveTo(Game.spawns.Spawn1);
-                }
-            }
-            else if (extension_target != null) {
+            if (target != null) {
                 if(speak){creep.say('Extension');}
-                if (creep.transfer(extension_target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards the spawn
-                    creep.moveTo(extension_target);
+                    creep.moveTo(target);
                 }
             }
             else {
