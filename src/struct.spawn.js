@@ -114,12 +114,12 @@ module.exports = {
                     name = Game.spawns[i].createBalancedCreep(energy, 'repairer');
                 }
                 else if (numberTransporters < Game.spawns[i].memory.maxTransporters) {
-                    var urgent = (numberTransporters < 2);
-                    name = createWorkerCreep(Game.spawns[i], transporterBody, 'transporter', urgent, Game.spawns[i].room.name);
+                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
+                    name = Game.spawns[i].createCarrierCreep(energy, 'transporter');
                 }
                 else if (numberDistributors < Game.spawns[i].memory.maxDistributors) {
-                    var urgent = (numberDistributors < 2);
-                    name = createWorkerCreep(Game.spawns[i], transporterBody, 'distributor', urgent, Game.spawns[i].room.name);
+                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
+                    name = Game.spawns[i].createCarrierCreep(energy, 'distributor');
                 }
                 else if (Game.spawns[i].memory.claim_room != undefined) {
                     if (!(createWorkerCreep(Game.spawns[i], [CLAIM, MOVE], 'claimer', false, Game.spawns[i].memory.claim_room) < 0)) {
