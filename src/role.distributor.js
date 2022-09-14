@@ -2,6 +2,8 @@
 Creep holt aus Storage und Containern Energy und verteilt sie auf den Spawn, Extensions und Tower.
 Nicht dafür gemacht den Raum in dem es geschaffen wurde zu verlassen.
 */
+require('prototype.creep')();
+
 module.exports = {
     run: function(creep, speak) {
         
@@ -42,39 +44,7 @@ module.exports = {
         }
         // if creep is supposed to get energy from target
         else {
-            var source_ground = creep.room.find(FIND_DROPPED_RESOURCES)[0];
-            var source_tombstone = creep.pos.findClosestByPath(FIND_TOMBSTONES, {
-                filter: (structure) => {
-                    return (structure.store[RESOURCE_ENERGY] > 0 &&
-                            structure.room == creep.room)
-                }
-            });
-            var source_container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return ((structure.structureType == STRUCTURE_CONTAINER ||
-                            structure.structureType == STRUCTURE_STORAGE) &&
-                            structure.store[RESOURCE_ENERGY] != 0 &&
-                            structure.room == creep.room)
-                }
-            });
-            if (source_ground) {
-                if (speak) {creep.say('DroppedItem');}
-                if (creep.pickup(source_ground) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source_ground);
-                }
-            }
-            else if (source_tombstone != null) {
-                if (speak) {creep.say('Tombstone');}
-                if (creep.withdraw(source_tombstone, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source_tombstone);
-                }
-            }
-            else if (source_container != null) {
-                if(speak){creep.say('Storage');}
-                if (creep.withdraw(source_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source_container);
-                }
-            }
+            creep.getResourceEnergy(speak);
         }
     }
 };

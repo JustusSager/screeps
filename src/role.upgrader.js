@@ -2,6 +2,8 @@
 Creep holt sich Energy aus einem Container, Storage oder Spawn, geht zum Controller und upgradet ihn.
 Bewegt sich nicht zwischen Räumen.
 */
+require('prototype.creep')();
+
 module.exports = {
     // a function to run the logic for this role
     run: function(creep, speak) {
@@ -25,28 +27,7 @@ module.exports = {
         }
         // if creep is supposed to get energy from target
         else {
-            var source_container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return ((structure.structureType == STRUCTURE_CONTAINER ||
-                            structure.structureType == STRUCTURE_STORAGE) &&
-                            structure.store[RESOURCE_ENERGY] != 0 &&
-                            structure.room == creep.room)
-                }
-            });
-            if (source_container != null) {
-                if(speak){creep.say('Container');}
-                if (creep.withdraw(source_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source_container);
-                }
-            }
-            else {
-                var source_spawn = creep.room.find(FIND_MY_SPAWNS)[0]; // find closest source
-                if(speak){creep.say('Spawn');}
-                // try to harvest energy, if the source is not in range move towards the source
-                if (creep.withdraw(source_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source_spawn);
-                }
-            }
+            creep.getResourceEnergy(speak);
         }
     }
 };

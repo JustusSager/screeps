@@ -3,6 +3,7 @@ Creep holt sich Energy aus Storage, Container oder Spawn und sucht die nächste 
 Falls es keine Structure zu reparieren gibt führt der creep die builder role aus.
 Nur für einen Raum gedacht.
 */
+require('prototype.creep')();
 var roleBuilder = require('role.builder');
 
 module.exports = {
@@ -34,28 +35,7 @@ module.exports = {
         }
         // if creep is supposed to get energy from target
         else {
-            var target_container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return ((structure.structureType == STRUCTURE_CONTAINER ||
-                            structure.structureType == STRUCTURE_STORAGE) &&
-                            structure.store[RESOURCE_ENERGY] != 0 &&
-                            structure.room == creep.room)
-                }
-            });
-            if (target_container != null) {
-                if(speak){creep.say('Storage');}
-                if (creep.withdraw(target_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target_container);
-                }
-            }
-            else {
-                var source_spawn = creep.room.find(FIND_MY_SPAWNS)[0]; // find closest source
-                if(speak){creep.say('Spawn');}
-                // try to harvest energy, if the source is not in range move towards the source
-                if (creep.withdraw(source_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source_spawn);
-                }
-            }
+            creep.getResourceEnergy(speak);
         }
     }
 };

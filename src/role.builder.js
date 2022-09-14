@@ -2,6 +2,8 @@
 Creep holt sich Energy aus Storage, Container oder Spawn und sucht die nächste Construction Site und baut diese.
 Kann über memory.room_target auch zu Targets in anderen Räumen geschickt werden.
 */
+require('prototype.creep')();
+
 var roleUpgrader = require('role.upgrader');
 
 module.exports = {
@@ -38,33 +40,7 @@ module.exports = {
         }
         // if creep is supposed to get energy from target
         else {
-            var source_storage = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return ((structure.structureType == STRUCTURE_CONTAINER ||
-                            structure.structureType == STRUCTURE_STORAGE) &&
-                            structure.store[RESOURCE_ENERGY] != 0 &&
-                            structure.room == creep.room)
-                }
-            });
-            if (creep.memory.room_home != undefined && creep.room.name != creep.memory.room_home) {
-                if(speak){creep.say('GoHome');}
-                var exit_direction = creep.room.findExitTo(creep.memory.room_home);
-                creep.moveTo(creep.pos.findClosestByPath(exit_direction));
-            }
-            else if (source_storage != null) {
-                if(speak) {creep.say('Storage');}
-                if (creep.withdraw(source_storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source_storage);
-                }
-            }
-            else {
-                var source_spawn = creep.room.find(FIND_MY_SPAWNS)[0]; // find closest source
-                if(speak) {creep.say('Spawn');}
-                // try to harvest energy, if the source is not in range move towards the source
-                if (creep.withdraw(source_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source_spawn);
-                }
-            }
+            creep.getResourceEnergy(speak);
         }
     }
 };
