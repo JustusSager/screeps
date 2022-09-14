@@ -1,3 +1,8 @@
+/*
+Creep holt sich Energy aus Storage, Container oder Spawn und sucht die nächste zu reparierende Structure und repariert diese. 
+Falls es keine Structure zu reparieren gibt führt der creep die builder role aus.
+Nur für einen Raum gedacht.
+*/
 var roleBuilder = require('role.builder');
 
 module.exports = {

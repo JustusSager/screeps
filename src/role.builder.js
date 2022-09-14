@@ -1,3 +1,7 @@
+/*
+Creep holt sich Energy aus Storage, Container oder Spawn und sucht die nächste Construction Site und baut diese.
+Kann über memory.room_target auch zu Targets in anderen Räumen geschickt werden.
+*/
 var roleUpgrader = require('role.upgrader');
 
 module.exports = {

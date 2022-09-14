@@ -1,3 +1,7 @@
+/*
+Creep holt sich Energy aus einem Container, Storage oder Spawn, geht zum Controller und upgradet ihn.
+Bewegt sich nicht zwischen Räumen.
+*/
 module.exports = {
     // a function to run the logic for this role
     run: function(creep, speak) {

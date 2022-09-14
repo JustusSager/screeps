@@ -1,3 +1,6 @@
+/*
+Creep geht in den Target Room und claimt den, in dem Raum vorhandenen Controller
+*/
 module.exports = {
     run: function(creep, speak) {
         if (creep.room.name == creep.memory.room_target) {

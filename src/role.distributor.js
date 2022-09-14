@@ -1,3 +1,7 @@
+/*
+Creep holt aus Storage und Containern Energy und verteilt sie auf den Spawn, Extensions und Tower.
+Nicht dafür gemacht den Raum in dem es geschaffen wurde zu verlassen.
+*/
 module.exports = {
     run: function(creep, speak) {
         

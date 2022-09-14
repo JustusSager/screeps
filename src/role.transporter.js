@@ -29,9 +29,9 @@ module.exports = {
             }
             else if (creep.room.find(FIND_MY_SPAWNS)[0].energy < 300) {
                 if (speak) {creep.say('Spawn');}
-                if (creep.transfer(Game.spawns.Spawn1, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                if (creep.transfer(creep.room.find(FIND_MY_SPAWNS)[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards the spawn
-                    creep.moveTo(Game.spawns.Spawn1);
+                    creep.moveTo(creep.room.find(FIND_MY_SPAWNS)[0]);
                 }
             }
             else {

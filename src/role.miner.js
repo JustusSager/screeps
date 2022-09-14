@@ -1,3 +1,6 @@
+/*
+Sucht einen Container, der neben der ihm zugewiesenen Energy Source steht, stellt sich auf den Container und baut die Energy Source ab.
+*/
 module.exports = {
     // a function to run the logic for this role
     run: function(creep, speak) {
