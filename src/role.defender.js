@@ -4,10 +4,10 @@ Greift Hostiles im Target Room an
 module.exports = {
     run: function(creep, speak) {
         if (creep.room.name == creep.memory.room_target) {
-            var target = creep.room.find(FIND_HOSTILE_CREEPS)[0];
-            if (target) {
-                if(creep.attack(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target);
+            var target_hostile_creep = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
+            if (target_hostile_creep) {
+                if(creep.attack(target_hostile_creep) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target_hostile_creep);
                 }
             }
         }

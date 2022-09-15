@@ -12,7 +12,7 @@ module.exports = function() {
                 filter: (structure) => {
                     return ((structure.structureType == STRUCTURE_CONTAINER ||
                             structure.structureType == STRUCTURE_STORAGE) &&
-                            structure.store[RESOURCE_ENERGY] != 0 &&
+                            structure.store[RESOURCE_ENERGY] > 100 &&
                             structure.room == this.room)
                 }
             })[0];
