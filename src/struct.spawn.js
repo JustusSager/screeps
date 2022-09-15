@@ -42,35 +42,26 @@ function createWorkerCreep(spawner, body_blueprint, role, urgent, room_target) {
 }
 
 module.exports = {
-    run: function() {
-        for(var i in Game.spawns) {
-            
-            var numberDefenders = _.sum(Game.creeps, (c) => (c.memory.role == 'defender' && c.memory.room_home == Game.spawns[i].room.name));
-            var numberBuilders = _.sum(Game.creeps, (c) => (c.memory.role == 'builder' && c.memory.room_home == Game.spawns[i].room.name));
-            var numberTransporters = _.sum(Game.creeps, (c) => (c.memory.role == 'transporter' && c.memory.room_home == Game.spawns[i].room.name));
-            var numberDistributors = _.sum(Game.creeps, (c) => (c.memory.role == 'distributor' && c.memory.room_home == Game.spawns[i].room.name));
-            var numberHarvesters = _.sum(Game.creeps, (c) => (c.memory.role == 'harvester' && c.memory.room_home == Game.spawns[i].room.name));
-            var numberMiners = _.sum(Game.creeps, (c) => (c.memory.role == 'miner' && c.memory.room_home == Game.spawns[i].room.name));
-            var numberRepairers = _.sum(Game.creeps, (c) => (c.memory.role == 'repairer' && c.memory.room_home == Game.spawns[i].room.name));
-            var numberUpgraders = _.sum(Game.creeps, (c) => (c.memory.role == 'upgrader' && c.memory.room_home == Game.spawns[i].room.name));
-            var numberlongDistanceHarvesters = _.sum(Game.creeps, (c) => (c.memory.role == 'longDistanceHarvester' && c.memory.room_home == Game.spawns[i].room.name));
-            
-            // Create and check body blueprint
-            var workerBody = [WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE];
-            var longDistanceHarvesterBody = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
-            var upgraderBody = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
-            var transporterBody = [WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-            var fighterBody = [TOUGH, ATTACK, MOVE, MOVE];
-            
-            // Skip if Spawner already spawning
-            if (Game.spawns[i].spawning) {
-                continue;
-            }
-            
-            // Spawn new creep
-            var name = undefined;
-            
-            let sources = Game.spawns[i].room.find(FIND_SOURCES);
+    run: function(spawn) {
+        
+        var numberDefenders = _.sum(Game.creeps, (c) => (c.memory.role == 'defender' && c.memory.room_home == spawn.room.name));
+        var numberBuilders = _.sum(Game.creeps, (c) => (c.memory.role == 'builder' && c.memory.room_home == spawn.room.name));
+        var numberTransporters = _.sum(Game.creeps, (c) => (c.memory.role == 'transporter' && c.memory.room_home == spawn.room.name));
+        var numberDistributors = _.sum(Game.creeps, (c) => (c.memory.role == 'distributor' && c.memory.room_home == spawn.room.name));
+        var numberHarvesters = _.sum(Game.creeps, (c) => (c.memory.role == 'harvester' && c.memory.room_home == spawn.room.name));
+        var numberMiners = _.sum(Game.creeps, (c) => (c.memory.role == 'miner' && c.memory.room_home == spawn.room.name));
+        var numberRepairers = _.sum(Game.creeps, (c) => (c.memory.role == 'repairer' && c.memory.room_home == spawn.room.name));
+        var numberUpgraders = _.sum(Game.creeps, (c) => (c.memory.role == 'upgrader' && c.memory.room_home == spawn.room.name));
+        var numberlongDistanceHarvesters = _.sum(Game.creeps, (c) => (c.memory.role == 'longDistanceHarvester' && c.memory.room_home == spawn.room.name));
+        
+        // Create body blueprint
+        var longDistanceHarvesterBody = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        
+        // Spawn new creep
+        var name = undefined;
+        
+        if (!spawn.spawning) {
+            let sources = spawn.room.find(FIND_SOURCES);
             let creeps_in_room = Game.creeps;
             for (let source of sources) {
                 if (!_.some(creeps_in_room, c => c.memory.role == 'miner' && c.memory.source_id == source.id)) {
@@ -78,11 +69,11 @@ module.exports = {
                         filter: s => s.structureType == STRUCTURE_CONTAINER
                     });
                     if (containers.length > 0) {
-                        name = Game.spawns[i].spawnCreep(
+                        name = spawn.spawnCreep(
                             [WORK, WORK, WORK, WORK, WORK, MOVE], 'miner' + Game.time, {
                                 memory: {
                                     role: 'miner',
-                                    room_home: Game.spawns[i].room.name,
+                                    room_home: spawn.room.name,
                                     source_id: source.id
                                 }
                             }
@@ -91,62 +82,62 @@ module.exports = {
                     }
                 }
             }
-            
-            if (!Game.spawns[i].spawning) {
-                if (Game.spawns[i].room.find(FIND_HOSTILE_CREEPS).length > 0 || numberDefenders < Game.spawns[i].memory.maxDefenders) {
-                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
-                    name = Game.spawns[i].createFighterCreep(energy, 'defender');
-                }
-                else if (numberHarvesters < Game.spawns[i].memory.maxHarvesters) {
-                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
-                    name = Game.spawns[i].createBalancedCreep(energy, 'harvester');
-                }
-                else if (numberUpgraders < Game.spawns[i].memory.maxUpgraders){
-                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
-                    name = Game.spawns[i].createBalancedCreep(energy, 'upgrader');
-                }
-                else if (numberBuilders < Game.spawns[i].memory.maxBuilders){
-                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
-                    name = Game.spawns[i].createBalancedCreep(energy, 'builder');
-                }
-                else if (numberRepairers < Game.spawns[i].memory.maxRepairers){
-                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
-                    name = Game.spawns[i].createBalancedCreep(energy, 'repairer');
-                }
-                else if (numberTransporters < Game.spawns[i].memory.maxTransporters) {
-                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
-                    name = Game.spawns[i].createCarrierCreep(energy, 'transporter');
-                }
-                else if (numberDistributors < Game.spawns[i].memory.maxDistributors) {
-                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
-                    name = Game.spawns[i].createCarrierCreep(energy, 'distributor');
-                }
-                else if (Game.spawns[i].memory.claim_room != undefined) {
-                    if (!(createWorkerCreep(Game.spawns[i], [CLAIM, MOVE], 'claimer', false, Game.spawns[i].memory.claim_room) < 0)) {
-                        delete Game.spawns[i].memory.claim_room;
-                    }
-                }
-                else if (numberlongDistanceHarvesters < Game.spawns[i].memory.maxLongDistanceHarvesters) {
-                    name = createWorkerCreep(Game.spawns[i], longDistanceHarvesterBody, 'longDistanceHarvester', false, 'E57S4');
+        }
+        
+        if (!spawn.spawning) {
+            if (spawn.room.find(FIND_HOSTILE_CREEPS).length > 0 || numberDefenders < spawn.memory.maxDefenders) {
+                let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
+                name = spawn.createFighterCreep(energy, 'defender');
+            }
+            else if (numberHarvesters < spawn.memory.maxHarvesters) {
+                let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
+                name = spawn.createBalancedCreep(energy, 'harvester');
+            }
+            else if (numberUpgraders < spawn.memory.maxUpgraders){
+                let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
+                name = spawn.createBalancedCreep(energy, 'upgrader');
+            }
+            else if (numberBuilders < spawn.memory.maxBuilders){
+                let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
+                name = spawn.createBalancedCreep(energy, 'builder');
+            }
+            else if (numberRepairers < spawn.memory.maxRepairers){
+                let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
+                name = spawn.createBalancedCreep(energy, 'repairer');
+            }
+            else if (numberTransporters < spawn.memory.maxTransporters) {
+                let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
+                name = spawn.createCarrierCreep(energy, 'transporter');
+            }
+            else if (numberDistributors < spawn.memory.maxDistributors) {
+                let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
+                name = spawn.createCarrierCreep(energy, 'distributor');
+            }
+            else if (spawn.memory.claim_room != undefined) {
+                if (!(createWorkerCreep(spawn, [CLAIM, MOVE], 'claimer', false, spawn.memory.claim_room) < 0)) {
+                    delete spawn.memory.claim_room;
                 }
             }
-            
-            console.log(
-                'Room: ' + Game.spawns[i].room.name + ' ' + i + ': ' +
-                'Defender: ' + numberDefenders + '/' + Game.spawns[i].memory.maxDefenders + 
-                ', Harvester: ' + numberHarvesters + '/' + Game.spawns[i].memory.maxHarvesters + 
-                ', Miner: ' + numberMiners +
-                ', Builder: ' + numberBuilders + '/' + Game.spawns[i].memory.maxBuilders + 
-                ', Repairer: ' + numberRepairers + '/' + Game.spawns[i].memory.maxRepairers + 
-                ', Upgrader: ' + numberUpgraders + '/' + Game.spawns[i].memory.maxUpgraders + 
-                ', Transporter: ' + numberTransporters + '/' + Game.spawns[i].memory.maxTransporters +
-                ', Distributor: ' + numberDistributors + '/' + Game.spawns[i].memory.maxDistributors +
-                ', LongDistanceHarvester: ' + numberlongDistanceHarvesters + '/' + Game.spawns[i].memory.maxLongDistanceHarvesters
-            );
-            
-            if (name) {
-                console.log(name);
+            else if (numberlongDistanceHarvesters < spawn.memory.maxLongDistanceHarvesters) {
+                name = createWorkerCreep(spawn, longDistanceHarvesterBody, 'longDistanceHarvester', false, 'E57S4');
             }
+        }
+        
+        console.log(
+            'Room: ' + spawn.room.name + ' ' + i + ': ' +
+            'Defender: ' + numberDefenders + '/' + spawn.memory.maxDefenders + 
+            ', Harvester: ' + numberHarvesters + '/' + spawn.memory.maxHarvesters + 
+            ', Miner: ' + numberMiners +
+            ', Builder: ' + numberBuilders + '/' + spawn.memory.maxBuilders + 
+            ', Repairer: ' + numberRepairers + '/' + spawn.memory.maxRepairers + 
+            ', Upgrader: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders + 
+            ', Transporter: ' + numberTransporters + '/' + spawn.memory.maxTransporters +
+            ', Distributor: ' + numberDistributors + '/' + spawn.memory.maxDistributors +
+            ', LongDistanceHarvester: ' + numberlongDistanceHarvesters + '/' + spawn.memory.maxLongDistanceHarvesters
+        );
+        
+        if (name) {
+            console.log(name);
         }
     }
 };

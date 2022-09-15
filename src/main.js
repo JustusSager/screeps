@@ -13,7 +13,9 @@ var structTower = require('struct.tower');
 
 module.exports.loop = function () {
     // run spawners
-    structSpawn.run();
+    for (let i in Game.spawns) {
+        structSpawn.run(Game.spawns[i]);
+    }
     // run towers
     structTower.run();
 
