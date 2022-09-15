@@ -59,11 +59,13 @@ module.exports = {
         
         // Spawn new creep
         var name = undefined;
+
+        var energy_sources = spawn.room.find(FIND_SOURCES);
+        var number_construction_sites = spawn.room.find(FIND_CONSTRUCTION_SITES).length;
         
         if (!spawn.spawning) {
-            let sources = spawn.room.find(FIND_SOURCES);
             let creeps_in_room = Game.creeps;
-            for (let source of sources) {
+            for (let source of energy_sources) {
                 if (!_.some(creeps_in_room, c => c.memory.role == 'miner' && c.memory.source_id == source.id)) {
                     let containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
                         filter: s => s.structureType == STRUCTURE_CONTAINER
@@ -89,7 +91,7 @@ module.exports = {
                 let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
                 name = spawn.createFighterCreep(energy, 'defender');
             }
-            else if (numberHarvesters < spawn.memory.maxHarvesters) {
+            else if (numberMiners < energy_sources.length && numberHarvesters < spawn.memory.maxHarvesters) {
                 let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
                 name = spawn.createBalancedCreep(energy, 'harvester');
             }
@@ -97,7 +99,7 @@ module.exports = {
                 let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
                 name = spawn.createBalancedCreep(energy, 'upgrader');
             }
-            else if (numberBuilders < spawn.memory.maxBuilders){
+            else if (numberBuilders < (number_construction_sites/3) + 1 && numberBuilders < spawn.memory.maxBuilders){
                 let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
                 name = spawn.createBalancedCreep(energy, 'builder');
             }
@@ -126,9 +128,9 @@ module.exports = {
         console.log(
             'Room: ' + spawn.room.name + ' ' + spawn.name + ': ' +
             'Defender: ' + numberDefenders + '/' + spawn.memory.maxDefenders + 
-            ', Harvester: ' + numberHarvesters + '/' + spawn.memory.maxHarvesters + 
-            ', Miner: ' + numberMiners +
-            ', Builder: ' + numberBuilders + '/' + spawn.memory.maxBuilders + 
+            ', Harvester: ' + numberHarvesters + '/' + (energy_sources.length - numberMiners) + '/' + spawn.memory.maxHarvesters + 
+            ', Miner: ' + numberMiners + '/' + energy_sources.length + '/X' +
+            ', Builder: ' + numberBuilders + '/' + ((number_construction_sites/3) + 1) + '/' + spawn.memory.maxBuilders + 
             ', Repairer: ' + numberRepairers + '/' + spawn.memory.maxRepairers + 
             ', Upgrader: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders + 
             ', Transporter: ' + numberTransporters + '/' + spawn.memory.maxTransporters +
