@@ -9,10 +9,12 @@ module.exports = {
         
         // if creep is bringing energy to the spawn but has no energy left
         if (creep.memory.working == true && creep.store[RESOURCE_ENERGY] == 0) {
+            creep.say('GetEnergy');
             creep.memory.working = false;
         }
         // if creep is harvesting energy but is full
         else if (creep.memory.working == false && creep.store.getFreeCapacity([RESOURCE_ENERGY]) == 0) {
+            creep.say('Distribute');
             creep.memory.working = true;
         }
 

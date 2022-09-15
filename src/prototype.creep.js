@@ -8,14 +8,14 @@ module.exports = function() {
                 }
             })[0];
             var source_ground = this.room.find(FIND_DROPPED_RESOURCES)[0];
-            var source_container = this.room.find(FIND_STRUCTURES, {
+            var source_container = this.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return ((structure.structureType == STRUCTURE_CONTAINER ||
                             structure.structureType == STRUCTURE_STORAGE) &&
-                            structure.store[RESOURCE_ENERGY] > 100 &&
-                            structure.room == this.room)
+                            structure.store[RESOURCE_ENERGY] > this.store[RESOURCE_ENERGY].getFreeCapacity
+                            )
                 }
-            })[0];
+            });
 
             if (source_tombstone != null) {
                 if (speak) {this.say('Tombstone');}

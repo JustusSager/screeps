@@ -108,7 +108,7 @@ module.exports = {
                 let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
                 name = spawn.createBalancedCreep(energy, 'upgrader');
             }
-            else if (numberBuilders < (number_construction_sites/3) + 1 && numberBuilders < spawn.memory.maxBuilders){
+            else if (numberBuilders < Math.floor(number_construction_sites/3) + 1 && numberBuilders < spawn.memory.maxBuilders){
                 let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
                 name = spawn.createBalancedCreep(energy, 'builder');
             }
@@ -139,7 +139,7 @@ module.exports = {
             'Defender: ' + numberDefenders + '/' + spawn.memory.maxDefenders + 
             ', Harvester: ' + numberHarvesters + '/' + (energy_sources.length - numberMiners) + '/' + spawn.memory.maxHarvesters + 
             ', Miner: ' + numberMiners + '/' + energy_sources.length + '/X' +
-            ', Builder: ' + numberBuilders + '/' + ((number_construction_sites/3) + 1) + '/' + spawn.memory.maxBuilders + 
+            ', Builder: ' + numberBuilders + '/' + (Math.floor(number_construction_sites/3) + 1) + '/' + spawn.memory.maxBuilders + 
             ', Repairer: ' + numberRepairers + '/' + spawn.memory.maxRepairers + 
             ', Upgrader: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders + 
             ', Transporter: ' + numberTransporters + '/' + spawn.memory.maxTransporters +
