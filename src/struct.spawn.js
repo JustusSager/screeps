@@ -57,6 +57,15 @@ module.exports = {
         // Create body blueprint
         var longDistanceHarvesterBody = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
         
+        //renew creep
+        var creeps_in_range = spawn.pos.findInRange(FIND_MY_CREEPS, 1, {
+            filter: (c) => c.ticksToLive < 1000 &&
+                c.hitsMax > 1000
+        })
+        if (creeps_in_range.length > 0) {
+            spawn.renewCreep(creeps_in_range[0])
+        }
+
         // Spawn new creep
         var name = undefined;
 
@@ -86,7 +95,7 @@ module.exports = {
             }
         }
         
-        if (!spawn.spawning) {
+        if (!spawn.spawning && name != undefined) {
             if (spawn.room.find(FIND_HOSTILE_CREEPS).length > 0 || numberDefenders < spawn.memory.maxDefenders) {
                 let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
                 name = spawn.createFighterCreep(energy, 'defender');

@@ -18,24 +18,39 @@ module.exports = {
 
         // if creep is supposed to transfer energy to the spawn
         if (creep.memory.working == true) {
-            var target = creep.room.find(FIND_STRUCTURES, {
+            var target_spawn = creep.room.find(FIND_MY_SPAWNS, {filter: (s) => s.energy < s.energyCapacity})[0];
+            var target_extension = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_SPAWN ||
-                            structure.structureType == STRUCTURE_EXTENSION ||
-                            structure.structureType == STRUCTURE_TOWER) &&
-                            structure.energy < structure.energyCapacity &&
-                            structure.room == creep.room;
+                    return (structure.structureType == STRUCTURE_EXTENSION &&
+                            structure.energy < structure.energyCapacity);
+                }
+            })[0];
+            var target_tower = creep.room.find(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType == STRUCTURE_TOWER &&
+                            structure.energy < structure.energyCapacity);
                 }
             })[0];
             // try to transfer energy, if the target is not in range
-            if (target != null) {
-                if(speak){creep.say('Extension');}
-                if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            if (target_spawn) {
+                if(speak){creep.say('Spawn');}
+                if (creep.transfer(target_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards the spawn
-                    creep.moveTo(target);
+                    creep.moveTo(target_spawn);
                 }
-            }
-            else {
+            } else if (target_extension) {
+                if(speak){creep.say('Extension');}
+                if (creep.transfer(target_extension, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    // move towards the spawn
+                    creep.moveTo(target_extension);
+                }
+            } else if (target_tower) {
+                if(speak){creep.say('Tower');}
+                if (creep.transfer(target_tower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    // move towards the spawn
+                    creep.moveTo(target_tower);
+                }
+            } else {
                 if(speak){creep.say('Controller');}
                 if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(creep.room.controller);
