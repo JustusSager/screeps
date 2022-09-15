@@ -43,7 +43,7 @@ function createWorkerCreep(spawner, body_blueprint, role, urgent, room_target) {
 
 module.exports = {
     run: function(spawn) {
-        
+
         var numberDefenders = _.sum(Game.creeps, (c) => (c.memory.role == 'defender' && c.memory.room_home == spawn.room.name));
         var numberBuilders = _.sum(Game.creeps, (c) => (c.memory.role == 'builder' && c.memory.room_home == spawn.room.name));
         var numberTransporters = _.sum(Game.creeps, (c) => (c.memory.role == 'transporter' && c.memory.room_home == spawn.room.name));
@@ -124,7 +124,7 @@ module.exports = {
         }
         
         console.log(
-            'Room: ' + spawn.room.name + ' ' + i + ': ' +
+            'Room: ' + spawn.room.name + ' ' + spawn.name + ': ' +
             'Defender: ' + numberDefenders + '/' + spawn.memory.maxDefenders + 
             ', Harvester: ' + numberHarvesters + '/' + spawn.memory.maxHarvesters + 
             ', Miner: ' + numberMiners +
