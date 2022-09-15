@@ -94,31 +94,31 @@ module.exports = {
             
             if (!Game.spawns[i].spawning) {
                 if (Game.spawns[i].room.find(FIND_HOSTILE_CREEPS).length > 0 || numberDefenders < Game.spawns[i].memory.maxDefenders) {
-                    let energy = Game.spawns[i].room.energyCapacityAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
+                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
                     name = Game.spawns[i].createFighterCreep(energy, 'defender');
                 }
                 else if (numberHarvesters < Game.spawns[i].memory.maxHarvesters) {
-                    let energy = Game.spawns[i].room.energyCapacityAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
+                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
                     name = Game.spawns[i].createBalancedCreep(energy, 'harvester');
                 }
                 else if (numberUpgraders < Game.spawns[i].memory.maxUpgraders){
-                    let energy = Game.spawns[i].room.energyCapacityAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
+                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
                     name = Game.spawns[i].createBalancedCreep(energy, 'upgrader');
                 }
                 else if (numberBuilders < Game.spawns[i].memory.maxBuilders){
-                    let energy = Game.spawns[i].room.energyCapacityAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
+                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
                     name = Game.spawns[i].createBalancedCreep(energy, 'builder');
                 }
                 else if (numberRepairers < Game.spawns[i].memory.maxRepairers){
-                    let energy = Game.spawns[i].room.energyCapacityAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
+                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
                     name = Game.spawns[i].createBalancedCreep(energy, 'repairer');
                 }
                 else if (numberTransporters < Game.spawns[i].memory.maxTransporters) {
-                    let energy = Game.spawns[i].room.energyCapacityAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
+                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
                     name = Game.spawns[i].createCarrierCreep(energy, 'transporter');
                 }
                 else if (numberDistributors < Game.spawns[i].memory.maxDistributors) {
-                    let energy = Game.spawns[i].room.energyCapacityAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
+                    let energy = Game.spawns[i].room.energyAvailable > 800 ? 800 : Game.spawns[i].room.energyAvailable;
                     name = Game.spawns[i].createCarrierCreep(energy, 'distributor');
                 }
                 else if (Game.spawns[i].memory.claim_room != undefined) {
