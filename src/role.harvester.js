@@ -34,20 +34,20 @@ module.exports = {
                         creep.moveTo(target);
                     }
                 }
-                else {
-                    var target_container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                        filter: (structure) => {
-                            return ((structure.structureType == STRUCTURE_CONTAINER ||
-                                    structure.structureType == STRUCTURE_STORAGE) &&
-                                    structure.store.getFreeCapacity([RESOURCE_ENERGY]) > 0 &&
-                                    structure.room == creep.room)
-                        }
-                    });
-                    if(speak){creep.say('Storage');}
-                    if (creep.transfer(target_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target_container);
-                    }
-                }
+                // else {
+                //     var target_container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                //         filter: (structure) => {
+                //             return ((structure.structureType == STRUCTURE_CONTAINER ||
+                //                     structure.structureType == STRUCTURE_STORAGE) &&
+                //                     structure.store.getFreeCapacity([RESOURCE_ENERGY]) > 0 &&
+                //                     structure.room == creep.room)
+                //         }
+                //     });
+                //     if(speak){creep.say('Storage');}
+                //     if (creep.transfer(target_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                //         creep.moveTo(target_container);
+                //     }
+                // }
             }
             else {
                 if(speak){creep.say('GoingHome');}

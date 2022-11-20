@@ -14,68 +14,79 @@ module.exports = {
 
         // if creep is supposed to transfer energy to the spawn
         if (creep.memory.working == true) {
-            var target_storage = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return structure.structureType == STRUCTURE_STORAGE &&
-                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-                            structure.room == creep.memory.home_room;
+            var target_spawn = creep.room.find(FIND_MY_SPAWNS, {filter: (s) => s.energy < s.energyCapacity})[0];
+            if (target_spawn) {
+                if(speak){creep.say('Spawn');}
+                if (creep.transfer(target_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    // move towards the spawn
+                    creep.moveTo(target_spawn);
                 }
-            });
-            // try to transfer energy, if the target is not in range
-            if (target_storage != null) {
+                return;
+            }
+            
+            
+            var target_extension = creep.find_extensions_not_full()[0];
+            if (target_extension) {
+                if(speak){creep.say('Extension');}
+                if (creep.transfer(target_extension, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    // move towards the spawn
+                    creep.moveTo(target_extension);
+                }
+                return;
+            }
+            
+            var target_tower = creep.find_towers_not_full()[0];
+            if (target_tower) {
+                if(speak){creep.say('Tower');}
+                if (creep.transfer(target_tower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    // move towards the spawn
+                    creep.moveTo(target_tower);
+                }
+                return;
+            }
+            
+            var target_storage = creep.find_storage_not_full();
+            if (target_storage) {
                 if (speak) {creep.say('Storage');}
                 if (creep.transfer(target_storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards the spawn
                     creep.moveTo(target_storage);
                 }
+                return;
             }
-            else if (creep.room.find(FIND_MY_SPAWNS)[0].energy < 300) {
-                if (speak) {creep.say('Spawn');}
-                if (creep.transfer(creep.room.find(FIND_MY_SPAWNS)[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    // move towards the spawn
-                    creep.moveTo(creep.room.find(FIND_MY_SPAWNS)[0]);
-                }
-            }
-            else {
-                if (speak) {creep.say('Controller');}
-                if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(creep.room.controller);
-                }
+            
+            if (speak) {creep.say('Controller');}
+            if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(creep.room.controller);
             }
         }
         // if creep is supposed to get energy from target
         else {
-            var source_ground = creep.room.find(FIND_DROPPED_RESOURCES)[0];
-            var source_tombstone = creep.pos.findClosestByPath(FIND_TOMBSTONES, {
-                filter: (structure) => {
-                    return (structure.store[RESOURCE_ENERGY] > 0 &&
-                            structure.room == creep.room)
-                }
-            });
-            var source_container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_CONTAINER &&
-                            structure.store[RESOURCE_ENERGY] > 200 &&
-                            structure.room == creep.room)
-                }
-            });
+            var source_ground = creep.find_dropped_rescources()[0];
             if (source_ground) {
                 if (speak) {creep.say('DroppedItem');}
                 if (creep.pickup(source_ground) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source_ground);
                 }
+                return;
             }
-            else if (source_tombstone != null) {
+            
+            var source_tombstone = creep.find_tombstones()[0];
+            if (source_tombstone != null) {
                 if (speak) {creep.say('Tombstone');}
                 if (creep.withdraw(source_tombstone, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source_tombstone);
                 }
+                return;
             }
-            else if (source_container != null) {
+            
+            var source_container = creep.find_container_not_empty();
+            if (source_container != null) {
                 if (speak) {creep.say('Container');}
                 if (creep.withdraw(source_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source_container);
                 }
+                return;
             }
         }
     }
