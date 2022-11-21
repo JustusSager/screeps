@@ -75,7 +75,7 @@ module.exports = function() {
         var number_of_parts = Math.floor((energy - 50) / 100);
         if (number_of_parts > 0) {
             var body = [];
-            for (let i = 0; i < number_of_parts || i < 5; i++) {
+            for (let i = 0; i < number_of_parts && i < 5; i++) {
                 body.push(WORK);
             }
             body.push(MOVE);
