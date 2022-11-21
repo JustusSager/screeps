@@ -172,7 +172,23 @@ var building_types = {
     "factory": STRUCTURE_FACTORY
 }
 
-var counter = 0;
+var blueprint_index = [
+  'spawn',
+  'tower',
+  'storage',
+  'link',
+  'terminal',
+  'powerSpawn',
+  'nuker',
+  'road',
+  'extension',
+  'observer',
+  'lab',
+  'factory'
+]
+
+var counter_inner = 0;
+var counter_outer = 0;
 
 function calculate_offset(dict, flag) {
     return {
@@ -182,27 +198,54 @@ function calculate_offset(dict, flag) {
 }
 
 function place_construction_sites(flag) {
-    for(let i in blueprint) {
-        if (blueprint[i].pos[counter]) {
-            console.log(JSON.stringify(blueprint[i].pos[counter]));
-            
-            let building = calculate_offset(blueprint[i].pos[counter], flag);
-            
-            if (Game.flags.BunkerFlag.room.createConstructionSite(building.x, building.y, building_types[i]) == ERR_INVALID_TARGET) {
-                console.log('Invalid Target');
+      if (blueprint[blueprint_index[counter_outer]].pos[counter_inner]) {
+          //console.log(JSON.stringify(blueprint[i].pos[counter]));
+          
+          let building = calculate_offset(blueprint[blueprint_index[counter_outer]].pos[counter_inner], flag);
+          
+          let check_pos = Game.flags.BunkerFlag.room.lookAt(building.x, building.y);
+          let road_blocking = false;
+          if (check_pos[0].type == 'structure') {
+            if (check_pos[0].structure.structureType == 'road' && blueprint_index[counter_outer] != 'road') {
+              console.log('Road is blocking non-road');
+              road_blocking = true;
             }
-        }
+          }
+
+          console.log('Trying building: ' + JSON.stringify(building) + ' ' + blueprint_index[counter_outer])
+
+          let name = Game.flags.BunkerFlag.room.createConstructionSite(building.x, building.y, building_types[blueprint_index[counter_outer]]);
+
+          if (name == ERR_INVALID_TARGET) {
+              console.log('ERR_INVALID_TARGET');
+              if (road_blocking) {
+                // Destroy road if it is blocking a buildable non-road
+                Game.getObjectById(check_pos[0].structure.id).destroy();
+                console.log('Destroy Road at: ' + JSON.stringify(check_pos[0].structure.pos))
+              }
+          } 
+          else if (name == ERR_INVALID_ARGS) {
+            console.log('ERR_INVALID_ARGS');
+          } 
+          else if (name == ERR_RCL_NOT_ENOUGH) {
+            // Cant build that yet
+            console.log('ERR_RCL_NOT_ENOUGH');
+          }
+      }
+
+    counter_inner++;
+    if (!blueprint[blueprint_index[counter_outer]].pos[counter_inner]) {
+      counter_inner = 0;
+      counter_outer++;
     }
-    
-    counter++;
-    if (counter == blueprint.road.pos.length) {
-        counter = 0;
+    if (!blueprint[blueprint_index[counter_outer]]) {
+      counter_outer = 0;
     }
 }
 
 module.exports = {
     run: function() {
-        if(Game.flags.BunkerFlag.room.memory.num_construction_sites < 10) {
+        if(Game.flags.BunkerFlag.room.memory.num_construction_sites < 10 || true) {
             place_construction_sites(Game.flags.BunkerFlag);
             Game.flags.BunkerFlag.room.memory.num_construction_sites = Game.flags.BunkerFlag.room.find(FIND_CONSTRUCTION_SITES).length;
         }
