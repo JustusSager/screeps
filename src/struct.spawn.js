@@ -85,8 +85,9 @@ module.exports = {
         }
 
         if (!spawn.spawning && name == undefined) {
-            if (spawn.room.find(FIND_HOSTILE_CREEPS).length > 0 && numberDefenders < spawn.memory.maxDefenders) {
-                name = spawn.createFighterCreep('defender', spawn.room.name);
+            if ((spawn.room.find(FIND_HOSTILE_CREEPS).length > 0 || !spawn.memory.target_attack) && numberDefenders < spawn.memory.maxDefenders) {
+                let target = spawn.memory.target_attack ? spawn.memory.target_attack : spawn.room.name
+                name = spawn.createFighterCreep('defender', target);
             }
             else if (numberMiners < spawn.memory.maxMiners && numberHarvesters < spawn.memory.maxHarvesters) {
                 name = spawn.createBalancedCreep('harvester', spawn.room.name);
