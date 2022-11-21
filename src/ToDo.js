@@ -2,12 +2,14 @@
 ToDo:
 - RemoteHarvesterUpgrader Rollennamen anpassen so dass er nicht mehr longRangHarvester heißt.
 - BunkerBuilding, Ramparts hinzufügen
-- Repairer dynamische Menge anhand der Anzahl von Structures und Towers
+- (Repairer dynamische Menge anhand der Anzahl von Structures und Towers)
 - role.manager schreiben, der ab RCL4 verwendet wird und aus dem Storage Energie auf Spawn und Tower aufteilt
 - Für roles verschiede Verhaltensweisen implementieren, je nach RCL
 
 
 Erledigt am 21.11.22:
+- spawn.memory nutzen für die RemoteHarvesterTargets
+- spawn.memory nutzen für die maximalen energiekosten eines neuen creeps
 - BunkerBuilding, umschreiben, sodass nur noch eine Construction Site pro tick erstellt wird
 - BunkerBuilding zerstört automatisch roads, die im Weg sind
 - Transporter füllt den Tower nicht

@@ -56,9 +56,6 @@ module.exports = {
         var numberUpgraders = _.sum(Game.creeps, (c) => (c.memory.role == 'upgrader' && c.memory.room_home == spawn.room.name));
         var numberRemoteHarvesters = _.sum(Game.creeps, (c) => (c.memory.role == 'longDistanceHarvester' && c.memory.room_home == spawn.room.name));
 
-        // Create body blueprint
-        var RemoteHarvesterTargets = ['W21S23', 'W22S24'];
-
         //renew creep
         var creeps_in_range = spawn.pos.findInRange(FIND_MY_CREEPS, 1, {
             filter: (c) => c.ticksToLive < 200 &&
@@ -114,10 +111,10 @@ module.exports = {
                     delete spawn.memory.claim_room;
                 }
             }
-            else if (numberRemoteHarvesters < spawn.memory.maxLongDistanceHarvesters) {
-                name = spawn.createBalancedCreep('longDistanceHarvester', RemoteHarvesterTargets[RemoteHarvesterTargetsCounter%2]);
+            else if (numberRemoteHarvesters < spawn.memory.maxLongDistanceHarvesters && spawn.memory.target_remote_harvesting.length > 0) {
+                name = spawn.createBalancedCreep('longDistanceHarvester', spawn.memory.target_remote_harvesting[RemoteHarvesterTargetsCounter%2]);
                 RemoteHarvesterTargetsCounter++;
-                if (RemoteHarvesterTargetsCounter == RemoteHarvesterTargets.length) {
+                if (RemoteHarvesterTargetsCounter == spawn.memory.target_remote_harvesting.length) {
                     RemoteHarvesterTargetsCounter = 0;
                 }
             }

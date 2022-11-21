@@ -5,6 +5,9 @@ module.exports = function() {
         if (!this.memory.max_spawn_energy) {
             this.memory.max_spawn_energy = 300;
         }
+        if (!this.memory.target_remote_harvesting) {
+            this.memory.target_remote_harvesting = [];
+        }
         if (!this.memory.maxHarvesters) {
             this.memory.maxHarvesters = 2;
         }
