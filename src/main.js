@@ -15,6 +15,7 @@ var roleRemoteHarvestUpgrader = require('role.RemoteHarvestUpgrader');
 var roleClaimer = require('role.claimer');
 var structSpawn = require('struct.spawn');
 var structTower = require('struct.tower');
+const roleSettler = require('role.settler');
 
 
 module.exports.loop = function () {
@@ -69,6 +70,9 @@ module.exports.loop = function () {
         }
         else if (creep.memory.role == 'claimer') {
             roleClaimer.run(creep, false);
+        }
+        else if (creep.memory.role == 'settler') {
+            roleSettler.run(creep, false);
         }
     }
 
