@@ -80,7 +80,7 @@ module.exports = {
                         filter: s => s.structureType == STRUCTURE_CONTAINER
                     });
                     if (containers.length > 0) {
-                        name = spawn.createMinerCreep(spawn.room.energyAvailable, 'miner', source.id);
+                        name = spawn.createMinerCreep('miner', source.id);
                         break;
                     }
                 }

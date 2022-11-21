@@ -95,4 +95,22 @@ module.exports = function() {
             }});
         }
     }
+
+    StructureSpawn.prototype.createMinerCreep =
+    function(role, source_id) {
+        let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable; this.memory.max_spawn_energy
+        var number_of_parts = Math.floor((energy - 50) / 100);
+        if (number_of_parts > 0) {
+            var body = [];
+            for (let i = 0; i < number_of_parts && i < 5; i++) {
+                body.push(WORK);
+            }
+            body.push(MOVE);
+            return this.spawnCreep(body, role + Game.time, { memory: {
+                role: role,
+                room_home: this.room.name,
+                source_id: source_id
+            }});
+        }
+    }
 };
