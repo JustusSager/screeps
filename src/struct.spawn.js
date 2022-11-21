@@ -88,28 +88,26 @@ module.exports = {
         }
 
         if (!spawn.spawning && name == undefined) {
-            let energy = spawn.room.energyAvailable > 800 ? 800 : spawn.room.energyAvailable;
-
             if (spawn.room.find(FIND_HOSTILE_CREEPS).length > 0 && numberDefenders < spawn.memory.maxDefenders) {
-                name = spawn.createFighterCreep(energy, 'defender', spawn.room.name);
+                name = spawn.createFighterCreep('defender', spawn.room.name);
             }
             else if (numberMiners < spawn.memory.maxMiners && numberHarvesters < spawn.memory.maxHarvesters) {
-                name = spawn.createBalancedCreep(energy, 'harvester', spawn.room.name);
+                name = spawn.createBalancedCreep('harvester', spawn.room.name);
             }
             else if (numberUpgraders < spawn.memory.maxUpgraders){
-                name = spawn.createBalancedCreep(energy, 'upgrader', spawn.room.name);
+                name = spawn.createBalancedCreep('upgrader', spawn.room.name);
             }
             //else if (numberDistributors < spawn.memory.maxDistributors) {
-            //    name = spawn.createCarrierCreep(energy, 'distributor');
+            //    name = spawn.createCarrierCreep('distributor');
             //}
             else if (numberTransporters < (numberMiners + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000))) {
-                name = spawn.createCarrierCreep(energy, 'transporter');
+                name = spawn.createCarrierCreep('transporter');
             }
             else if (numberRepairers < spawn.memory.maxRepairers){
-                name = spawn.createBalancedCreep(energy, 'repairer', spawn.room.name);
+                name = spawn.createBalancedCreep('repairer', spawn.room.name);
             }
             else if (numberBuilders < Math.ceil(spawn.room.memory.num_construction_sites/10)){
-                name = spawn.createBalancedCreep(energy, 'builder', spawn.room.name);
+                name = spawn.createBalancedCreep('builder', spawn.room.name);
             }
             else if (spawn.memory.claim_room != undefined) {
                 if (!(createWorkerCreep(spawn, [CLAIM, MOVE], 'claimer', false, spawn.memory.claim_room) < 0)) {
@@ -117,7 +115,7 @@ module.exports = {
                 }
             }
             else if (numberRemoteHarvesters < spawn.memory.maxLongDistanceHarvesters) {
-                name = spawn.createBalancedCreep(energy, 'longDistanceHarvester', RemoteHarvesterTargets[RemoteHarvesterTargetsCounter%2]);
+                name = spawn.createBalancedCreep('longDistanceHarvester', RemoteHarvesterTargets[RemoteHarvesterTargetsCounter%2]);
                 RemoteHarvesterTargetsCounter++;
                 if (RemoteHarvesterTargetsCounter == RemoteHarvesterTargets.length) {
                     RemoteHarvesterTargetsCounter = 0;
