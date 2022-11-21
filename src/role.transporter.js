@@ -14,23 +14,22 @@ module.exports = {
 
         // if creep is supposed to transfer energy to the spawn
         if (creep.memory.working == true) {
-            var target_spawn = creep.room.find(FIND_MY_SPAWNS, {filter: (s) => s.energy < s.energyCapacity})[0];
-            if (target_spawn) {
-                if(speak){creep.say('Spawn');}
-                if (creep.transfer(target_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    // move towards the spawn
-                    creep.moveTo(target_spawn);
-                }
-                return;
-            }
-            
-            
             var target_extension = creep.find_extensions_not_full()[0];
             if (target_extension) {
                 if(speak){creep.say('Extension');}
                 if (creep.transfer(target_extension, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards the spawn
                     creep.moveTo(target_extension);
+                }
+                return;
+            }
+            
+            var target_spawn = creep.room.find(FIND_MY_SPAWNS, {filter: (s) => s.energy < s.energyCapacity})[0];
+            if (target_spawn) {
+                if(speak){creep.say('Spawn');}
+                if (creep.transfer(target_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    // move towards the spawn
+                    creep.moveTo(target_spawn);
                 }
                 return;
             }
