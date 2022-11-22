@@ -25,26 +25,39 @@ module.exports = {
             if (creep.memory.task == 'upgrade') {
                 creep.memory.task = 'build'
             } else if (creep.memory.task == 'build') {
-                creep.memory.task = 'upgrade'
+                creep.memory.task = 'store';
+            } else if (creep.memory.task == 'store') {
+                creep.memory.task = 'upgrade';
             }
         }
 
         // if creep is supposed to transfer energy
         if (creep.memory.working == true) {
             if (creep.room.name == creep.memory.room_home) {
-                let construction_target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-                if (construction_target && creep.memory.task == 'build') {
+                let target_construction = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+                if (target_construction && creep.memory.task == 'build') {
                     if(speak) {creep.say('Build');}
-                    if (creep.build(construction_target) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(construction_target);
+                    if (creep.build(target_construction) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(target_construction);
                     }
                     return;
-                } else {
-                    if(speak){creep.say('Controller');}
-                    if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(creep.room.controller);
-                    }
                 }
+
+                let target_spawn = creep.room.find(FIND_MY_SPAWNS, {filter: (s) => s.energy < s.energyCapacity})[0];
+                if (target_spawn) {
+                    if(speak){creep.say('Spawn');}
+                    if (creep.transfer(target_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        // move towards the spawn
+                        creep.moveTo(target_spawn);
+                    }
+                    return;
+                }
+
+                if(speak){creep.say('Controller');}
+                if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.controller);
+                }
+                return;
             }
             else {
                 if(speak){creep.say('GoingHome');}
