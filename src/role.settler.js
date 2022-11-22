@@ -2,6 +2,8 @@
 Creep sucht eine Energy Ressource und baut diese ab, bei vollem Inventar geht sie zum Spawn, Extensions, oder Towers, falls alle voll sucht sie ein Container oder Storage.
 Kann auch verwendet werden um Energy in anderen Räumen abzubauen.
 */
+var build = false;
+
 module.exports = {
     // a function to run the logic for this role
     run: function(creep, speak) {
@@ -21,28 +23,19 @@ module.exports = {
         if (creep.memory.working == true) {
             if (creep.room.name == creep.memory.room_home) {
                 let construction_target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-                if (construction_target) {
+                if (construction_target && build) {
                     if(speak) {creep.say('Build');}
                     if (creep.build(construction_target) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(construction_target);
                     }
+                    build = false;
                     return;
                 }
-                var storage_target = creep.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_SPAWN ||
-                                structure.structureType == STRUCTURE_EXTENSION ||
-                                structure.structureType == STRUCTURE_TOWER) &&
-                                structure.energy < structure.energyCapacity;
-                    }
-                })[0];
-                if (storage_target) {
-                    if(speak){creep.say('Spawn');}
-                    if (creep.transfer(storage_target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(storage_target);
-                    }
-                    return;
+                if(speak){creep.say('Controller');}
+                if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.controller);
                 }
+                build = true;
             }
             else {
                 if(speak){creep.say('GoingHome');}
