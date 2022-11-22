@@ -89,7 +89,7 @@ module.exports = {
                 let target = spawn.memory.target_attack ? spawn.memory.target_attack : spawn.room.name
                 name = spawn.createFighterCreep('defender', target);
             }
-            else if (numberMiners < spawn.memory.maxMiners && numberHarvesters < spawn.memory.maxHarvesters) {
+            else if (numberMiners < spawn.room.memory.energy_sources.length && numberHarvesters < spawn.memory.maxHarvesters) {
                 name = spawn.createBalancedCreep('harvester', spawn.room.name);
             }
             else if (numberUpgraders < spawn.memory.maxUpgraders){
