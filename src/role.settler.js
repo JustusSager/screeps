@@ -8,6 +8,10 @@ module.exports = {
     // a function to run the logic for this role
     run: function(creep, speak) {
         
+        if (!creep.memory.task) {
+            creep.memory.task = 'upgrade';
+        }
+        
         // if creep is bringing energy to the spawn but has no energy left
         if (creep.memory.working == true && creep.store[RESOURCE_ENERGY] == 0) {
             creep.say('MineEnergy');
@@ -17,25 +21,30 @@ module.exports = {
         else if (creep.memory.working == false && creep.store.getFreeCapacity([RESOURCE_ENERGY]) == 0) {
             creep.say('StoreEnergy');
             creep.memory.working = true;
+            
+            if (creep.memory.task == 'upgrade') {
+                creep.memory.task = 'build'
+            } else if (creep.memory.task == 'build') {
+                creep.memory.task = 'upgrade'
+            }
         }
 
         // if creep is supposed to transfer energy
         if (creep.memory.working == true) {
             if (creep.room.name == creep.memory.room_home) {
                 let construction_target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-                if (construction_target && build) {
+                if (construction_target && creep.memory.task == 'build') {
                     if(speak) {creep.say('Build');}
                     if (creep.build(construction_target) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(construction_target);
                     }
-                    build = false;
                     return;
+                } else {
+                    if(speak){creep.say('Controller');}
+                    if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(creep.room.controller);
+                    }
                 }
-                if(speak){creep.say('Controller');}
-                if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(creep.room.controller);
-                }
-                build = true;
             }
             else {
                 if(speak){creep.say('GoingHome');}
