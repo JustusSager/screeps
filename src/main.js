@@ -1,4 +1,5 @@
 require('prototype.room')();
+require('prototype.spawn')();
 
 var bunkerbuilding = require('bunkerbuilding');
 
@@ -24,14 +25,16 @@ module.exports.loop = function () {
 
     // run spawners
     for (let i in Game.spawns) {
-        
-        structSpawn.run(Game.spawns[i]);
-        
+        // Init spawn memory
+        Game.spawns[i].init_memory();
         // init room memory
         Game.spawns[i].room.init_memory();
         
         // update room memory
         Game.spawns[i].room.update_memory(false);
+        
+        structSpawn.run(Game.spawns[i]);
+        
     }
     // run towers
     structTower.run();
