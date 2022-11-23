@@ -203,7 +203,7 @@ function place_construction_sites(flag) {
           
           let building = calculate_offset(blueprint[blueprint_index[counter_outer]].pos[counter_inner], flag);
           
-          let check_pos = Game.flags.BunkerFlag.room.lookAt(building.x, building.y);
+          let check_pos = flag.room.lookAt(building.x, building.y);
           let road_blocking = false;
           if (check_pos[0].type == 'structure') {
             if (check_pos[0].structure.structureType == 'road' && blueprint_index[counter_outer] != 'road') {
@@ -214,7 +214,7 @@ function place_construction_sites(flag) {
 
           console.log('Trying building: ' + JSON.stringify(building) + ' ' + blueprint_index[counter_outer])
 
-          let name = Game.flags.BunkerFlag.room.createConstructionSite(building.x, building.y, building_types[blueprint_index[counter_outer]]);
+          let name = flag.room.createConstructionSite(building.x, building.y, building_types[blueprint_index[counter_outer]]);
 
           if (name == ERR_INVALID_TARGET) {
               console.log('ERR_INVALID_TARGET');
@@ -245,9 +245,13 @@ function place_construction_sites(flag) {
 
 module.exports = {
     run: function() {
-        if(Game.flags.BunkerFlag.room.memory.num_construction_sites < 10 || true) {
-            place_construction_sites(Game.flags.BunkerFlag);
-            Game.flags.BunkerFlag.room.memory.num_construction_sites = Game.flags.BunkerFlag.room.find(FIND_CONSTRUCTION_SITES).length;
+        let flags = [Game.flags.BunkerFlag, Game.flags.BunkerFlag2]
+        for (let i in flags) {
+          if(flags[i].room.memory.num_construction_sites < 10 || true) {
+            place_construction_sites(flags[i]);
+            flags[i].room.memory.num_construction_sites = flags[i].room.find(FIND_CONSTRUCTION_SITES).length;
+          }
         }
+        
     }
 };
