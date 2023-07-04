@@ -172,6 +172,21 @@ var building_types = {
     "factory": STRUCTURE_FACTORY
 }
 
+var building_rcl = {
+    "spawn": 7,
+    "tower": 3,
+    "storage": 4,
+    "link": 5,
+    "terminal": 6,
+    "powerSpawn": 8,
+    "nuker": 8,
+    "road": 0,
+    "extension": 2,
+    "observer": 8,
+    "lab": 6,
+    "factory": 7
+}
+
 var blueprint_index = [
   'spawn',
   'tower',
@@ -198,40 +213,47 @@ function calculate_offset(dict, flag) {
 }
 
 function place_construction_sites(flag) {
-      if (blueprint[blueprint_index[counter_outer]].pos[counter_inner]) {
-          //console.log(JSON.stringify(blueprint[i].pos[counter]));
-          
-          let building = calculate_offset(blueprint[blueprint_index[counter_outer]].pos[counter_inner], flag);
-          
-          let check_pos = flag.room.lookAt(building.x, building.y);
-          let road_blocking = false;
-          if (check_pos[0].type == 'structure') {
-            if (check_pos[0].structure.structureType == 'road' && blueprint_index[counter_outer] != 'road') {
-              console.log('Road is blocking non-road');
-              road_blocking = true;
+    if (building_rcl[blueprint[blueprint_index[counter_outer]]] > flag.room.controller.level) {
+      return;
+    }
+    if (blueprint[blueprint_index[counter_outer]].pos[counter_inner]) {
+        //console.log(JSON.stringify(blueprint[i].pos[counter]));
+        
+        // calculate position
+        let building = calculate_offset(blueprint[blueprint_index[counter_outer]].pos[counter_inner], flag);
+        
+        // check, if a road is blocking a non-road 
+        let check_pos = flag.room.lookAt(building.x, building.y);
+        let road_blocking = false;
+        if (check_pos[0].type == 'structure') {
+          if (check_pos[0].structure.structureType == 'road' && blueprint_index[counter_outer] != 'road') {
+            console.log('Road is blocking non-road');
+            road_blocking = true;
+          }
+        }
+
+        console.log('Trying building: ' + JSON.stringify(building) + ' ' + blueprint_index[counter_outer])
+
+        // place construction site
+        let name = flag.room.createConstructionSite(building.x, building.y, building_types[blueprint_index[counter_outer]]);
+
+        // check for errors
+        if (name == ERR_INVALID_TARGET) {
+            console.log('ERR_INVALID_TARGET');
+            if (road_blocking) {
+              // Destroy road if it is blocking a buildable non-road
+              Game.getObjectById(check_pos[0].structure.id).destroy();
+              console.log('Destroy Road at: ' + JSON.stringify(check_pos[0].structure.pos))
             }
-          }
-
-          console.log('Trying building: ' + JSON.stringify(building) + ' ' + blueprint_index[counter_outer])
-
-          let name = flag.room.createConstructionSite(building.x, building.y, building_types[blueprint_index[counter_outer]]);
-
-          if (name == ERR_INVALID_TARGET) {
-              console.log('ERR_INVALID_TARGET');
-              if (road_blocking) {
-                // Destroy road if it is blocking a buildable non-road
-                Game.getObjectById(check_pos[0].structure.id).destroy();
-                console.log('Destroy Road at: ' + JSON.stringify(check_pos[0].structure.pos))
-              }
-          } 
-          else if (name == ERR_INVALID_ARGS) {
-            console.log('ERR_INVALID_ARGS');
-          } 
-          else if (name == ERR_RCL_NOT_ENOUGH) {
-            // Cant build that yet
-            console.log('ERR_RCL_NOT_ENOUGH');
-          }
-      }
+        } 
+        else if (name == ERR_INVALID_ARGS) {
+          console.log('ERR_INVALID_ARGS');
+        } 
+        else if (name == ERR_RCL_NOT_ENOUGH) {
+          // Cant build that yet
+          console.log('ERR_RCL_NOT_ENOUGH');
+        }
+    }
 
     counter_inner++;
     if (!blueprint[blueprint_index[counter_outer]].pos[counter_inner]) {
@@ -248,7 +270,7 @@ module.exports = {
         if(!Game.flags.BunkerFlag) {
           return;
         }
-        let flags = [Game.flags.BunkerFlag, Game.flags.BunkerFlag2]
+        let flags = [Game.flags.BunkerFlag]
         for (let i in flags) {
           if(flags[i].room.memory.num_construction_sites < 10) {
             place_construction_sites(flags[i]);
