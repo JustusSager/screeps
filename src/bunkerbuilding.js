@@ -250,7 +250,7 @@ module.exports = {
         }
         let flags = [Game.flags.BunkerFlag, Game.flags.BunkerFlag2]
         for (let i in flags) {
-          if(flags[i].room.memory.num_construction_sites < 10 || true) {
+          if(flags[i].room.memory.num_construction_sites < 10) {
             place_construction_sites(flags[i]);
             flags[i].room.memory.num_construction_sites = flags[i].room.find(FIND_CONSTRUCTION_SITES).length;
           }
