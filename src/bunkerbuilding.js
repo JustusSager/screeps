@@ -245,6 +245,9 @@ function place_construction_sites(flag) {
 
 module.exports = {
     run: function() {
+        if(!Game.flags.BunkerFlag) {
+          return;
+        }
         let flags = [Game.flags.BunkerFlag, Game.flags.BunkerFlag2]
         for (let i in flags) {
           if(flags[i].room.memory.num_construction_sites < 10 || true) {
