@@ -98,13 +98,13 @@ module.exports = {
             //else if (numberDistributors < spawn.memory.maxDistributors) {
             //    name = spawn.createCarrierCreep('distributor');
             //}
-            else if (numberTransporters < (numberMiners + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000))) {
+            else if (numberTransporters < (numberMiners * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000))) {
                 name = spawn.createCarrierCreep('transporter');
             }
             else if (numberRepairers < spawn.memory.maxRepairers){
                 name = spawn.createBalancedCreep('repairer', spawn.room.name);
             }
-            else if (numberBuilders < Math.ceil(spawn.room.memory.num_construction_sites/10)){
+            else if (numberBuilders < Math.ceil(spawn.room.memory.num_construction_sites/5)){
                 name = spawn.createBalancedCreep('builder', spawn.room.name);
             }
             else if (spawn.memory.claim_room != undefined) {
@@ -127,9 +127,9 @@ module.exports = {
           ' M: ' + numberMiners + '/' + spawn.room.memory.energy_sources.length +
           //', Distributor: ' + numberDistributors + '/' + spawn.memory.maxDistributors +
           ' R: ' + numberRepairers + '/' + spawn.memory.maxRepairers +
-          ' B: ' + numberBuilders + '/' + Math.ceil(spawn.room.memory.num_construction_sites/10) + 
+          ' B: ' + numberBuilders + '/' + Math.ceil(spawn.room.memory.num_construction_sites/5) + 
           ' U: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders +
-          ' T: ' + numberTransporters + '/' + (numberMiners + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000)) +
+          ' T: ' + numberTransporters + '/' + (numberMiners * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000)) +
           ' RH: ' + numberRemoteHarvesters + '/' + spawn.memory.maxLongDistanceHarvesters
 
         new RoomVisual(spawn.room.name).text(text, 25, 2, {color: 'green', font: 0.8});
