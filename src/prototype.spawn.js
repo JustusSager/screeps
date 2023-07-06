@@ -44,7 +44,7 @@ module.exports = function() {
                 body.push(MOVE);
             }
 
-            return this.spawnCreep(body, role + Game.time, { memory: {
+            return this.spawnCreep(body, "Rook" + Game.time, { memory: {
                 role: role,
                 working: true,
                 room_home: this.room.name,
@@ -71,7 +71,7 @@ module.exports = function() {
             }
         }
 
-        return this.spawnCreep(body, role + Game.time, { memory: {
+        return this.spawnCreep(body, "Knight" + Game.time, { memory: {
             role: role,
             working: true,
             room_home: this.room.name,
@@ -82,10 +82,9 @@ module.exports = function() {
     StructureSpawn.prototype.createCarrierCreep =
     function(role) {
         let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable;
-        var number_of_parts = Math.floor((energy - 100) / 100);
+        var number_of_parts = Math.floor(energy / 100);
         if (number_of_parts > 0) {
             var body = [];
-            body.push(WORK);
             for (let i = 0; i < number_of_parts; i++) {
                 body.push(CARRY);
             }
@@ -93,7 +92,7 @@ module.exports = function() {
                 body.push(MOVE);
             }
 
-            return this.spawnCreep(body, role + Game.time, { memory: {
+            return this.spawnCreep(body, "Bishop" + Game.time, { memory: {
                 role: role,
                 working: true,
                 room_home: this.room.name,
@@ -112,7 +111,7 @@ module.exports = function() {
                 body.push(WORK);
             }
             body.push(MOVE);
-            return this.spawnCreep(body, role + Game.time, { memory: {
+            return this.spawnCreep(body, "Pawn" + Game.time, { memory: {
                 role: role,
                 room_home: this.room.name,
                 source_id: source_id

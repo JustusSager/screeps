@@ -53,11 +53,6 @@ module.exports = {
                 }
                 return;
             }
-            
-            if (speak) {creep.say('Controller');}
-            if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller);
-            }
         }
         // if creep is supposed to get energy from target
         else {
