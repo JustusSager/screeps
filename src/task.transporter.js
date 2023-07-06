@@ -1,7 +1,7 @@
 module.exports = {
     run: function(creep, speak) {
 
-        if (creep.room.memory.amount_dropped_energy < 1000) {
+        if (creep.room.energyAvailable > (creep.room.energyCapacityAvailable * 0.9)) {
             creep.memory.task = "searching"
             creep.memory.target = "searching"
         }
