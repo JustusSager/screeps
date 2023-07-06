@@ -92,7 +92,7 @@ module.exports = function() {
             if (this.withdraw(source_tombstone, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 this.moveTo(source_tombstone);
             }
-            return;
+            return true;
         }
         var source_ground = this.find_dropped_rescources()[0];
         if (source_ground) {
@@ -100,7 +100,7 @@ module.exports = function() {
             if (this.pickup(source_ground) == ERR_NOT_IN_RANGE) {
                 this.moveTo(source_ground);
             }
-            return;
+            return true;
         }
         var source_container = this.find_container_storage_not_empty();
         if (source_container != null) {
@@ -108,7 +108,7 @@ module.exports = function() {
             if (this.withdraw(source_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 this.moveTo(source_container);
             }
-            return;
+            return true;
         }
         var source_spawn = this.room.find(FIND_MY_SPAWNS, {
             filter: (structure) => {return structure.store[RESOURCE_ENERGY] > 200}
@@ -119,5 +119,6 @@ module.exports = function() {
         if (this.withdraw(source_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
             this.moveTo(source_spawn);
         }
+        return false;
     }
 };
