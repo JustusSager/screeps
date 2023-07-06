@@ -31,7 +31,7 @@ module.exports = {
                 }
             }
             else {
-                creep.memory.role = "searching"
+                creep.memory.task = "searching"
                 creep.memory.target = "searching"
             }
         }
