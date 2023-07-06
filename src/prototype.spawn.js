@@ -30,7 +30,7 @@ module.exports = function() {
 
     StructureSpawn.prototype.createBalancedCreep = 
     function(role, room_target) {
-        let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable; this.memory.max_spawn_energy
+        let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable;
         let number_of_parts = Math.floor(energy / 200);
         if (number_of_parts > 0) {
             var body = [];
@@ -55,7 +55,7 @@ module.exports = function() {
     
     StructureSpawn.prototype.createFighterCreep =
     function(role, room_target) {
-        let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable; this.memory.max_spawn_energy
+        let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable;
         var number_of_parts = Math.floor(energy / 190);
         if (number_of_parts > 0) {
             var body = [];
@@ -81,7 +81,7 @@ module.exports = function() {
 
     StructureSpawn.prototype.createCarrierCreep =
     function(role) {
-        let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable; this.memory.max_spawn_energy
+        let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable;
         var number_of_parts = Math.floor((energy - 100) / 100);
         if (number_of_parts > 0) {
             var body = [];
@@ -104,7 +104,7 @@ module.exports = function() {
 
     StructureSpawn.prototype.createMinerCreep =
     function(role, source_id) {
-        let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable; this.memory.max_spawn_energy
+        let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable;
         var number_of_parts = Math.floor((energy - 50) / 100);
         if (number_of_parts > 0) {
             var body = [];
