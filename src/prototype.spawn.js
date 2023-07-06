@@ -44,7 +44,7 @@ module.exports = function() {
                 body.push(MOVE);
             }
 
-            return this.spawnCreep(body, "Rook" + Game.time, { memory: {
+            return this.spawnCreep(body, "ROOK" + Game.time, { memory: {
                 role: role,
                 working: true,
                 room_home: this.room.name,
@@ -71,7 +71,7 @@ module.exports = function() {
             }
         }
 
-        return this.spawnCreep(body, "Knight" + Game.time, { memory: {
+        return this.spawnCreep(body, "KNIGHT" + Game.time, { memory: {
             role: role,
             working: true,
             room_home: this.room.name,
@@ -92,7 +92,7 @@ module.exports = function() {
                 body.push(MOVE);
             }
 
-            return this.spawnCreep(body, "Bishop" + Game.time, { memory: {
+            return this.spawnCreep(body, "BISHOP" + Game.time, { memory: {
                 role: role,
                 working: true,
                 room_home: this.room.name,
@@ -111,7 +111,7 @@ module.exports = function() {
                 body.push(WORK);
             }
             body.push(MOVE);
-            return this.spawnCreep(body, "Pawn" + Game.time, { memory: {
+            return this.spawnCreep(body, "PAWN" + Game.time, { memory: {
                 role: role,
                 room_home: this.room.name,
                 source_id: source_id
