@@ -104,7 +104,7 @@ module.exports = {
             else if (numberRepairers < spawn.memory.maxRepairers){
                 name = spawn.createBalancedCreep('repairer', spawn.room.name);
             }
-            else if (numberBuilders < Math.ceil(spawn.room.memory.num_construction_sites/10)){
+            else if (numberBuilders < Math.floor(spawn.room.memory.num_construction_sites/5)){
                 name = spawn.createBalancedCreep('builder', spawn.room.name);
             }
             else if (spawn.memory.claim_room != undefined) {
@@ -127,7 +127,7 @@ module.exports = {
           ' M: ' + numberMiners + '/' + spawn.room.memory.energy_sources.length +
           ' G: ' + numberGenerics + '/' + spawn.memory.maxGenerics +
           ' R: ' + numberRepairers + '/' + spawn.memory.maxRepairers +
-          ' B: ' + numberBuilders + '/' + Math.ceil(spawn.room.memory.num_construction_sites/5) + 
+          ' B: ' + numberBuilders + '/' + Math.floor(spawn.room.memory.num_construction_sites/5) + 
           ' U: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders +
           ' T: ' + numberTransporters + '/' + (numberMiners * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000)) +
           ' RH: ' + numberRemoteHarvesters + '/' + spawn.memory.maxLongDistanceHarvesters
