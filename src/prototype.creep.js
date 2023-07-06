@@ -13,7 +13,7 @@ module.exports = function() {
         // nochmal anschauen was hier passieren muss!!!
         return this.room.find(FIND_DROPPED_RESOURCES, {
             filter: (r) => {
-                return r.resourceType == RESOURCE_ENERGY;
+                return r.resourceType == RESOURCE_ENERGY && r.amount > this.store.getFreeCapacity([RESOURCE_ENERGY]);
             }
         });
     }
