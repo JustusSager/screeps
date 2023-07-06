@@ -120,7 +120,7 @@ module.exports = {
                 }
             }
         }
-        let text = spawn.room.name + ' ' + spawn.name +
+        let text = spawn.room.name + ' (' + spawn.room.controller.level + ') ' + spawn.name +
           ': E: ' + spawn.room.energyAvailable + '/' + spawn.room.energyCapacityAvailable +
           ' Def: ' + numberDefenders + '/' + spawn.memory.maxDefenders +
           ' H: ' + numberHarvesters + '/' + (spawn.room.memory.energy_sources.length - numberMiners) + '/' + spawn.memory.maxHarvesters +
