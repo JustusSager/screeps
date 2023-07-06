@@ -49,7 +49,7 @@ module.exports = {
         var numberDefenders = _.sum(Game.creeps, (c) => (c.memory.role == 'defender' && c.memory.room_home == spawn.room.name));
         var numberBuilders = _.sum(Game.creeps, (c) => (c.memory.role == 'builder' && c.memory.room_home == spawn.room.name));
         var numberTransporters = _.sum(Game.creeps, (c) => (c.memory.role == 'transporter' && c.memory.room_home == spawn.room.name));
-        //var numberDistributors = _.sum(Game.creeps, (c) => (c.memory.role == 'distributor' && c.memory.room_home == spawn.room.name));
+        var numberGenerics = _.sum(Game.creeps, (c) => (c.memory.role == 'generic' && c.memory.room_home == spawn.room.name));
         var numberHarvesters = _.sum(Game.creeps, (c) => (c.memory.role == 'harvester' && c.memory.room_home == spawn.room.name));
         var numberMiners = _.sum(Game.creeps, (c) => (c.memory.role == 'miner' && c.memory.room_home == spawn.room.name));
         var numberRepairers = _.sum(Game.creeps, (c) => (c.memory.role == 'repairer' && c.memory.room_home == spawn.room.name));
@@ -95,11 +95,11 @@ module.exports = {
             else if (numberUpgraders < spawn.memory.maxUpgraders){
                 name = spawn.createBalancedCreep('upgrader', spawn.room.name);
             }
-            //else if (numberDistributors < spawn.memory.maxDistributors) {
-            //    name = spawn.createCarrierCreep('distributor');
-            //}
             else if (numberTransporters < (numberMiners * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000))) {
                 name = spawn.createCarrierCreep('transporter');
+            }
+            else if (numberGenerics < spawn.memory.maxGenerics) {
+                name = spawn.createBalancedCreep('generic', spawn.room.name);
             }
             else if (numberRepairers < spawn.memory.maxRepairers){
                 name = spawn.createBalancedCreep('repairer', spawn.room.name);
@@ -125,7 +125,7 @@ module.exports = {
           ' Def: ' + numberDefenders + '/' + spawn.memory.maxDefenders +
           ' H: ' + numberHarvesters + '/' + (spawn.room.memory.energy_sources.length - numberMiners) + '/' + spawn.memory.maxHarvesters +
           ' M: ' + numberMiners + '/' + spawn.room.memory.energy_sources.length +
-          //', Distributor: ' + numberDistributors + '/' + spawn.memory.maxDistributors +
+          ' G: ' + numberGenerics + '/' + spawn.memory.maxGenerics +
           ' R: ' + numberRepairers + '/' + spawn.memory.maxRepairers +
           ' B: ' + numberBuilders + '/' + Math.ceil(spawn.room.memory.num_construction_sites/5) + 
           ' U: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders +

@@ -23,6 +23,9 @@ module.exports = function() {
         if (!this.memory.maxDefenders) {
             this.memory.maxDefenders = 0;
         }
+        if (!this.memory.maxGenerics) {
+            this.memory.maxGenerics = 1;
+        }
     }
 
     StructureSpawn.prototype.createBalancedCreep = 

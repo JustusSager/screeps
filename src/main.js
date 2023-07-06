@@ -17,6 +17,7 @@ var roleClaimer = require('role.claimer');
 var structSpawn = require('struct.spawn');
 var structTower = require('struct.tower');
 const roleSettler = require('role.settler');
+var roleGeneric = require('role.generic');
 
 
 module.exports.loop = function () {
@@ -76,6 +77,9 @@ module.exports.loop = function () {
         }
         else if (creep.memory.role == 'settler') {
             roleSettler.run(creep, false);
+        }
+        else if (creep.memory.role == 'generic') {
+            roleGeneric.run(creep, true)
         }
     }
 
