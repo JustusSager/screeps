@@ -11,7 +11,7 @@ module.exports = {
         if (creep.memory.working == true && creep.store[RESOURCE_ENERGY] == 0) {
             creep.say('GetEnergy');
             creep.memory.working = false;
-            creep.memory.role = "searching"
+            creep.memory.task = "searching"
             creep.memory.target = "searching"
         }
         // if creep is harvesting energy but is full
@@ -33,7 +33,7 @@ module.exports = {
                 }
             }
             else {
-                creep.memory.role = "searching"
+                creep.memory.task = "searching"
                 creep.memory.target = "searching"
             }
         }
