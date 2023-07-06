@@ -5,6 +5,9 @@ module.exports = function() {
         if (!this.memory.energy_sources) {
             this.memory.energy_sources = this.find(FIND_SOURCES);
         }
+        if (!this.memory.construction_sites) {
+            this.memory.num_construction_sites = this.find(FIND_CONSTRUCTION_SITES);
+        }
         if (!this.memory.num_construction_sites) {
             this.memory.num_construction_sites = this.find(FIND_CONSTRUCTION_SITES).length;
         }
@@ -25,6 +28,9 @@ module.exports = function() {
     
     Room.prototype.update_memory = 
     function(force) {
+        if (Game.time % 10 == 0) {
+            this.memory.construction_sites = this.find(FIND_CONSTRUCTION_SITES);
+        }
         if (Game.time % 1000 == 0) {
             this.memory.energy_sources = this.find(FIND_SOURCES);
         } 
