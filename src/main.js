@@ -14,10 +14,11 @@ var roleTransporter = require('role.transporter');
 var roleDistributor = require('role.distributor');
 var roleRemoteHarvestUpgrader = require('role.RemoteHarvestUpgrader');
 var roleClaimer = require('role.claimer');
-var structSpawn = require('struct.spawn');
-var structTower = require('struct.tower');
 const roleSettler = require('role.settler');
 var roleGeneric = require('role.generic');
+var structSpawn = require('struct.spawn');
+var structTower = require('struct.tower');
+var structLink = require('struct.link');
 
 
 module.exports.loop = function () {
@@ -39,6 +40,8 @@ module.exports.loop = function () {
     }
     // run towers
     structTower.run();
+    structLink.run();
+
 
     // run creeps
     for (var name in Game.creeps) {

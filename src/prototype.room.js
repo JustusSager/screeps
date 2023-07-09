@@ -6,7 +6,7 @@ module.exports = function() {
             this.memory.energy_sources = this.find(FIND_SOURCES);
         }
         if (!this.memory.construction_sites) {
-            this.memory.num_construction_sites = this.find(FIND_CONSTRUCTION_SITES);
+            this.memory.construction_sites = this.find(FIND_CONSTRUCTION_SITES);
         }
         if (!this.memory.num_construction_sites) {
             this.memory.num_construction_sites = this.find(FIND_CONSTRUCTION_SITES).length;
@@ -24,6 +24,19 @@ module.exports = function() {
             }
             this.memory.amount_dropped_energy = sum;
         }
+
+        // Links
+        if (!this.memory.storage_link && this.controller.level > 4) {
+            let storages = _.filter(Game.structures, s => s.structureType == STRUCTURE_STORAGE && s.room == Game.rooms[i]);
+            if (storages.length  > 0) {
+                let storage_links = storages[0].pos.findInRange(FIND_STRUCTURES, 2, {
+                    filter: s => s.structureType == STRUCTURE_LINK
+                });
+                if (storage_links > 0) {
+                    this.memory.storage_link = storage_links[0].id;
+                }
+            }
+        }
     }
     
     Room.prototype.update_memory = 
@@ -31,13 +44,23 @@ module.exports = function() {
         if (Game.time % 10 == 0) {
             this.memory.construction_sites = this.find(FIND_CONSTRUCTION_SITES);
         }
-        if (Game.time % 1000 == 0) {
-            this.memory.energy_sources = this.find(FIND_SOURCES);
-        } 
-        else if (Game.time % 50 == 1 || force) {
+        // Links
+        if(this.controller.level > 4 & Game.time % 10 == 1) {
+            let storages = _.filter(Game.structures, s => s.structureType == STRUCTURE_STORAGE && s.room == Game.rooms[i]);
+            if (storages.length  > 0) {
+                let storage_links = storages[0].pos.findInRange(FIND_STRUCTURES, 2, {
+                    filter: s => s.structureType == STRUCTURE_LINK
+                });
+                if (storage_links > 0) {
+                    this.memory.storage_link = storage_links[0].id;
+                }
+            }
+        }
+
+        if (Game.time % 50 == 1 || force) {
             this.memory.num_construction_sites = this.find(FIND_CONSTRUCTION_SITES).length;
         }
-        else if (Game.time % 50 == 2 || force) {
+        if (Game.time % 50 == 2 || force) {
             let dropped_energy = num_dropped_energy = this.find(FIND_DROPPED_RESOURCES, {
                 filter: (r) => {
                     return r.resourceType == RESOURCE_ENERGY
@@ -49,6 +72,9 @@ module.exports = function() {
                 sum = sum + i.amount;
             }
             this.memory.amount_dropped_energy = sum;
+        }
+        if (Game.time % 1000 == 0) {
+            this.memory.energy_sources = this.find(FIND_SOURCES);
         }
     }
 };
