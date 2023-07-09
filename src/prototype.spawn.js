@@ -102,19 +102,28 @@ module.exports = function() {
     }
 
     StructureSpawn.prototype.createMinerCreep =
-    function(role, source_id) {
+    function(role, source_id, link_mining) {
         let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable;
-        var number_of_parts = Math.floor((energy - 50) / 100);
+        var number_of_parts = 0;
+        if (link_mining) {
+            var number_of_parts = Math.floor((energy - 100) / 100);
+        } else {
+            var number_of_parts = Math.floor((energy - 50) / 100);
+        }
         if (number_of_parts > 0) {
             var body = [];
             for (let i = 0; i < number_of_parts && i < 5; i++) {
                 body.push(WORK);
             }
+            if (link_mining) {
+                body.push(CARRY)
+            }
             body.push(MOVE);
             return this.spawnCreep(body, "PAWN" + Game.time, { memory: {
                 role: role,
                 room_home: this.room.name,
-                source_id: source_id
+                source_id: source_id,
+                link_mining: link_mining
             }});
         }
     }
