@@ -23,7 +23,7 @@ module.exports = {
             if (creep.store.getFreeCapacity([RESOURCE_ENERGY]) > 0 && !creep.getResourceEnergy()) { // TODO funktioniert nicht
                 creep.memory.task = "harvester";
                 creep.memory.target = "energy_source";
-            } else if (creep.room.energyAvailable < 150) {
+            } else if (creep.room.energyAvailable < (creep.room.energyCapacityAvailable * 0.5)) {
                 if (speak) creep.say("transporter");
                 creep.memory.task = "transporter";
                 creep.memory.target = "transporter";
