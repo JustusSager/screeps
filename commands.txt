@@ -1,0 +1,17 @@
+Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 'builder2', {memory: { role: 'builder', working: true, room_home: Game.spawns['Spawn1'].room.name, room_target: 'E57S4' }})
+
+Game.spawns.Spawn1.spawnCreep([WORK, CARRY, MOVE, MOVE], 'builder1', {memory: { role: 'builder', working: true, room_home: Game.spawns['Spawn1'].room.name, room_target: Game.spawns['Spawn1'].room.name }})
+
+Game.spawns.Spawn1.spawnCreep([WORK, CARRY, CARRY, MOVE, MOVE], 'builder4', {memory: { role: 'builder', working: true, room_home: Game.spawns['Spawn1'].room.name, room_target: Game.spawns['Spawn1'].room.name }})
+
+Game.spawns.Spawn1.spawnCreep([WORK, CARRY, MOVE, MOVE], 'settler1', {memory: { role: '', working: true, room_home: '', room_target: '' }})
+
+Game.spawns.Spawn1.spawnCreep([WORK, WORK, WORK, MOVE], 'miner1', {memory: { role: 'miner', room_home: Game.spawns.Spawn1.room.name, source_id: source_id}})
+
+Claimer Creep erstellen, der benannten Raum claimt:
+	Game.spawns['Spawn1'].memory.claim_room = 'E57S4'
+	
+
+Damit ein Spawn anfängt creeps zu spawnen, müssen die maximale Anzahl der Roles im Memory festgelegt werden:
+	Game.spawns['Spawn1'].memory.maxHarvesters = 2
+	Game.spawns['Spawn1'].memory.maxBuilders = 1
