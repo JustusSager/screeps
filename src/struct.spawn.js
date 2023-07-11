@@ -107,7 +107,7 @@ module.exports = {
             else if (numberUpgraders < spawn.memory.maxUpgraders){
                 name = spawn.createBalancedCreep('upgrader', spawn.room.name);
             }
-            else if (numberTransporters < (numberMiners * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000))) {
+            else if (numberTransporters < ((numberMiners - spawn.room.memory.source_links.length) * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000))) {
                 name = spawn.createCarrierCreep('transporter');
             }
             else if (numberRepairers < spawn.memory.maxRepairers){
@@ -142,7 +142,7 @@ module.exports = {
           ' R: ' + numberRepairers + '/' + spawn.memory.maxRepairers +
           ' B: ' + numberBuilders + '/' + Math.floor(spawn.room.memory.num_construction_sites/5) + 
           ' U: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders +
-          ' T: ' + numberTransporters + '/' + (numberMiners * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000)) +
+          ' T: ' + numberTransporters + '/' + ((numberMiners - spawn.room.memory.source_links.length) * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000)) +
           ' RH: ' + numberRemoteHarvesters + '/' + spawn.memory.maxLongDistanceHarvesters
 
         new RoomVisual(spawn.room.name).text(text, 25, 2, {color: 'green', font: 0.8});

@@ -8,7 +8,7 @@ module.exports = {
             filter: s => s.structureType == STRUCTURE_LINK
         });
         var towers = Game.flags[creep.memory.target].pos.findInRange(FIND_STRUCTURES, 1, {
-            filter: s => s.structureType == STRUCTURE_TOWER && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+            filter: s => s.structureType == STRUCTURE_TOWER && s.store.getFreeCapacity(RESOURCE_ENERGY) > 50
         });
         var storages = Game.flags[creep.memory.target].pos.findInRange(FIND_STRUCTURES, 1, {
             filter: s => s.structureType == STRUCTURE_STORAGE
