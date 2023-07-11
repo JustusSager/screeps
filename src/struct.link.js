@@ -1,17 +1,15 @@
 module.exports = {
     run: function() {
-        for (let i = 0; i < Game.rooms.length; i++) {
+        for (let i in Game.rooms) {
             if (!Game.rooms[i].memory.storage_link) continue;
 
-            let storage_link = Game.getObjectById(Game.rooms[i].memory.storage_link)
+            let storage_link = Game.getObjectById(Game.rooms[i].memory.storage_link);
 
-            links = _.filter(Game.structures, s => s.structureType == STRUCTURE_LINK && s.room == Game.rooms[i]);
-
-            for (let j = 0; j < links.length; j++) {
-                link = links[j];
+            for (let j in Game.rooms[i].memory.source_links) {
+                let link = Game.getObjectById(Game.rooms[i].memory.source_links[j]);
                 if (link.id == storage_link.id) continue;
 
-                if (link.store.getFreeCapacity < link.store.getCapacity * 0.9) {
+                if (link.store.getFreeCapacity() < 50) {
                     link.transferEnergy(storage_link)
                 }
             }
