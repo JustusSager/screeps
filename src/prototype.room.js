@@ -27,7 +27,7 @@ module.exports = function() {
 
         // Links
         if (!this.memory.storage_link && this.controller.level > 4) {
-            let storages = _.filter(Game.structures, s => s.structureType == STRUCTURE_STORAGE && s.room == Game.rooms[i]);
+            let storages = _.filter(Game.structures, s => s.structureType == STRUCTURE_STORAGE && s.room == this);
             if (storages.length  > 0) {
                 let storage_links = storages[0].pos.findInRange(FIND_STRUCTURES, 2, {
                     filter: s => s.structureType == STRUCTURE_LINK
@@ -46,7 +46,7 @@ module.exports = function() {
         }
         // Links
         if(this.controller.level > 4 & Game.time % 10 == 1) {
-            let storages = _.filter(Game.structures, s => s.structureType == STRUCTURE_STORAGE && s.room == Game.rooms[i]);
+            let storages = _.filter(Game.structures, s => s.structureType == STRUCTURE_STORAGE && s.room == this);
             if (storages.length  > 0) {
                 let storage_links = storages[0].pos.findInRange(FIND_STRUCTURES, 2, {
                     filter: s => s.structureType == STRUCTURE_LINK
