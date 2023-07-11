@@ -9,7 +9,7 @@ module.exports = {
                 let link = Game.getObjectById(Game.rooms[i].memory.source_links[j]);
                 if (link.id == storage_link.id) continue;
 
-                if (link.store.getFreeCapacity() < 50) {
+                if (link.store.getFreeCapacity(RESOURCE_ENERGY) < 50) {
                     link.transferEnergy(storage_link)
                 }
             }
