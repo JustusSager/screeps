@@ -7,9 +7,9 @@ module.exports = {
         let source = Game.getObjectById(creep.memory.source_id);
         if (creep.memory.link_mining) {
             let link = source.pos.findInRange(FIND_STRUCTURES, 2, {
-                filter: s => s.structureType == STRUCTURE_CONTAINER
+                filter: s => s.structureType == STRUCTURE_LINK
             })[0];
-            if (getFreeCapacity([RESOURCE_ENERGY]) == 0) {
+            if (creep.store.getFreeCapacity([RESOURCE_ENERGY]) == 0) {
                 if (creep.transfer(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(link);
                 }
