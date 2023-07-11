@@ -121,4 +121,39 @@ module.exports = function() {
         }
         return false;
     }
+
+    Creep.prototype.storeResourceEnergy =
+    function(speak) {
+        var target_extensions = this.find_extensions_not_full();
+        if (target_extensions > 0) {
+            if (this.transfer(target_extensions[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(target_extensions[0]);
+            }
+            return;
+        }
+        var target_storage = this.find_storage_not_full();
+        if (target_storage) {
+            if (this.transfer(target_storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(target_storage);
+            }
+            return;
+        }
+        var target_container = this.find_container_not_full();
+        if (target_container) {
+            if (this.transfer(target_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(target_container);
+            }
+            return;
+        }
+
+        var source_spawn = this.room.find(FIND_MY_SPAWNS, {
+            filter: (structure) => {return structure.store[RESOURCE_ENERGY] > 200}
+        })[0]; // find closest source
+    
+        if(speak) {this.say('Spawn');}
+        // try to harvest energy, if the source is not in range move towards the source
+        if (this.transfer(source_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            this.moveTo(source_spawn);
+        }
+    }
 };
