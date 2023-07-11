@@ -55,13 +55,15 @@ module.exports = {
         var numberRepairers = _.sum(Game.creeps, (c) => (c.memory.role == 'repairer' && c.memory.room_home == spawn.room.name));
         var numberUpgraders = _.sum(Game.creeps, (c) => (c.memory.role == 'upgrader' && c.memory.room_home == spawn.room.name));
         var numberRemoteHarvesters = _.sum(Game.creeps, (c) => (c.memory.role == 'longDistanceHarvester' && c.memory.room_home == spawn.room.name));
+        var numberKings = _.sum(Game.creeps, (c) => (c.memory.role == 'king' && c.memory.room_home == spawn.room.name));
+        var numberQueens = _.sum(Game.creeps, (c) => (c.memory.role == 'queen' && c.memory.room_home == spawn.room.name));
 
         //renew creep
         var creeps_in_range = spawn.pos.findInRange(FIND_MY_CREEPS, 1, {
             filter: (c) => c.ticksToLive < 200 &&
                 c.hitsMax > 1000
         })
-        if (creeps_in_range.length > 0 && spawn.energy > 200) {
+        if (creeps_in_range.length > 0 && spawn.energy > 100) {
             spawn.renewCreep(creeps_in_range[0])
         }
         
@@ -111,8 +113,12 @@ module.exports = {
             else if (numberRepairers < spawn.memory.maxRepairers){
                 name = spawn.createBalancedCreep('repairer', spawn.room.name);
             }
-            else if (numberBuilders < Math.floor(spawn.room.memory.num_construction_sites/5)){
-                name = spawn.createBalancedCreep('builder', spawn.room.name);
+            else if (numberKings < 1){
+                target = _.filter(Game.flags, f => f.room = spawn.room && f.name == 'BunkerFlag')[0].name;
+                name = spawn.createKingCreep(target);
+            }
+            else if (numberQueens < 1){
+                name = spawn.createCarrierCreep('queen');
             }
             else if (spawn.memory.claim_room != undefined) {
                 if (!(createWorkerCreep(spawn, [CLAIM, MOVE], 'claimer', false, spawn.memory.claim_room) < 0)) {

@@ -16,6 +16,8 @@ var roleRemoteHarvestUpgrader = require('role.RemoteHarvestUpgrader');
 var roleClaimer = require('role.claimer');
 const roleSettler = require('role.settler');
 var roleGeneric = require('role.generic');
+var roleKing = require('role.king');
+var roleQueen = require('role.queen');
 var structSpawn = require('struct.spawn');
 var structTower = require('struct.tower');
 var structLink = require('struct.link');
@@ -83,6 +85,12 @@ module.exports.loop = function () {
         }
         else if (creep.memory.role == 'generic') {
             roleGeneric.run(creep, true)
+        }
+        else if (creep.memory.role == 'king') {
+            roleKing.run(creep, false)
+        }
+        else if (creep.memory.role == 'queen') {
+            roleQueen.run(creep, false)
         }
     }
 

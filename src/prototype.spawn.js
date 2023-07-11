@@ -92,7 +92,7 @@ module.exports = function() {
                 body.push(MOVE);
             }
 
-            return this.spawnCreep(body, "BISHOP" + Game.time, { memory: {
+            return this.spawnCreep(body, (role != 'queen' ? "BISHOP": "QUEEN") + Game.time, { memory: {
                 role: role,
                 working: true,
                 room_home: this.room.name,
@@ -126,5 +126,23 @@ module.exports = function() {
                 link_mining: link_mining
             }});
         }
+    }
+
+    StructureSpawn.prototype.createKingCreep =
+    function(target) {
+        let energy = this.room.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.room.energyAvailable;
+        var number_of_parts = Math.floor((energy - 50) / 50) > 4 ? 4 : Math.floor((energy - 50) / 50);
+        if (number_of_parts > 0) {
+            var body = [];
+            for (let i = 0; i < number_of_parts; i++) {
+                body.push(CARRY);
+            }
+            body.push(MOVE);
+        }
+        return this.spawnCreep(body, "KING", { memory: {
+            role: "king",
+            room_home: this.room.name,
+            target: target
+        }});
     }
 };
