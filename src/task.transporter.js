@@ -48,21 +48,7 @@ module.exports = {
                 }
                 return;
             }
-            
-            var target_storage = creep.find_storage_not_full();
-            if (target_storage) {
-                if (speak) {creep.say('Storage');}
-                if (creep.transfer(target_storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    // move towards the spawn
-                    creep.moveTo(target_storage);
-                }
-                return;
-            }
-            
-            if (speak) {creep.say('Controller');}
-            if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller);
-            }
+            creep.say("ER TR");
         }
         // if creep is supposed to get energy from target
         else {
@@ -84,7 +70,7 @@ module.exports = {
                 return;
             }
             
-            var source_container = creep.find_container_not_empty();
+            var source_container = creep.find_container_storage_not_empty();
             if (source_container != null) {
                 if (speak) {creep.say('Container');}
                 if (creep.withdraw(source_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
