@@ -79,11 +79,12 @@ module.exports = {
                     let links = Game.getObjectById(source.id).pos.findInRange(FIND_STRUCTURES, 2, {
                         filter: s => s.structureType == STRUCTURE_LINK
                     });
-                    if (containers.length > 0) {
-                        name = spawn.createMinerCreep('miner', source.id, false);
-                        break;
-                    } else if (links.length > 0) {
+                    if (links.length > 0) {
                         name = spawn.createMinerCreep('miner', source.id, true);
+                        break;
+                    }
+                    else if (containers.length > 0) {
+                        name = spawn.createMinerCreep('miner', source.id, false);
                         break;
                     }
                 }
