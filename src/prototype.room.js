@@ -63,7 +63,7 @@ module.exports = function() {
                 }
             }
         }
-        if(this.controller.level > 4) {
+        if(this.controller.level > 4 & Game.time % 10 == 2) {
             this.memory.source_links = [];
             let source_links = _.filter(Game.structures, s => s.pos.findInRange(FIND_SOURCES, 2).length > 0 && s.structureType == STRUCTURE_LINK);
             for (let i = 0; i < source_links.length; i++) {
