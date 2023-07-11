@@ -32,7 +32,7 @@ module.exports = function() {
                 let storage_links = storages[0].pos.findInRange(FIND_STRUCTURES, 2, {
                     filter: s => s.structureType == STRUCTURE_LINK
                 });
-                if (storage_links > 0) {
+                if (storage_links.length > 0) {
                     this.memory.storage_link = storage_links[0].id;
                 }
             }
@@ -58,14 +58,14 @@ module.exports = function() {
                 let storage_links = storages[0].pos.findInRange(FIND_STRUCTURES, 2, {
                     filter: s => s.structureType == STRUCTURE_LINK
                 });
-                if (storage_links > 0) {
+                if (storage_links.length > 0) {
                     this.memory.storage_link = storage_links[0].id;
                 }
             }
         }
         if(this.controller.level > 4 & Game.time % 10 == 2) {
             this.memory.source_links = [];
-            let source_links = _.filter(Game.structures, s => s.pos.findInRange(FIND_SOURCES, 2).length > 0 && s.structureType == STRUCTURE_LINK);
+            let source_links = _.filter(Game.structures, s => s.pos.findInRange(FIND_SOURCES, 2).length > 0 && s.structureType == STRUCTURE_LINK && s.room == this);
             for (let i = 0; i < source_links.length; i++) {
                 this.memory.source_links.push(source_links[i].id);
             }
