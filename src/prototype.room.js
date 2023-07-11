@@ -37,6 +37,13 @@ module.exports = function() {
                 }
             }
         }
+        if (!this.memory.source_links && this.controller.level > 4) {
+            this.memory.source_links = [];
+            let source_links = _.filter(Game.structures, s => s.pos.findInRange(FIND_SOURCES, 2).length > 0 && s.structureType == STRUCTURE_LINK);
+            for (let i = 0; i < source_links.length; i++) {
+                this.memory.source_links.push(source_links[i].id);
+            }
+        }
     }
     
     Room.prototype.update_memory = 
@@ -54,6 +61,13 @@ module.exports = function() {
                 if (storage_links > 0) {
                     this.memory.storage_link = storage_links[0].id;
                 }
+            }
+        }
+        if(this.controller.level > 4) {
+            this.memory.source_links = [];
+            let source_links = _.filter(Game.structures, s => s.pos.findInRange(FIND_SOURCES, 2).length > 0 && s.structureType == STRUCTURE_LINK);
+            for (let i = 0; i < source_links.length; i++) {
+                this.memory.source_links.push(source_links[i].id);
             }
         }
 
