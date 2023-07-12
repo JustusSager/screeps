@@ -11,7 +11,8 @@ module.exports = {
                     }})
                     var closest_damaged_structure = towers[i].pos.findClosestByRange(FIND_STRUCTURES, {
                         filter: (s) => s.hits < s.hitsMax && 
-                            s.structureType != STRUCTURE_WALL
+                            s.structureType != STRUCTURE_WALL &&
+                            s.hits < 1000000
                     });
                     
                     if(closest_hostile) {
