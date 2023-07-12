@@ -14,7 +14,7 @@ module.exports = {
 
         // if creep is supposed to transfer energy to the spawn
         if (creep.memory.working == true) {
-            var target_extension = creep.find_extensions_not_full()[0];
+            var target_extension = creep.find_extensions_not_full();
             if (target_extension) {
                 if(speak){creep.say('Extension');}
                 if (creep.transfer(target_extension, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -34,7 +34,7 @@ module.exports = {
                 return;
             }
             
-            var target_tower = creep.find_towers_not_full()[0];
+            var target_tower = creep.find_towers_not_full();
             if (target_tower) {
                 if(speak){creep.say('Tower');}
                 if (creep.transfer(target_tower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -56,7 +56,7 @@ module.exports = {
         }
         // if creep is supposed to get energy from target
         else {
-            var source_ground = creep.find_dropped_rescources()[0];
+            var source_ground = creep.find_dropped_rescources();
             if (source_ground) {
                 if (speak) {creep.say('DroppedItem');}
                 if (creep.pickup(source_ground) == ERR_NOT_IN_RANGE) {
@@ -65,7 +65,7 @@ module.exports = {
                 return;
             }
             
-            var source_tombstone = creep.find_tombstones()[0];
+            var source_tombstone = creep.find_tombstones();
             if (source_tombstone != null) {
                 if (speak) {creep.say('Tombstone');}
                 if (creep.withdraw(source_tombstone, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {

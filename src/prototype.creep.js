@@ -1,7 +1,7 @@
 module.exports = function() {
     Creep.prototype.find_tombstones = 
     function() {
-        return this.room.find(FIND_TOMBSTONES, {
+        return this.pos.findClosestByPath(FIND_TOMBSTONES, {
             filter: (structure) => {
                 return structure.store[RESOURCE_ENERGY] > 0 && structure.room == this.room;
             }
@@ -11,7 +11,7 @@ module.exports = function() {
     Creep.prototype.find_dropped_rescources = 
     function() {
         // nochmal anschauen was hier passieren muss!!!
-        return this.room.find(FIND_DROPPED_RESOURCES, {
+        return this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
             filter: (r) => {
                 return r.resourceType == RESOURCE_ENERGY && r.amount > this.store.getFreeCapacity([RESOURCE_ENERGY]);
             }
@@ -20,7 +20,7 @@ module.exports = function() {
         
     Creep.prototype.find_extensions_not_full = 
     function() {
-        return this.room.find(FIND_STRUCTURES, {
+        return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
                 return  structure.structureType == STRUCTURE_EXTENSION && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
@@ -29,7 +29,7 @@ module.exports = function() {
     
     Creep.prototype.find_towers_not_full = 
     function() {
-        return this.room.find(FIND_STRUCTURES, {
+        return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
                 return  structure.structureType == STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
@@ -86,7 +86,7 @@ module.exports = function() {
     
     Creep.prototype.getResourceEnergy =
     function(speak) {
-        var source_tombstone = this.find_tombstones()[0];
+        var source_tombstone = this.find_tombstones();
         if (source_tombstone) {
             if (speak) {this.say('Tombstone');}
             if (this.withdraw(source_tombstone, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -94,7 +94,7 @@ module.exports = function() {
             }
             return true;
         }
-        var source_ground = this.find_dropped_rescources()[0];
+        var source_ground = this.find_dropped_rescources();
         if (source_ground) {
             if (speak) {this.say('DroppedItem');}
             if (this.pickup(source_ground) == ERR_NOT_IN_RANGE) {
@@ -124,10 +124,10 @@ module.exports = function() {
 
     Creep.prototype.storeResourceEnergy =
     function(speak) {
-        var target_extensions = this.find_extensions_not_full();
-        if (target_extensions > 0) {
-            if (this.transfer(target_extensions[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                this.moveTo(target_extensions[0]);
+        var target_extension = this.find_extensions_not_full();
+        if (target_extension) {
+            if (this.transfer(target_extension, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(target_extension);
             }
             return;
         }
@@ -145,15 +145,14 @@ module.exports = function() {
             }
             return;
         }
-
-        var source_spawn = this.room.find(FIND_MY_SPAWNS, {
+        var target_spawn = this.room.find(FIND_MY_SPAWNS, {
             filter: (structure) => {return structure.store[RESOURCE_ENERGY] > 200}
-        })[0]; // find closest source
-    
-        if(speak) {this.say('Spawn');}
-        // try to harvest energy, if the source is not in range move towards the source
-        if (this.transfer(source_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-            this.moveTo(source_spawn);
+        });
+        if (target_spawn > 0) {
+            if (this.transfer(source_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(source_spawn);
+            }
+            return;
         }
     }
 };

@@ -29,7 +29,7 @@ module.exports = {
                 return;
             }
             
-            var target_extension = creep.find_extensions_not_full()[0];
+            var target_extension = creep.find_extensions_not_full();
             if (target_extension) {
                 if(speak){creep.say('Extension');}
                 if (creep.transfer(target_extension, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -39,7 +39,7 @@ module.exports = {
                 return;
             }
             
-            var target_tower = creep.find_towers_not_full()[0];
+            var target_tower = creep.find_towers_not_full();
             if (target_tower) {
                 if(speak){creep.say('Tower');}
                 if (creep.transfer(target_tower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
