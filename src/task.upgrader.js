@@ -39,7 +39,10 @@ module.exports = {
         }
         // if creep is supposed to get energy from target
         else {
-            creep.getResourceEnergy(speak);
+            if (!creep.getResourceEnergy(speak)) {
+                creep.memory.task = "searching"
+                creep.memory.target = "searching"
+            }
         }
     }
 };

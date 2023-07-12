@@ -78,6 +78,9 @@ module.exports = {
                 }
                 return;
             }
+
+            creep.memory.task = "searching";
+            creep.memory.target = "searching";
         }
     }
 };
