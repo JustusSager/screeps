@@ -19,6 +19,12 @@ module.exports = {
             creep.memory.target = "searching"
         }
 
+        if (creep.room.name != creep.memory.room_home) {
+            let exit_direction = creep.room.findExitTo(creep.memory.room_home);
+            creep.moveTo(creep.pos.findClosestByPath(exit_direction));
+            return;
+        }
+
         if (creep.memory.task == "searching") {
             if (creep.store.getFreeCapacity([RESOURCE_ENERGY]) > 0 && !creep.getResourceEnergy()) { // TODO funktioniert nicht
                 creep.memory.task = "harvester";
@@ -27,11 +33,15 @@ module.exports = {
                 if (speak) creep.say("transporter");
                 creep.memory.task = "transporter";
                 creep.memory.target = "transporter";
-            } else if (creep.room.memory.construction_sites.length > 0) {
+            } else if (creep.room.memory.construction_sites && creep.room.memory.construction_sites.length > 0) {
                 if (speak) creep.say("builder");
                 creep.memory.task = "builder";
                 creep.memory.target = creep.room.memory.construction_sites[0].id;
-            } else {
+            } else if (!creep.room.memory.construction_sites && creep.room.find(FIND_CONSTRUCTION_SITES).length > 0) {
+                creep.memory.task = "builder";
+                creep.memory.target = creep.room.find(FIND_CONSTRUCTION_SITES)[0].id;
+            }
+            else {
                 if (speak) creep.say("upgrader")
                 creep.memory.task = "upgrader";
                 creep.memory.target = creep.room.controller.id;
