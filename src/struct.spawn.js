@@ -141,7 +141,7 @@ module.exports = {
           ' G: ' + numberGenerics + '/' + spawn.memory.maxGenerics +
           ' R: ' + numberRepairers + '/' + spawn.memory.maxRepairers +
           ' U: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders +
-          ' T: ' + numberTransporters + '/' + ((numberMiners - spawn.room.memory.source_links.length) * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000)) +
+          ' T: ' + numberTransporters + '/' + ((numberMiners - (spawn.room.memory.source_links ? spawn.room.memory.source_links.length : 0)) * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000)) +
           ' RH: ' + numberRemoteHarvesters + '/' + spawn.memory.maxLongDistanceHarvesters
 
         new RoomVisual(spawn.room.name).text(text, 25, 2, {color: 'green', font: 0.8});
