@@ -30,8 +30,7 @@ module.exports.loop = function () {
     
     // Room memory
     for (let i in Game.rooms) {
-        Game.rooms[i].init_memory();
-        Game.rooms[i].update_memory(false);
+        Game.rooms[i].handle_memory();
     }
 
     // run spawners
