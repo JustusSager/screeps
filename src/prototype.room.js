@@ -8,9 +8,6 @@ module.exports = function() {
         if (!this.memory.construction_sites) {
             this.memory.construction_sites = this.find(FIND_CONSTRUCTION_SITES);
         }
-        if (!this.memory.num_construction_sites) {
-            this.memory.num_construction_sites = this.find(FIND_CONSTRUCTION_SITES).length;
-        }
         if (!this.memory.amount_dropped_energy) {
             let dropped_energy = num_dropped_energy = this.find(FIND_DROPPED_RESOURCES, {
                 filter: (r) => {
@@ -69,10 +66,6 @@ module.exports = function() {
             for (let i = 0; i < source_links.length; i++) {
                 this.memory.source_links.push(source_links[i].id);
             }
-        }
-
-        if (Game.time % 50 == 1 || force) {
-            this.memory.num_construction_sites = this.find(FIND_CONSTRUCTION_SITES).length;
         }
         if (Game.time % 50 == 2 || force) {
             let dropped_energy = num_dropped_energy = this.find(FIND_DROPPED_RESOURCES, {

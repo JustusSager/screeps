@@ -140,7 +140,6 @@ module.exports = {
           ' M: ' + numberMiners + '/' + spawn.room.memory.energy_sources.length +
           ' G: ' + numberGenerics + '/' + spawn.memory.maxGenerics +
           ' R: ' + numberRepairers + '/' + spawn.memory.maxRepairers +
-          ' B: ' + numberBuilders + '/' + Math.floor(spawn.room.memory.num_construction_sites/5) + 
           ' U: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders +
           ' T: ' + numberTransporters + '/' + ((numberMiners - spawn.room.memory.source_links.length) * 2 + Math.ceil(spawn.room.memory.amount_dropped_energy / 1000)) +
           ' RH: ' + numberRemoteHarvesters + '/' + spawn.memory.maxLongDistanceHarvesters
