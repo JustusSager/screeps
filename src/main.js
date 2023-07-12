@@ -18,6 +18,7 @@ const roleSettler = require('role.settler');
 var roleGeneric = require('role.generic');
 var roleKing = require('role.king');
 var roleQueen = require('role.queen');
+
 var structSpawn = require('struct.spawn');
 var structTower = require('struct.tower');
 var structLink = require('struct.link');
@@ -26,16 +27,17 @@ var structLink = require('struct.link');
 module.exports.loop = function () {
     
     bunkerbuilding.run();
+    
+    // Room memory
+    for (let i in Game.rooms) {
+        Game.rooms[i].init_memory();
+        Game.rooms[i].update_memory(false);
+    }
 
     // run spawners
     for (let i in Game.spawns) {
         // Init spawn memory
         Game.spawns[i].init_memory();
-        // init room memory
-        Game.spawns[i].room.init_memory();
-        
-        // update room memory
-        Game.spawns[i].room.update_memory(false);
         
         structSpawn.run(Game.spawns[i]);
         
