@@ -7,7 +7,7 @@ module.exports = function() {
 
     Room.prototype.memory_construction_sites = 
     function() {
-        this.memory.construction_sites = this.find(FIND_SOURCES);
+        this.memory.construction_sites = this.find(FIND_CONSTRUCTION_SITES);
     }
 
     Room.prototype.memory_amount_dropped_energy = 
