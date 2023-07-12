@@ -107,7 +107,7 @@ module.exports = {
             else if (numberUpgraders < spawn.memory.maxUpgraders){
                 name = spawn.createBalancedCreep('upgrader', spawn.room.name);
             }
-            else if (numberTransporters < ((numberMiners - spawn.room.memory.source_links.length) * 2 + Math.floor(spawn.room.memory.amount_dropped_energy / 1000))) {
+            else if (numberTransporters < ((numberMiners - (spawn.room.memory.source_links ? spawn.room.memory.source_links.length : 0)) * 2 + Math.floor(spawn.room.memory.amount_dropped_energy / 1000))) {
                 name = spawn.createCarrierCreep('transporter');
             }
             else if (numberRepairers < spawn.memory.maxRepairers){
