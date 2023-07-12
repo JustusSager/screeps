@@ -112,7 +112,7 @@ module.exports = function() {
         }
         if (number_of_parts > 0) {
             var body = [];
-            for (let i = 0; i < number_of_parts && i < 5; i++) {
+            for (let i = 0; i < number_of_parts && i < 6; i++) {
                 body.push(WORK);
             }
             if (link_mining) {
