@@ -12,10 +12,10 @@ function calculate_offset(dict, flag) {
     }
 }
 
-function print_result(code, building) {
+function print_result(flag, code, building) {
   if (!config.basebuilding.printResult) return;
 
-  console.log('Trying building: ' + JSON.stringify(building))
+  console.log(flag.name + ' Trying building: ' + JSON.stringify(building))
   if (code == OK) {
     console.log('SUCCESS');
   }
@@ -34,7 +34,7 @@ function print_result(code, building) {
 
 function place_construction_sites(flag, rcl_level, counter) {
     if (blueprint[counter].rcl > rcl_level) {
-      return true;
+      return;
     }
 
     // calculate position
@@ -53,7 +53,7 @@ function place_construction_sites(flag, rcl_level, counter) {
     // place construction site
     let name = flag.room.createConstructionSite(building_cords.x, building_cords.y, blueprint[counter].type);
 
-    print_result(name, blueprint[counter]);
+    print_result(flag, name, blueprint[counter]);
 }
 
 module.exports = {
@@ -72,9 +72,8 @@ module.exports = {
           }
           let rcl_level = flags[i].room.controller.level
           if(flags[i].room.memory.construction_sites.length < config.basebuilding.maxConstructionSites) {
-            if (place_construction_sites(flags[i], rcl_level, flags[i].memory.counter)) {
-              flags[i].memory.counter = flags[i].memory.counter + 1;
-            }
+            place_construction_sites(flags[i], rcl_level, flags[i].memory.counter);
+            flags[i].memory.counter = flags[i].memory.counter + 1;
 
             if (flags[i].memory.counter > blueprint.length) {
               flags[i].memory.counter = 0;
