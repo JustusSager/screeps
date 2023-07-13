@@ -1,7 +1,12 @@
 
 module.exports = {
     basebuilding: {
-        maxConstructionSites: 3
+        printResult: true,
+        maxConstructionSites: 3,
+        flagNames: [
+            'BunkerFlag',
+            'BunkerFlag1'
+        ]
     },
     structureLink: {
         upperThreshold: 50
