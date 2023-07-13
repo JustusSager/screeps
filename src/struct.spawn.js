@@ -113,11 +113,11 @@ module.exports = {
             else if (numberRepairers < spawn.memory.maxRepairers){
                 name = spawn.createBalancedCreep('repairer', spawn.room.name);
             }
-            else if (numberKings < 1){
+            else if (numberKings < 1 && spawn.room.controller.level > 4){
                 target = _.filter(Game.flags, f => f.room = spawn.room && f.name == 'BunkerFlag')[0].name;
                 name = spawn.createKingCreep(target);
             }
-            else if (numberQueens < 1){
+            else if (numberQueens < 1 && spawn.room.controller.level > 4){
                 name = spawn.createCarrierCreep('queen');
             }
             else if (spawn.memory.claim_room != undefined) {
