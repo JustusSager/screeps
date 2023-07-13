@@ -14,7 +14,7 @@ module.exports = {
                     var closest_damaged_structure = towers[i].pos.findClosestByRange(FIND_STRUCTURES, {
                         filter: (s) => s.hits < s.hitsMax && 
                             s.structureType != STRUCTURE_WALL &&
-                            s.hits < 1000000
+                            s.hits < config.structureTower.repairMaxHits
                     });
                     
                     if(closest_hostile) {
@@ -25,7 +25,7 @@ module.exports = {
                         towers[i].heal(closest_damaged_creep);
                     }
                     else if (closest_damaged_structure) {
-                        if(towers[i].energy > config.structureTower.repairThreshold) {
+                        if(towers[i].energy > config.structureTower.repairEnergyThreshold) {
                             towers[i].repair(closest_damaged_structure);
                         }
                     }

@@ -7,6 +7,7 @@ module.exports = {
         upperThreshold: 50
     },
     structureTower: {
-        repairThreshold: 750
+        repairEnergyThreshold: 750,
+        repairMaxHits: 1000000
     }
 }
