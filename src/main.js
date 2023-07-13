@@ -1,7 +1,7 @@
 require('prototype.room')();
 require('prototype.spawn')();
 
-var bunkerbuilding = require('bunkerbuilding');
+var basebuilding = require('basebuilding');
 
 var roleCreep = require('role.creep');
 var roleDefender = require('role.defender');
@@ -26,7 +26,7 @@ var structLink = require('struct.link');
 
 module.exports.loop = function () {
     
-    bunkerbuilding.run();
+    basebuilding.run();
     
     // Room memory
     for (let i in Game.rooms) {
