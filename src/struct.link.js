@@ -1,3 +1,5 @@
+var config = require('config');
+
 module.exports = {
     run: function() {
         for (let i in Game.rooms) {
@@ -9,7 +11,7 @@ module.exports = {
                 let link = Game.getObjectById(Game.rooms[i].memory.source_links[j]);
                 if (link.id == storage_link.id) continue;
 
-                if (link.store.getFreeCapacity(RESOURCE_ENERGY) < 50) {
+                if (link.store.getFreeCapacity(RESOURCE_ENERGY) < config.structureLink.upperThreshold) {
                     link.transferEnergy(storage_link)
                 }
             }

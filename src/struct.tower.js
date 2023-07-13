@@ -1,3 +1,5 @@
+var config = require('config')
+
 module.exports = {
     run: function() {
         var towers = _.filter(Game.structures, s => s.structureType == STRUCTURE_TOWER);
@@ -23,7 +25,7 @@ module.exports = {
                         towers[i].heal(closest_damaged_creep);
                     }
                     else if (closest_damaged_structure) {
-                        if(towers[i].energy > 750) {
+                        if(towers[i].energy > config.structureTower.repairThreshold) {
                             towers[i].repair(closest_damaged_structure);
                         }
                     }

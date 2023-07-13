@@ -1,6 +1,12 @@
 
 module.exports = {
     basebuilding: {
-        maxConstructionSites: 5
+        maxConstructionSites: 3
+    },
+    structureLink: {
+        upperThreshold: 50
+    },
+    structureTower: {
+        repairThreshold: 750
     }
 }
