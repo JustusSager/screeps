@@ -33,7 +33,7 @@ function print_result(flag, code, building) {
 }
 
 function place_construction_sites(flag, rcl_level, counter) {
-    if (blueprint[counter].rcl > rcl_level) {
+    if (!blueprint[counter] | blueprint[counter].rcl > rcl_level) {
       return;
     }
 

@@ -26,8 +26,6 @@ var structLink = require('struct.link');
 
 module.exports.loop = function () {
     
-    basebuilding.run();
-    
     // Room memory
     for (let i in Game.rooms) {
         Game.rooms[i].handle_memory();
@@ -94,6 +92,8 @@ module.exports.loop = function () {
             roleQueen.run(creep, false)
         }
     }
+
+    basebuilding.run();
 
     // clear memory
     for(var i in Memory.creeps) {
