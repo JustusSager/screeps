@@ -1,30 +1,32 @@
+var config = require('config');
+
 module.exports = function() {
 
     StructureSpawn.prototype.init_memory = 
     function() {
         if (!this.memory.max_spawn_energy) {
-            this.memory.max_spawn_energy = 300;
+            this.memory.max_spawn_energy = config.structureSpawn.initalMaxSpawnEnergy;
         }
         if (!this.memory.target_remote_harvesting) {
             this.memory.target_remote_harvesting = [];
         }
         if (!this.memory.maxHarvesters) {
-            this.memory.maxHarvesters = 2;
+            this.memory.maxHarvesters = config.structureSpawn.initialMaxHarvesters;
         }
         if (!this.memory.maxRepairers) {
-            this.memory.maxRepairers = 1;
+            this.memory.maxRepairers = config.structureSpawn.initialMaxRepairers;
         }
         if (!this.memory.maxUpgraders) {
-            this.memory.maxUpgraders = 1;
+            this.memory.maxUpgraders = config.structureSpawn.initialMaxUpgraders;
         }
         if (!this.memory.maxLongDistanceHarvesters) {
-            this.memory.maxLongDistanceHarvesters = 0;
+            this.memory.maxLongDistanceHarvesters = config.structureSpawn.initialMaxLongDistanceHarvesters;
         }
         if (!this.memory.maxDefenders) {
-            this.memory.maxDefenders = 0;
+            this.memory.maxDefenders = config.structureSpawn.initialMaxDefenders;
         }
         if (!this.memory.maxGenerics) {
-            this.memory.maxGenerics = 1;
+            this.memory.maxGenerics = config.structureSpawn.initialMaxGenerics;
         }
     }
 
