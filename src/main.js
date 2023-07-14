@@ -31,7 +31,7 @@ module.exports.loop = function () {
         try {
             Game.rooms[i].handle_memory();
         } catch (error) {
-            console.error(error);
+            console.log(error);
         }
     }
 
@@ -41,7 +41,7 @@ module.exports.loop = function () {
             Game.spawns[i].init_memory();
             structSpawn.run(Game.spawns[i]);
         } catch (error) {
-            console.error(error);
+            console.log(error);
         }
         
     }
@@ -50,7 +50,7 @@ module.exports.loop = function () {
         structTower.run();
         structLink.run();
     } catch (error) {
-        console.error(error);
+        console.log(error);
     }
 
 
@@ -105,7 +105,7 @@ module.exports.loop = function () {
     try {
         basebuilding.run();
     } catch (error) {
-        console.error(error)
+        console.log(error)
     }
 
     // clear memory
