@@ -108,9 +108,12 @@ module.exports = function() {
         } else {
             var number_of_parts = Math.floor((energy - 50) / 100);
         }
+        if (number_of_parts > config.structureSpawn.minerCreepMaxWorkParts) {
+            number_of_parts = config.structureSpawn.minerCreepMaxWorkParts;
+        }
         if (number_of_parts > 0) {
             var body = [];
-            for (let i = 0; i < number_of_parts && i < 6; i++) {
+            for (let i = 0; i < number_of_parts; i++) {
                 body.push(WORK);
             }
             if (link_mining) {
@@ -128,7 +131,10 @@ module.exports = function() {
 
     StructureSpawn.prototype.createKingCreep =
     function(energy, target) {
-        var number_of_parts = Math.floor((energy - 50) / 50) > 4 ? 4 : Math.floor((energy - 50) / 50);
+        var number_of_parts = Math.floor((energy - 50) / 50);
+        if (number_of_parts > config.structureSpawn.kingCreepMaxCarryParts) {
+            number_of_parts = config.structureSpawn.kingCreepMaxCarryParts;
+        }
         if (number_of_parts > 0) {
             var body = [];
             for (let i = 0; i < number_of_parts; i++) {
