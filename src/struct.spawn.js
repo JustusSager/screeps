@@ -104,6 +104,13 @@ module.exports = {
             else if (numberGenerics < spawn.memory.maxGenerics) {
                 name = spawn.createBalancedCreep('generic', spawn.room.name);
             }
+            else if (numberKings < 1 && spawn.room.controller.level > 4){
+                target = _.filter(Game.flags, f => f.room = spawn.room && f.name == 'BunkerFlag')[0].name;
+                name = spawn.createKingCreep(target);
+            }
+            else if (numberQueens < 1 && spawn.room.controller.level > 4){
+                name = spawn.createCarrierCreep('queen');
+            }
             else if (numberUpgraders < spawn.memory.maxUpgraders){
                 name = spawn.createBalancedCreep('upgrader', spawn.room.name);
             }
@@ -112,13 +119,6 @@ module.exports = {
             }
             else if (numberRepairers < spawn.memory.maxRepairers){
                 name = spawn.createBalancedCreep('repairer', spawn.room.name);
-            }
-            else if (numberKings < 1 && spawn.room.controller.level > 4){
-                target = _.filter(Game.flags, f => f.room = spawn.room && f.name == 'BunkerFlag')[0].name;
-                name = spawn.createKingCreep(target);
-            }
-            else if (numberQueens < 1 && spawn.room.controller.level > 4){
-                name = spawn.createCarrierCreep('queen');
             }
             else if (spawn.memory.claim_room != undefined) {
                 if (!(createWorkerCreep(spawn, [CLAIM, MOVE], 'claimer', false, spawn.memory.claim_room) < 0)) {

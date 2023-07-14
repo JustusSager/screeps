@@ -28,20 +28,30 @@ module.exports.loop = function () {
     
     // Room memory
     for (let i in Game.rooms) {
-        Game.rooms[i].handle_memory();
+        try {
+            Game.rooms[i].handle_memory();
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     // run spawners
     for (let i in Game.spawns) {
-        // Init spawn memory
-        Game.spawns[i].init_memory();
-        
-        structSpawn.run(Game.spawns[i]);
+        try {
+            Game.spawns[i].init_memory();
+            structSpawn.run(Game.spawns[i]);
+        } catch (error) {
+            console.error(error);
+        }
         
     }
-    // run towers
-    structTower.run();
-    structLink.run();
+    // run towers and links
+    try {
+        structTower.run();
+        structLink.run();
+    } catch (error) {
+        console.error(error);
+    }
 
 
     // run creeps
@@ -92,8 +102,11 @@ module.exports.loop = function () {
             roleQueen.run(creep, false)
         }
     }
-
-    basebuilding.run();
+    try {
+        basebuilding.run();
+    } catch (error) {
+        console.error(error)
+    }
 
     // clear memory
     for(var i in Memory.creeps) {
