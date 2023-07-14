@@ -37,8 +37,8 @@ function place_rampart(flag, rcl_level, counter) {
     if (!blueprint[counter] || rcl_level < config.basebuilding.rampartRCLLevel) {
       return false;
     }
-    let ramparts_on_repair = _.filter(Game.structures, s => s.structureType == STRUCTURE_RAMPART && s.hits < config.structureTower.repairMaxHits);
-    if (ramparts_on_repair > 0) {
+    let ramparts_on_repair = _.filter(Game.structures, s => s.structureType == STRUCTURE_RAMPART && s.room == flag.room && s.hits < config.structureTower.repairMaxHits);
+    if (ramparts_on_repair.length > 0) {
       return false;
     }
     
