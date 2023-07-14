@@ -12,7 +12,7 @@ function calculate_offset(dict, flag) {
     }
 }
 
-function print_result(flag, code, building) {
+function print_result(flag, code, rampart_code, building) {
   if (!config.basebuilding.printResult) return;
 
   console.log(flag.name + ' Trying building: ' + JSON.stringify(building))
@@ -29,11 +29,32 @@ function print_result(flag, code, building) {
     // Cant build that yet
     console.log('ERR_RCL_NOT_ENOUGH');
   }
+  console.log(flag.name + 'Rampart building: ' + rampart_code);
   
 }
 
+function place_rampart(flag, rcl_level, counter) {
+    if (!blueprint[counter] || rcl_level < config.basebuilding.rampartRCLLevel) {
+      return false;
+    }
+    let ramparts_on_repair = _.filter(Game.structures, s => s.structureType == STRUCTURE_RAMPART && s.hits < config.structureTower.repairMaxHits);
+    if (ramparts_on_repair > 0) {
+      return false;
+    }
+    
+    let building_cords = calculate_offset(blueprint[counter], flag);
+    let check_pos = flag.room.lookAt(building_cords.x, building_cords.y);
+    if (check_pos[0].type == 'structure') {
+      if (check_pos[0].structure.structureType == 'road' && rcl_level < config.basebuilding.rampartOnRoadsRCLLevel) {
+        return false;
+      }
+      return flag.room.createConstructionSite(building_cords.x, building_cords.y, STRUCTURE_RAMPART);
+    }
+    return false;
+}
+
 function place_construction_sites(flag, rcl_level, counter) {
-    if (!blueprint[counter] | blueprint[counter].rcl > rcl_level) {
+    if (!blueprint[counter] || blueprint[counter].rcl > rcl_level) {
       return;
     }
 
@@ -53,7 +74,9 @@ function place_construction_sites(flag, rcl_level, counter) {
     // place construction site
     let name = flag.room.createConstructionSite(building_cords.x, building_cords.y, blueprint[counter].type);
 
-    print_result(flag, name, blueprint[counter]);
+    let rampart_name = place_rampart(flag, rcl_level, counter);
+
+    print_result(flag, name, rampart_name, blueprint[counter]);
 }
 
 module.exports = {

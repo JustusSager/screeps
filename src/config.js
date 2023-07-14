@@ -6,14 +6,16 @@ module.exports = {
         flagNames: [
             'BunkerFlag',
             'BunkerFlag1'
-        ]
+        ],
+        rampartRCLLevel: 4, // rampartRCLLevel > 8 -> no Rampart construction
+        rampartOnRoadsRCLLevel: 8 // rampartOnRoadsRCLLevel > 8 -> no Rampart construction on Roads
     },
     structureLink: {
         upperThreshold: 50
     },
     structureTower: {
         repairEnergyThreshold: 750,
-        repairMaxHits: 1000000
+        repairMaxHits: 100000
     },
     structureSpawn: {
         initalMaxSpawnEnergy: 300,
