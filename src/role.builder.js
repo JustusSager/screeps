@@ -49,7 +49,7 @@ module.exports = {
             }
             // try to transfer energy, if the spawn is not in range move towards the source
             else {
-                roleUpgrader.run(creep, speak);
+                // roleUpgrader.run(creep, speak);
             }
         }
         // if creep is supposed to get energy from target

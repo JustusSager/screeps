@@ -1,5 +1,6 @@
 require('prototype.room')();
 require('prototype.spawn')();
+require('creep-tasks');
 
 var basebuilding = require('basebuilding');
 
@@ -75,7 +76,7 @@ module.exports.loop = function () {
             roleRepairer.run(creep, false);
         }
         else if (creep.memory.role == 'upgrader') {
-            roleUpgrader.run(creep, false);
+            // roleUpgrader.run(creep, false);
         }
         else if (creep.memory.role == 'transporter') {
             roleTransporter.run(creep, false);
@@ -118,5 +119,17 @@ module.exports.loop = function () {
         if(!Game.spawns[i]) {
             delete Memory.spawns[i];
         }
+    }
+
+    let creeps = _.values(Game.creeps);
+    let upgraders = _.filter(creeps, creep => creep.memory.role.includes("upgrader"));
+
+    for (let upgrader of upgraders) {
+        if (upgrader.isIdle) {
+            roleUpgrader.newTask(upgrader);
+        }
+    }
+    for (let creep of upgraders) {
+        creep.run();
     }
 }
