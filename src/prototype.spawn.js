@@ -50,7 +50,8 @@ module.exports = function() {
                 working: true,
                 room_home: this.room.name,
                 room_target: room_target
-            }});
+            },
+            directions: [TOP, RIGHT]});
         }
     }
     
@@ -76,7 +77,8 @@ module.exports = function() {
             working: true,
             room_home: this.room.name,
             room_target: room_target
-        }});
+        },
+        directions: [TOP, RIGHT]});
     }
 
     StructureSpawn.prototype.createCarrierCreep =
@@ -96,7 +98,8 @@ module.exports = function() {
                 working: true,
                 room_home: this.room.name,
                 room_target: this.room.name
-            }});
+            },
+            directions: [TOP, RIGHT]});
         }
     }
 
@@ -125,7 +128,8 @@ module.exports = function() {
                 room_home: this.room.name,
                 source_id: source_id,
                 link_mining: link_mining
-            }});
+            },
+            directions: [TOP, RIGHT]});
         }
     }
 
@@ -146,6 +150,7 @@ module.exports = function() {
             role: "king",
             room_home: this.room.name,
             target: target
-        }});
+        },
+        directions: [BOTTOM_LEFT, BOTTOM]});
     }
 };
