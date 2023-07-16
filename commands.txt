@@ -1,6 +1,6 @@
 Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 'builder2', {memory: { role: 'builder', working: true, room_home: Game.spawns['Spawn1'].room.name, room_target: 'E57S4' }})
 
-Game.spawns.Spawn1.spawnCreep([WORK, CARRY, MOVE, MOVE], 'builder1', {memory: { role: 'builder', working: true, room_home: Game.spawns['Spawn1'].room.name, room_target: Game.spawns['Spawn1'].room.name }})
+Game.spawns.Spawn1.spawnCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], 'generic1', {memory: { role: 'generic', working: true, room_home: 'E14S23', room_target: 'E14S23' }})
 
 Game.spawns.Spawn1.spawnCreep([WORK, CARRY, CARRY, MOVE, MOVE], 'builder4', {memory: { role: 'builder', working: true, room_home: Game.spawns['Spawn1'].room.name, room_target: Game.spawns['Spawn1'].room.name }})
 
