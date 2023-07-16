@@ -30,6 +30,12 @@ module.exports = {
         // if creep is supposed to harvest energy from source
         else {
             if (creep.room.name == creep.memory.room_target) {
+                var container = creep.find_container_not_empty();
+                if (container) {
+                    if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(container);
+                    }
+                }
                 // Find and harvest source if inside target room
                 var source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
                 if(speak){creep.say('Source');}
