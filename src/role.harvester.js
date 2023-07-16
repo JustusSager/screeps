@@ -6,12 +6,12 @@ let roleHarvester = {
     // This module demonstrates the RoomObject.targetedBy functionality
 
     newTask: function (creep) {
-        if (creep.store.getFreeCapacity > 0) {
+        if (creep.store.getFreeCapacity() > 0) {
             let sources = creep.room.find(FIND_SOURCES);
-            creep.task = Tasks.harvest(sources[0]);
+            creep.task = Tasks.harvest(creep, sources[0]);
         } else {
             let spawn = Game.spawns['Spawn1'];
-            creep.task = Tasks.transfer(spawn);
+            creep.task = Tasks.transfer(creep, spawn);
         }
     }
 

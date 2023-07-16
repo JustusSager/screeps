@@ -3,15 +3,16 @@
 function deref(ref) {
     return Game.getObjectById(ref) || Game.flags[ref] || Game.creeps[ref] || Game.spawns[ref] || null;
 }
-function derefRoomPosition(protoPos) {
+function derefRoomPos(protoPos) {
     return new RoomPosition(protoPos.x, protoPos.y, protoPos.roomName);
 }
 
 class Task {
-    constructor(taskName, targetId, options={}) {
+    constructor(taskName, creep, target, options={}) {
         this.name = taskName;
-        if(Game.getObjectById(targetId)) {
-            this.targetId = targetId;
+        this.creepName = creep.name;
+        if(target) {
+            this.targetId = target.id;
         } else {
             this.targetId = '';
         }
@@ -53,7 +54,21 @@ class Task {
         return deref(this.targetId);
     }
     get targetPos() {
-        return derefRoomPos(deref(this.targetId) != null? deref(this.targetId).pos : null);
+        return derefRoomPos(this.target != null? this.target.pos : null);
+    }
+
+    isValid() {
+        let validTask = false;
+        if (this.creep) {
+            validTask = this.isValidTask();
+        }
+
+        let validTarget = false;
+        if (this.target) {
+            validTarget = this.isValidTarget();
+        }
+
+        return validTask && validTarget;
     }
 
     move(range = this.settings.targetRange) {
@@ -74,8 +89,8 @@ class Task {
 }
 
 class TaskTransfer extends Task {
-    constructor(targetId, resourceType = RESOURCE_ENERGY, amount = undefined, options = {}) {
-        super(TaskTransfer.taskName, targetId, options);
+    constructor(creep, target, resourceType = RESOURCE_ENERGY, amount = undefined, options = {}) {
+        super(TaskTransfer.taskName, creep, target, options);
         this.data.resourceType = resourceType;
         this.data.amount = amount;
     }
@@ -97,8 +112,8 @@ class TaskTransfer extends Task {
 TaskTransfer.taskName = 'transfer'
 
 class TaskHarvest extends Task {
-    constructor(targetId, options = {}) {
-        super(TaskHarvest.taskName, targetId, options);
+    constructor(creep, target, options = {}) {
+        super(TaskHarvest.taskName, creep, target, options);
     }
 
     isValidTask() {
@@ -116,8 +131,8 @@ class TaskHarvest extends Task {
 TaskHarvest.taskName = 'harvest';
 
 class TaskBuild extends Task {
-    constructor(targetId, options = {}) {
-        super(TaskBuild.taskName, targetId, options);
+    constructor(creep, target, options = {}) {
+        super(TaskBuild.taskName, creep, target, options);
         this.settings.targetRange = 3;
     }
 
@@ -136,8 +151,8 @@ class TaskBuild extends Task {
 TaskBuild.taskName = 'build';
 
 class TaskUpgrade extends Task {
-    constructor(targetId, options = {}) {
-        super(TaskUpgrade.taskName, targetId, options);
+    constructor(creep, target, options = {}) {
+        super(TaskUpgrade.taskName, creep, target, options);
         this.settings.targetRange = 3;
     }
 
@@ -155,26 +170,44 @@ class TaskUpgrade extends Task {
 }
 TaskUpgrade.taskName = 'upgrade';
 
+class TaskInvalid extends Task {
+    constructor(creep, target, options = {}) {
+        super(TaskInvalid.taskName, creep, target, options);
+    }
+
+    isValidTask() {
+        return false;
+    }
+
+    isValidTarget() {
+        return false;
+    }
+
+    work() {
+        this.creep.say('ERROR');
+        return false;
+    }
+
+}
+TaskInvalid.taskName = 'INVALID'
+
 function initializeTask(protoTask) {
     let taskName = protoTask.name;
-    let targetId = protoTask.targetId;
-    console.log(TaskTransfer.taskName)
+    let creep = deref(protoTask.creepName);
+    let target = deref(protoTask.targetId);
     let task;
     switch (taskName) {
         case TaskHarvest.taskName:
-            task = new TaskHarvest(targetId);
-            break;
-        case TaskBuild.taskName:
-            task = new TaskBuild(targetId);
+            task = new TaskHarvest(creep, target);
             break;
         case TaskUpgrade.taskName:
-            task = new TaskUpgrade(targetId);
+            task = new TaskUpgrade(creep, target);
             break;
         case TaskTransfer.taskName:
-            task = new TaskTransfer(targetId)
+            task = new TaskTransfer(creep, target)
         default:
             console.log(`Invalid task name: ${taskName}!`);
-            task = null;
+            task = new TaskInvalid(null);
     }
     task.proto = protoTask;
     return task;
@@ -188,7 +221,7 @@ Object.defineProperty(Creep.prototype, 'task', {
     },
     set(task) {
         // Set the new task
-        this.memory.task = task ? task.proto : "Test";
+        this.memory.task = task ? task.proto : null;
         if (task) {
             // Register references to creep
             task.creep = this;
@@ -222,76 +255,8 @@ Object.defineProperty(RoomPosition.prototype, 'isEdge', {
 
 // Export stuff =============================================================================================
 class Tasks$1 {
-    static attack(target, options = {}) {
-        return new TaskAttack(target, options);
-    }
-
-    static build(target, options = {}) {
-        return new TaskBuild(target, options);
-    }
-
-    static claim(target, options = {}) {
-        return new TaskClaim(target, options);
-    }
-
-    static dismantle(target, options = {}) {
-        return new TaskDismantle(target, options);
-    }
-
-    static drop(target, resourceType = RESOURCE_ENERGY, amount = undefined, options = {}) {
-        return new TaskDrop(target, resourceType, amount, options);
-    }
-
-    static fortify(target, options = {}) {
-        return new TaskFortify(target, options);
-    }
-
-    static getBoosted(target, amount = undefined, options = {}) {
-        return new TaskGetBoosted(target, amount, options);
-    }
-
-    static getRenewed(target, options = {}) {
-        return new TaskGetRenewed(target, options);
-    }
-
-    static goTo(target, options = {}) {
-        return new TaskGoTo(target, options);
-    }
-
-    static goToRoom(target, options = {}) {
-        return new TaskGoToRoom(target, options);
-    }
-
     static harvest(target, options = {}) {
         return new TaskHarvest(target, options);
-    }
-
-    static heal(target, options = {}) {
-        return new TaskHeal(target, options);
-    }
-
-    static meleeAttack(target, options = {}) {
-        return new TaskMeleeAttack(target, options);
-    }
-
-    static pickup(target, options = {}) {
-        return new TaskPickup(target, options);
-    }
-
-    static rangedAttack(target, options = {}) {
-        return new TaskRangedAttack(target, options);
-    }
-
-    static repair(target, options = {}) {
-        return new TaskRepair(target, options);
-    }
-
-    static reserve(target, options = {}) {
-        return new TaskReserve(target, options);
-    }
-
-    static signController(target, signature, options = {}) {
-        return new TaskSignController(target, signature, options);
     }
 
     static transfer(target, resourceType = RESOURCE_ENERGY, amount = undefined, options = {}) {
@@ -300,10 +265,6 @@ class Tasks$1 {
 
     static upgrade(target, options = {}) {
         return new TaskUpgrade(target, options);
-    }
-
-    static withdraw(target, resourceType = RESOURCE_ENERGY, amount = undefined, options = {}) {
-        return new TaskWithdraw(target, resourceType, amount, options);
     }
 }
 

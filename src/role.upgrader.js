@@ -6,9 +6,9 @@ let roleUpgrader = {
 
     newTask: function(creep) {
         if (creep.store[RESOURCE_ENERGY] > 0) {
-            creep.task = Tasks.upgrade(creep.room.controller);
+            creep.task = Tasks.upgrade(creep, creep.room.controller);
         } else {
-            creep.task = Tasks.harvest(creep.room.find(FIND_SOURCES)[0])
+            creep.task = Tasks.harvest(creep, creep.room.find(FIND_SOURCES)[0]);
         }
     }
 
