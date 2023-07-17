@@ -36,6 +36,7 @@ class Task {
         }
     }
     set proto(protoTask) {
+        this.name = protoTask.name;
         this.creepName = protoTask.creepName;
         this.targetId = protoTask.targetId;
         this.options = protoTask.options;
@@ -44,6 +45,7 @@ class Task {
     }
 
     get creep() {
+        console.log(Game.creeps[this.creepName]);
         return Game.creeps[this.creepName];
     }
     set creep(creep) {
@@ -194,6 +196,7 @@ TaskInvalid.taskName = 'INVALID'
 function initializeTask(protoTask) {
     let taskName = protoTask.name;
     let creep = deref(protoTask.creepName);
+    console.log(JSON.stringify(creep));
     let target = deref(protoTask.targetId);
     let task;
     switch (taskName) {
@@ -223,6 +226,7 @@ Object.defineProperty(Creep.prototype, 'task', {
         // Set the new task
         this.memory.task = task ? task.proto : null;
         if (task) {
+            console.log("TEST-----------------");
             // Register references to creep
             task.creep = this;
         }
