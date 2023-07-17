@@ -26,6 +26,7 @@ module.exports = {
         initialMaxDefenders: 0,
         initialMaxGenerics: 3,
         kingCreepMaxCarryParts: 4,
-        minerCreepMaxWorkParts: 6
+        minerCreepMaxWorkParts: 6,
+        transporterMultiplier: 1
     }
 }

@@ -1,5 +1,7 @@
 require('prototype.spawn')();
 
+var config = require('config');
+
 var RemoteHarvesterTargetsCounter = 0;
 
 function body_cost(body_blueprint) {
@@ -121,7 +123,7 @@ module.exports = {
                 let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
                 name = spawn.createBalancedCreep(energy, 'upgrader', spawn.room.name);
             }
-            else if (numberTransporters < ((numberMiners - (spawn.room.memory.source_links ? spawn.room.memory.source_links.length : 0)) * 2 + Math.floor(spawn.room.memory.amount_dropped_energy / 1000))) {
+            else if (numberTransporters < ((numberMiners - (spawn.room.memory.source_links ? spawn.room.memory.source_links.length : 0)) * config.structureSpawn.transporterMultiplier + Math.floor(spawn.room.memory.amount_dropped_energy / 1000))) {
                 let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
                 name = spawn.createCarrierCreep(energy, 'transporter');
             }
@@ -151,7 +153,7 @@ module.exports = {
           ' G: ' + numberGenerics + '/' + spawn.memory.maxGenerics +
           ' R: ' + numberRepairers + '/' + spawn.memory.maxRepairers +
           ' U: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders +
-          ' T: ' + numberTransporters + '/' + ((numberMiners - (spawn.room.memory.source_links ? spawn.room.memory.source_links.length : 0)) * 2 + Math.floor(spawn.room.memory.amount_dropped_energy / 1000)) +
+          ' T: ' + numberTransporters + '/' + ((numberMiners - (spawn.room.memory.source_links ? spawn.room.memory.source_links.length : 0)) * config.structureSpawn.transporterMultiplier + Math.floor(spawn.room.memory.amount_dropped_energy / 1000)) +
           ' RH: ' + numberRemoteHarvesters + '/' + spawn.memory.maxLongDistanceHarvesters
 
         new RoomVisual(spawn.room.name).text(text, 25, 2, {color: 'green', font: 0.8});
