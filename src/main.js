@@ -23,7 +23,7 @@ var structSpawn = require('struct.spawn');
 var structTower = require('struct.tower');
 var structLink = require('struct.link');
 
-var taskManager = require('task-manager');
+var taskManager = require('creep-tasks');
 
 
 module.exports.loop = function () {
