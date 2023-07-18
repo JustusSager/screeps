@@ -1,11 +1,5 @@
 module.exports = {
     run: function(creep, speak) {
-
-        if (creep.ticksToLive < 200 && creep.hitsMax > 1000) {
-            creep.moveTo(creep.room.find(FIND_MY_SPAWNS));
-            return;
-        }
-        
         // if creep is bringing energy to the spawn but has no energy left
         if (creep.memory.working == true && creep.store[RESOURCE_ENERGY] == 0) {
             creep.say('GetEnergy');
