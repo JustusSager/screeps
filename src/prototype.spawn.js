@@ -146,7 +146,7 @@ module.exports = function() {
             }
             body.push(MOVE);
         }
-        return this.spawnCreep(body, "KING", { memory: {
+        return this.spawnCreep(body, "KING " + target, { memory: {
             role: "king",
             room_home: this.room.name,
             target: target
