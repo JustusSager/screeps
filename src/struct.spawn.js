@@ -112,7 +112,7 @@ module.exports = {
             }
             else if (numberKings < 1 && spawn.room.controller.level > 4){
                 let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
-                target = _.filter(Game.flags, f => f.room = spawn.room && f.name == 'BunkerFlag')[0].name;
+                target = _.filter(Game.flags, f => f.room = spawn.room && f.name.includes('BunkerFlag'))[0].name;
                 name = spawn.createKingCreep(energy, target);
             }
             else if (numberQueens < 1 && spawn.room.controller.level > 4){
