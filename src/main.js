@@ -23,6 +23,8 @@ var structSpawn = require('struct.spawn');
 var structTower = require('struct.tower');
 var structLink = require('struct.link');
 
+var taskManager = require('task-manager');
+
 
 module.exports.loop = function () {
     
@@ -92,9 +94,6 @@ module.exports.loop = function () {
         else if (creep.memory.role == 'settler') {
             roleSettler.run(creep, false);
         }
-        else if (creep.memory.role == 'generic') {
-            roleGeneric.run(creep, true)
-        }
         else if (creep.memory.role == 'king') {
             roleKing.run(creep, false)
         }
@@ -102,6 +101,9 @@ module.exports.loop = function () {
             roleQueen.run(creep, false)
         }
     }
+    taskManager.run();
+    
+
     try {
         basebuilding.run();
     } catch (error) {

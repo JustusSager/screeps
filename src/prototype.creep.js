@@ -78,10 +78,43 @@ module.exports = function() {
             filter: (structure) => {
                 return ((structure.structureType == STRUCTURE_CONTAINER ||
                         structure.structureType == STRUCTURE_STORAGE) &&
-                        structure.store[RESOURCE_ENERGY] > this.store.getFreeCapacity([RESOURCE_ENERGY]) // ???
+                        structure.store[RESOURCE_ENERGY] > this.store.getFreeCapacity([RESOURCE_ENERGY])
                         )
             }
         });
+    }
+
+    Creep.prototype.find_spawn_not_full = 
+    function() {
+        return this.pos.findClosestByPath(FIND_MY_SPAWNS, {
+            filter: (s) => {
+                s.store.getFreeCapacity > 0;
+            }
+        })
+    }
+    Creep.prototype.find_spawn_not_empty = 
+    function() {
+        return this.pos.findClosestByPath(FIND_MY_SPAWNS, {
+            filter: (s) => {
+                s.store[RESOURCE_ENERGY] > this.store.getFreeCapacity;
+            }
+        })
+    }
+
+    Creep.prototype.find_energy = 
+    function(include_spawn) {
+        let tombstone = this.find_tombstones();
+        if (tombstone) return tombstone;
+
+        let container_storage = this.find_container_storage_not_empty();
+        if (container_storage) return container_storage;
+
+        if (include_spawn) {
+            let spawn = this.find_spawn_not_empty();
+            if (spawn) return spawn;
+        }
+
+        return false;
     }
     
     Creep.prototype.getResourceEnergy =
@@ -110,9 +143,7 @@ module.exports = function() {
             }
             return true;
         }
-        var source_spawn = this.room.find(FIND_MY_SPAWNS, {
-            filter: (structure) => {return structure.store[RESOURCE_ENERGY] > 200}
-        })[0]; // find closest source
+        var source_spawn = this.find_spawn_not_empty();
     
         if(speak) {this.say('Spawn');}
         // try to harvest energy, if the source is not in range move towards the source
@@ -131,6 +162,13 @@ module.exports = function() {
             }
             return;
         }
+        var target_spawn = this.find_spawn_not_full();
+        if (target_spawn > 0) {
+            if (this.transfer(source_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(source_spawn);
+            }
+            return;
+        }
         var target_storage = this.find_storage_not_full();
         if (target_storage) {
             if (this.transfer(target_storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -142,15 +180,6 @@ module.exports = function() {
         if (target_container) {
             if (this.transfer(target_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 this.moveTo(target_container);
-            }
-            return;
-        }
-        var target_spawn = this.room.find(FIND_MY_SPAWNS, {
-            filter: (structure) => {return structure.store[RESOURCE_ENERGY] > 200}
-        });
-        if (target_spawn > 0) {
-            if (this.transfer(source_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                this.moveTo(source_spawn);
             }
             return;
         }
