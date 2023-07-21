@@ -145,6 +145,9 @@ module.exports = {
         code = creep.work();
         if (code != OK) {
             creep.say(code);
+            if (code == ERR_NOT_ENOUGH_ENERGY) {
+                creep.memory.task = undefined;
+            }
         }
     }
 }
