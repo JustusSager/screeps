@@ -7,7 +7,6 @@ var roleCreep = require('role.creep');
 var roleDefender = require('role.defender');
 var roleHarvester = require('role.harvester');
 var roleMiner = require('role.miner');
-var roleUpgrader = require('role.upgrader');
 var roleTransporter = require('role.transporter');
 var roleDistributor = require('role.distributor');
 var roleRemoteHarvestUpgrader = require('role.RemoteHarvestUpgrader');
@@ -67,9 +66,6 @@ module.exports.loop = function () {
         else if (creep.memory.role == 'miner') {
             roleMiner.run(creep, false);
         }
-        else if (creep.memory.role == 'upgrader') {
-            roleUpgrader.run(creep, false);
-        }
         else if (creep.memory.role == 'transporter') {
             roleTransporter.run(creep, false);
         }
@@ -92,7 +88,12 @@ module.exports.loop = function () {
             roleQueen.run(creep, false)
         }
     }
-    taskManager.run();
+
+    let creeps_for_tasks = _.filter(Game.creeps, c => c.memory.role == 'generic' || c.memory.role == 'repairer' || c.memory.role == 'upgrader');
+    for (var i in creeps_for_tasks) {
+        taskManager.run(creeps_for_tasks[i]);
+    }
+    
     
 
     try {
