@@ -33,6 +33,9 @@ Creep.prototype.work = function() {
                 resource = this.memory.task.resource ? this.memory.task.resource : RESOURCE_ENERGY;
                 // amount = this.memory.task.amount ? this.memory.task.amount : this.store[resource];
                 return this.transfer(target, resource);
+            case 'moveToRoom':
+                var exit_direction = creep.room.findExitTo(creep.memory.task.target);
+                return creep.moveTo(creep.pos.findClosestByPath(exit_direction));
             default:
                 return -101;
         }
@@ -48,6 +51,8 @@ Creep.prototype.isValidTask = function() {
     }
 
     switch (this.memory.task.name) {
+        case 'moveToRoom':
+            return true;
         case 'upgrade':
             if (this.store[RESOURCE_ENERGY] > 0 && this.getActiveBodyparts(WORK) > 0) {
                 return true;
@@ -92,10 +97,22 @@ Creep.prototype.isValidTarget = function() {
     if (!this.memory.task || !this.memory.task.target) {
         return false;
     }
-    if (Game.getObjectById(this.memory.task.target)) {
-        return true;
+    let target;
+    switch (this.memory.task.name) {
+        case 'moveToRoom':
+            return this.room.name != this.memory.task.target;
+        case 'repair':
+            target = Game.getObjectById(this.memory.task.target);
+            return target && target.hits < target.hitsMax && target.structureType != STRUCTURE_WALL;
+        case 'withdraw':
+            target = Game.getObjectById(this.memory.task.target);
+            return target && target.store && target.store[this.memory.task.resource] > 0;
+        default:
+            if (Game.getObjectById(this.memory.task.target)) {
+                return true;
+            }
+            return false;
     }
-    return false;
 }
 
 module.exports = {
@@ -103,6 +120,10 @@ module.exports = {
         if (!creep.memory.task || creep.memory.task == {}) {
             creep.memory.task = {};
             if (creep.store[RESOURCE_ENERGY] > 0) {
+                if (creep.memory.room_home && creep.memory.room_home != creep.room.name) {
+                    creep.memory.task['name'] = "moveToRoom";
+                    creep.memory.task['target'] = creep.memory.room_home;
+                }
                 let repair_site = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL});
                 if (creep.memory.role == 'repairer' && repair_site) {
                     creep.memory.task['name'] = "repair";
@@ -126,6 +147,10 @@ module.exports = {
                 }
             } 
             else {
+                if (creep.memory.room_target && creep.memory.room_target != creep.room.name) {
+                    creep.memory.task['name'] = "moveToRoom";
+                    creep.memory.task['target'] = creep.memory.room_target;
+                }
                 if (creep.find_dropped_rescources()) {
                     creep.memory.task['name'] = "pickup";
                     creep.memory.task['target'] = creep.find_dropped_rescources().id;
