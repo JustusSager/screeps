@@ -62,7 +62,7 @@ module.exports = {
 
         //renew creep
         var creeps_in_range = spawn.pos.findInRange(FIND_MY_CREEPS, 1, {
-            filter: (c) => c.ticksToLive < 300 &&
+            filter: (c) => c.ticksToLive < 1400 &&
                 c.hitsMax > 1000
         })
         if (creeps_in_range.length > 0 && spawn.energy > 100) {

@@ -15,6 +15,11 @@ Creep.prototype.work = function() {
 
     if (this.pos.inRangeTo(target, range)) {
         switch (this.memory.task.name) {
+            case 'getRenewed':
+                if (target.store[RESOURCE_ENERGY] <= 100) {
+                    this.transfer(target, resource);
+                }
+                return OK;
             case 'upgrade':
                 return this.upgradeController(target);
             case 'build':
@@ -53,6 +58,8 @@ Creep.prototype.isValidTask = function() {
     switch (this.memory.task.name) {
         case 'moveToRoom':
             return true;
+        case 'getRenewed':
+            return this.ticksToLive < 1400 && this.hitsMax > 1000;
         case 'upgrade':
             if (this.store[RESOURCE_ENERGY] > 0 && this.getActiveBodyparts(WORK) > 0) {
                 return true;
@@ -119,50 +126,66 @@ module.exports = {
     run: function (creep) {
         if (!creep.memory.task || creep.memory.task == {}) {
             creep.memory.task = {};
+            let target;
             if (creep.store[RESOURCE_ENERGY] > 0) {
                 if (creep.memory.room_home && creep.memory.room_home != creep.room.name) {
                     creep.memory.task['name'] = "moveToRoom";
                     creep.memory.task['target'] = creep.memory.room_home;
+                    return;
                 }
-                let repair_site = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL});
-                if (creep.memory.role == 'repairer' && repair_site) {
+                /*if (creep.ticksToLive < 500 && creep.hitsMax > 1000) {
+                    creep.memory.task['name'] = "getRenewed";
+                    creep.memory.task['target'] = creep.pos.findClosestByPath(FIND_MY_SPAWNS).id;
+                    return;
+                }*/
+                target = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL});
+                if (creep.memory.role == 'repairer' && target) {
                     creep.memory.task['name'] = "repair";
-                    creep.memory.task['target'] = repair_site.id;
+                    creep.memory.task['target'] = target.id;
                     creep.memory.task['range'] = 3;
+                    return;
                 }
-                else if (creep.memory.role == 'upgrader') {
+                if (creep.memory.role == 'upgrader') {
                     creep.memory.task['name'] = "upgrade";
                     creep.memory.task['target'] = creep.room.controller.id;
                     creep.memory.task['range'] = 3;
+                    return;
                 }
-                else if (creep.room.memory.construction_sites && creep.room.memory.construction_sites.length > 0) {
+                if (creep.room.memory.construction_sites && creep.room.memory.construction_sites.length > 0) {
                     creep.memory.task['name'] = "build";
                     creep.memory.task['target'] = creep.room.memory.construction_sites[0].id;
                     creep.memory.task['range'] = 3;
+                    return;
                 }
                 else {
                     creep.memory.task['name'] = "upgrade";
                     creep.memory.task['target'] = creep.room.controller.id;
                     creep.memory.task['range'] = 3;
+                    return;
                 }
             } 
             else {
                 if (creep.memory.room_target && creep.memory.room_target != creep.room.name) {
                     creep.memory.task['name'] = "moveToRoom";
                     creep.memory.task['target'] = creep.memory.room_target;
+                    return;
                 }
                 if (creep.find_dropped_rescources()) {
                     creep.memory.task['name'] = "pickup";
                     creep.memory.task['target'] = creep.find_dropped_rescources().id;
+                    return;
                 }
-                else if (creep.find_energy(false)) {
+                if (creep.find_energy(false)) {
                     creep.memory.task['name'] = "withdraw";
                     creep.memory.task['target'] = creep.find_energy(false).id;
                     creep.memory.task['resource'] = RESOURCE_ENERGY;
+                    return;
                 }
-                else {
+                target = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+                if (target) {
                     creep.memory.task['name'] = "harvest";
-                    creep.memory.task['target'] = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id;
+                    creep.memory.task['target'] = target.id;
+                    return;
                 }
             }
             
