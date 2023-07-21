@@ -21,6 +21,8 @@ Creep.prototype.work = function() {
                 return this.build(target);
             case 'harvest':
                 return this.harvest(target);
+            case 'repair':
+                return this.repair(target);
             case 'withdraw':
                 resource = this.memory.task.resource ? this.memory.task.resource : RESOURCE_ENERGY;
                 // amount = this.memory.task.amount ? this.memory.task.amount : this.store.getFreeCapacity;
@@ -52,6 +54,11 @@ Creep.prototype.isValidTask = function() {
             }
             return false;
         case 'build':
+            if (this.store[RESOURCE_ENERGY] > 0 && this.getActiveBodyparts(WORK) > 0) {
+                return true;
+            }
+            return false;
+        case 'repair':
             if (this.store[RESOURCE_ENERGY] > 0 && this.getActiveBodyparts(WORK) > 0) {
                 return true;
             }
@@ -93,14 +100,20 @@ Creep.prototype.isValidTarget = function() {
 
 module.exports = {
     run: function () {
-        let creeps = _.filter(Game.creeps, c => c.memory.role == 'generic' );
+        let creeps = _.filter(Game.creeps, c => c.memory.role == 'generic' || c.memory.role == 'repairer');
 
         for (var i in creeps) {
             var creep = creeps[i];
             if (!creep.memory.task || creep.memory.task == {}) {
                 creep.memory.task = {};
                 if (creep.store[RESOURCE_ENERGY] > 0) {
-                    if (creep.room.memory.construction_sites && creep.room.memory.construction_sites.length > 0) {
+                    let repair_site = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL});
+                    if (creep.memory.role == 'repairer' && repair_site) {
+                        creep.memory.task['name'] = "repair";
+                        creep.memory.task['target'] = repair_site.id;
+                        creep.memory.task['range'] = 3;
+                    }
+                    else if (creep.room.memory.construction_sites && creep.room.memory.construction_sites.length > 0) {
                         creep.memory.task['name'] = "build";
                         creep.memory.task['target'] = creep.room.memory.construction_sites[0].id;
                         creep.memory.task['range'] = 3;
@@ -128,7 +141,10 @@ module.exports = {
                 }
                 
             }
-            creep.say(creep.work());
+            code = creep.work();
+            if (code != OK) {
+                creep.say(code);
+            }
         }
     }
 }

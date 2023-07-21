@@ -45,7 +45,7 @@ module.exports = function() {
                 body.push(MOVE);
             }
 
-            return this.spawnCreep(body, "ROOK" + Game.time, { memory: {
+            return this.spawnCreep(body, role + Game.time, { memory: {
                 role: role,
                 working: true,
                 room_home: this.room.name,

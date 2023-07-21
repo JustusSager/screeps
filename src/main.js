@@ -7,15 +7,12 @@ var roleCreep = require('role.creep');
 var roleDefender = require('role.defender');
 var roleHarvester = require('role.harvester');
 var roleMiner = require('role.miner');
-var roleBuilder = require('role.builder');
-var roleRepairer = require('role.repairer');
 var roleUpgrader = require('role.upgrader');
 var roleTransporter = require('role.transporter');
 var roleDistributor = require('role.distributor');
 var roleRemoteHarvestUpgrader = require('role.RemoteHarvestUpgrader');
 var roleClaimer = require('role.claimer');
 const roleSettler = require('role.settler');
-var roleGeneric = require('role.generic');
 var roleKing = require('role.king');
 var roleQueen = require('role.queen');
 
@@ -69,12 +66,6 @@ module.exports.loop = function () {
         }
         else if (creep.memory.role == 'miner') {
             roleMiner.run(creep, false);
-        }
-        else if (creep.memory.role == 'builder') {
-            roleBuilder.run(creep, false);
-        }
-        else if (creep.memory.role == 'repairer') {
-            roleRepairer.run(creep, false);
         }
         else if (creep.memory.role == 'upgrader') {
             roleUpgrader.run(creep, false);
