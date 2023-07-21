@@ -45,6 +45,15 @@ module.exports = function() {
         });
     }
 
+    Creep.prototype.find_container_incl_minerals = 
+    function() {
+        return this.pos.findClosestByPath(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return  structure.structureType == STRUCTURE_CONTAINER && structure.store.getUsedCapacity() > 0;
+            }
+        });
+    }
+
     Creep.prototype.find_container_not_full = 
     function() {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {

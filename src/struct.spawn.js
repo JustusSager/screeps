@@ -94,6 +94,22 @@ module.exports = {
                     }
                 }
             }
+            for (let mineral_source_id of spawn.room.memory.mineral_sources) {
+                if (!Game.getObjectById(mineral_source_id).pos.inRangeTo(STRUCTURE_EXTRACTOR, 1)) {
+                    continue;
+                }
+                if (!_.some(creeps_in_room, c => c.memory.role == 'miner' && c.memory.source_id == mineral_source_id)) {
+                    let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
+                    let containers = Game.getObjectById(mineral_source_id).pos.findInRange(FIND_STRUCTURES, 1, {
+                        filter: s => s.structureType == STRUCTURE_CONTAINER
+                    });
+                    if (containers.length > 0) {
+                        name = spawn.createMinerCreep(energy, 'miner', mineral_source_id, false);
+                        break;
+                    }
+                }
+                
+            }
         }
 
         if (!spawn.spawning && name == undefined) {

@@ -10,7 +10,7 @@ module.exports = {
                 let link = source.pos.findInRange(FIND_STRUCTURES, 2, {
                     filter: s => s.structureType == STRUCTURE_LINK
                 })[0];
-                if (creep.store.getFreeCapacity([RESOURCE_ENERGY]) == 0) {
+                if (creep.store.getFreeCapacity() == 0) {
                     if (creep.transfer(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(link);
                     }

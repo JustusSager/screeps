@@ -5,6 +5,15 @@ module.exports = function() {
         this.memory.energy_sources = this.find(FIND_SOURCES);
     }
 
+    Room.prototype.memory_mineral_sources = 
+    function() {
+        let sources = this.find(FIND_MINERALS);
+        this.memory.mineral_sources = []
+        for (let source of sources) {
+            this.memory.mineral_sources.push(source.id);
+        }
+    }
+
     Room.prototype.memory_construction_sites = 
     function() {
         this.memory.construction_sites = this.find(FIND_CONSTRUCTION_SITES);
@@ -51,6 +60,9 @@ module.exports = function() {
     function() {
         if (!this.memory.energy_sources || Game.time % 1000 == 0) {
             this.memory_energy_sources();
+        }
+        if (!this.memory.mineral_sources) {
+            this.memory_mineral_sources();
         }
         if (!this.memory.construction_sites || Game.time % 10 == 0) {
             this.memory_construction_sites();
