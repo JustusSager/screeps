@@ -13,7 +13,11 @@ module.exports = {
 
         // if creep is supposed to transfer energy to the spawn
         if (creep.memory.working == true) {
-            var target_spawn = creep.room.find(FIND_MY_SPAWNS, {filter: (s) => s.energy < s.energyCapacity})[0];
+            var target_spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
+                filter: (s) => {
+                    s.store.getFreeCapacity > 100;
+                }
+            })
             if (target_spawn) {
                 if(speak){creep.say('Spawn');}
                 if (creep.transfer(target_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -39,6 +43,20 @@ module.exports = {
                 if (creep.transfer(target_tower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards the spawn
                     creep.moveTo(target_tower);
+                }
+                return;
+            }
+            var target_lab = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (s) => {
+                    s.structureType == STRUCTURE_LAB &&
+                    s.store.getFreeCapacity > 0;
+                }
+            })
+            if (target_lab) {
+                if(speak){creep.say('Tower');}
+                if (creep.transfer(target_lab, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    // move towards the spawn
+                    creep.moveTo(target_lab);
                 }
                 return;
             }
