@@ -1,5 +1,6 @@
 require('prototype.room')();
 require('prototype.spawn')();
+require('prototype.flag')();
 
 var basebuilding = require('basebuilding');
 
@@ -31,6 +32,10 @@ module.exports.loop = function () {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    for (let i in Game.flags) {
+        Game.flags[i].handle_memory();
     }
 
     // run spawners
