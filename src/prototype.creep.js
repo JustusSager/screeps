@@ -1,111 +1,111 @@
 module.exports = function() {
     Creep.prototype.find_tombstones = 
-    function() {
+    function(threshold = 0) {
         return this.pos.findClosestByPath(FIND_TOMBSTONES, {
             filter: (structure) => {
-                return structure.store[RESOURCE_ENERGY] > 0 && structure.room == this.room;
+                return structure.store.getUsedCapacity() > threshold && structure.room == this.room;
             }
         });
     }
         
     Creep.prototype.find_dropped_rescources = 
-    function() {
+    function(threshold = 0, resource = RESOURCE_ENERGY) {
         // nochmal anschauen was hier passieren muss!!!
         return this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
             filter: (r) => {
-                return r.resourceType == RESOURCE_ENERGY && r.amount > this.store.getFreeCapacity([RESOURCE_ENERGY]);
+                return r.resourceType == resource && r.amount > threshold;
             }
         });
     }
         
     Creep.prototype.find_extensions_not_full = 
-    function() {
+    function(threshold = 0) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return  structure.structureType == STRUCTURE_EXTENSION && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                return  structure.structureType == STRUCTURE_EXTENSION && structure.store.getFreeCapacity(RESOURCE_ENERGY) > threshold;
             }
         });
     }
     
     Creep.prototype.find_towers_not_full = 
-    function() {
+    function(threshold = 0) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return  structure.structureType == STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                return  structure.structureType == STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > threshold;
             }
         });
     }
     
     Creep.prototype.find_container_not_empty = 
-    function() {
+    function(threshold = 0, resource = RESOURCE_ENERGY) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return  structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > 0;
+                return  structure.structureType == STRUCTURE_CONTAINER && structure.store[resource] > threshold;
             }
         });
     }
 
     Creep.prototype.find_container_incl_minerals = 
-    function() {
+    function(threshold = 0) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return  structure.structureType == STRUCTURE_CONTAINER && structure.store.getUsedCapacity() > 0;
+                return  structure.structureType == STRUCTURE_CONTAINER && structure.store.getUsedCapacity() > threshold;
             }
         });
     }
 
     Creep.prototype.find_container_not_full = 
-    function() {
+    function(threshold = 0) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return  structure.structureType == STRUCTURE_CONTAINER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                return  structure.structureType == STRUCTURE_CONTAINER && structure.store.getFreeCapacity() > threshold;
             }
         });
     }
         
     Creep.prototype.find_storage_not_empty = 
-    function(threshhold = 0) {
+    function(threshhold = 0, resource = RESOURCE_ENERGY) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return  structure.structureType == STRUCTURE_STORAGE && structure.store[RESOURCE_ENERGY] > threshhold;
+                return  structure.structureType == STRUCTURE_STORAGE && structure.store[resource] > threshhold;
             }
         });
     }
         
     Creep.prototype.find_storage_not_full = 
-    function() {
+    function(threshhold = 0) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return structure.structureType == STRUCTURE_STORAGE && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                return structure.structureType == STRUCTURE_STORAGE && structure.store.getFreeCapacity() > 0;
             }
         });
     }
     
     Creep.prototype.find_container_storage_not_empty = 
-    function() {
+    function(threshhold = 0, resource = RESOURCE_ENERGY) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
                 return ((structure.structureType == STRUCTURE_CONTAINER ||
                         structure.structureType == STRUCTURE_STORAGE) &&
-                        structure.store[RESOURCE_ENERGY] > this.store.getFreeCapacity([RESOURCE_ENERGY])
+                        structure.store[resource] > threshhold
                         )
             }
         });
     }
 
     Creep.prototype.find_spawn_not_full = 
-    function() {
+    function(threshhold = 0) {
         return this.pos.findClosestByPath(FIND_MY_SPAWNS, {
             filter: (s) => {
-                s.store.getFreeCapacity > 0;
+                s.store.getFreeCapacity() > threshhold;
             }
         })
     }
     Creep.prototype.find_spawn_not_empty = 
-    function() {
+    function(threshhold = 0) {
         return this.pos.findClosestByPath(FIND_MY_SPAWNS, {
             filter: (s) => {
-                s.store[RESOURCE_ENERGY] > this.store.getFreeCapacity;
+                s.store[RESOURCE_ENERGY] > threshhold;
             }
         })
     }
