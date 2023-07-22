@@ -31,5 +31,9 @@ module.exports = {
     },
     structureStorage: {
         genericsEnergyThreshhold: 2000
+    },
+    structureTerminal: {
+        energyUpperTheshold: 5000,
+        energyLowerThreshold: 3000
     }
 }
