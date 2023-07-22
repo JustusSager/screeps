@@ -59,11 +59,19 @@ module.exports = {
         }
         // if creep is supposed to get energy from target
         else {
-            var source_storage = creep.find_storage_not_full();
-            if (source_storage != null) {
-                if (speak) {creep.say('Container');}
-                if (creep.withdraw(source_storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source_storage);
+            var source = creep.find_storage_not_empty();
+            if (source) {
+                if (speak) {creep.say('Storage');}
+                if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(source);
+                }
+                return;
+            }
+            source = Game.getObjectById(creep.room.memory.storage_link);
+            if (source) {
+                if (speak) {creep.say('Link');}
+                if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(source);
                 }
                 return;
             }
