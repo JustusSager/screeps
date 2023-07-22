@@ -64,16 +64,16 @@ module.exports = function() {
     }
         
     Creep.prototype.find_storage_not_empty = 
-    function(threshhold = 0, resource = RESOURCE_ENERGY) {
+    function(threshold = 0, resource = RESOURCE_ENERGY) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return  structure.structureType == STRUCTURE_STORAGE && structure.store[resource] > threshhold;
+                return  structure.structureType == STRUCTURE_STORAGE && structure.store[resource] > threshold;
             }
         });
     }
         
     Creep.prototype.find_storage_not_full = 
-    function(threshhold = 0) {
+    function(threshold = 0) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_STORAGE && structure.store.getFreeCapacity() > 0;
@@ -82,43 +82,43 @@ module.exports = function() {
     }
     
     Creep.prototype.find_container_storage_not_empty = 
-    function(threshhold = 0, resource = RESOURCE_ENERGY) {
+    function(threshold = 0, resource = RESOURCE_ENERGY) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
                 return ((structure.structureType == STRUCTURE_CONTAINER ||
                         structure.structureType == STRUCTURE_STORAGE) &&
-                        structure.store[resource] > threshhold
+                        structure.store[resource] > threshold
                         )
             }
         });
     }
 
     Creep.prototype.find_spawn_not_full = 
-    function(threshhold = 0) {
+    function(threshold = 0) {
         return this.pos.findClosestByPath(FIND_MY_SPAWNS, {
             filter: (s) => {
-                s.store.getFreeCapacity() > threshhold;
+                s.store.getFreeCapacity() > threshold;
             }
         })
     }
     Creep.prototype.find_spawn_not_empty = 
-    function(threshhold = 0) {
+    function(threshold = 0) {
         return this.pos.findClosestByPath(FIND_MY_SPAWNS, {
             filter: (s) => {
-                s.store[RESOURCE_ENERGY] > threshhold;
+                s.store[RESOURCE_ENERGY] > threshold;
             }
         })
     }
 
     Creep.prototype.find_energy = 
-    function(include_spawn = true, storage_threshhold = 0) {
+    function(include_spawn = true, storage_threshold = 0) {
         let tombstone = this.find_tombstones();
         if (tombstone) return tombstone;
 
         let container = this.find_container_not_empty();
         if (container) return container;
 
-        let storage = this.find_storage_not_empty(storage_threshhold);
+        let storage = this.find_storage_not_empty(storage_threshold);
         if (storage) return storage;
 
         if (include_spawn) {
