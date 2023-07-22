@@ -15,7 +15,7 @@ module.exports = {
     },
     structureTower: {
         repairEnergyThreshold: 750,
-        repairMaxHits: 100000
+        repairMaxHits: 250000
     },
     structureSpawn: {
         initalMaxSpawnEnergy: 300,
@@ -28,5 +28,8 @@ module.exports = {
         kingCreepMaxCarryParts: 4,
         minerCreepMaxWorkParts: 6,
         transporterMultiplier: 1
+    },
+    structureStorage: {
+        genericsEnergyThreshhold: 2000
     }
 }

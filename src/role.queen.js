@@ -21,7 +21,6 @@ module.exports = {
             if (target_spawn) {
                 if(speak){creep.say('Spawn');}
                 if (creep.transfer(target_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    // move towards the spawn
                     creep.moveTo(target_spawn);
                 }
                 return;
@@ -31,7 +30,6 @@ module.exports = {
             if (target_extension) {
                 if(speak){creep.say('Extension');}
                 if (creep.transfer(target_extension, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    // move towards the spawn
                     creep.moveTo(target_extension);
                 }
                 return;
@@ -41,7 +39,6 @@ module.exports = {
             if (target_tower) {
                 if(speak){creep.say('Tower');}
                 if (creep.transfer(target_tower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    // move towards the spawn
                     creep.moveTo(target_tower);
                 }
                 return;
@@ -53,9 +50,8 @@ module.exports = {
                 }
             })
             if (target_lab) {
-                if(speak){creep.say('Tower');}
+                if(speak){creep.say('Lab');}
                 if (creep.transfer(target_lab, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    // move towards the spawn
                     creep.moveTo(target_lab);
                 }
                 return;

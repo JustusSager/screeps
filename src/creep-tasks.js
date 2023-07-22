@@ -1,3 +1,5 @@
+const config = require("config");
+
 Creep.prototype.work = function() {
     if (!this.isValidTask()) {
         this.memory.task = undefined;
@@ -175,9 +177,10 @@ module.exports = {
                     creep.memory.task['target'] = creep.find_dropped_rescources().id;
                     return;
                 }
-                if (creep.find_energy(false)) {
+                target = creep.find_energy(false, config.structureStorage.genericsEnergyThreshhold);
+                if (target) {
                     creep.memory.task['name'] = "withdraw";
-                    creep.memory.task['target'] = creep.find_energy(false).id;
+                    creep.memory.task['target'] = target.id;
                     creep.memory.task['resource'] = RESOURCE_ENERGY;
                     return;
                 }
