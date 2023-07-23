@@ -49,7 +49,7 @@ module.exports = {
     run: function(spawn) {
 
         var numberDefenders = _.sum(Game.creeps, (c) => (c.memory.role == 'defender' && c.memory.room_home == spawn.room.name));
-        var numberBuilders = _.sum(Game.creeps, (c) => (c.memory.role == 'builder' && c.memory.room_home == spawn.room.name));
+        var numberExtractors = _.sum(Game.creeps, (c) => (c.memory.role == 'extractor' && c.memory.room_home == spawn.room.name));
         var numberTransporters = _.sum(Game.creeps, (c) => (c.memory.role == 'transporter' && c.memory.room_home == spawn.room.name));
         var numberGenerics = _.sum(Game.creeps, (c) => (c.memory.role == 'generic' && c.memory.room_home == spawn.room.name));
         var numberHarvesters = _.sum(Game.creeps, (c) => (c.memory.role == 'harvester' && c.memory.room_home == spawn.room.name));
@@ -146,6 +146,10 @@ module.exports = {
             else if (numberRepairers < spawn.memory.maxRepairers){
                 let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
                 name = spawn.createBalancedCreep(energy, 'repairer', spawn.room.name);
+            }
+            else if (numberExtractors < 1 && spawn.room.find(FIND_MY_STRUCTURES, s => s.structureType == STRUCTURE_EXTRACTOR).length > 0) {
+                let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
+                name = spawn.createBalancedCreep(energy, 'extractor', spawn.room.name);
             }
             else if (spawn.memory.claim_room != undefined) {
                 if (!(createWorkerCreep(spawn, [CLAIM, MOVE], 'claimer', false, spawn.memory.claim_room) < 0)) {

@@ -37,7 +37,7 @@ Creep.prototype.work = function() {
             case 'pickup':
                 return this.pickup(target);
             case 'transfer':
-                resource = this.memory.task.resource ? this.memory.task.resource : RESOURCE_ENERGY;
+                resource = this.memory.task.resource ? this.memory.task.resource : Object.keys(creep.store)[0];
                 // amount = this.memory.task.amount ? this.memory.task.amount : this.store[resource];
                 return this.transfer(target, resource);
             case 'moveToRoom':
@@ -129,7 +129,7 @@ module.exports = {
         if (!creep.memory.task || creep.memory.task == {}) {
             creep.memory.task = {};
             let target;
-            if (creep.store[RESOURCE_ENERGY] > 0) {
+            if (creep.store.getUsedCapacity() > 0) {
                 if (creep.memory.room_home && creep.memory.room_home != creep.room.name) {
                     creep.memory.task['name'] = "moveToRoom";
                     creep.memory.task['target'] = creep.memory.room_home;
@@ -153,6 +153,15 @@ module.exports = {
                     creep.memory.task['range'] = 3;
                     return;
                 }
+                let terminal = creep.room.find(FIND_MY_STRUCTURES, {
+                    filter: s => s.structureType == STRUCTURE_TERMINAL && s.store.getFreeCapacity() > 0
+                })
+                if (creep.memory.role == 'extractor') {
+                    creep.memory.task['name'] = "transfer";
+                    creep.memory.task['target'] = terminal.length > 0 ? terminal[0].id : creep.find_storage_not_full();
+                    creep.memory.task['resource'] = Object.keys(creep.store)[0];
+                    return;
+                }
                 if (creep.room.memory.construction_sites && creep.room.memory.construction_sites.length > 0) {
                     creep.memory.task['name'] = "build";
                     creep.memory.task['target'] = creep.room.memory.construction_sites[0].id;
@@ -170,6 +179,11 @@ module.exports = {
                 if (creep.memory.room_target && creep.memory.room_target != creep.room.name) {
                     creep.memory.task['name'] = "moveToRoom";
                     creep.memory.task['target'] = creep.memory.room_target;
+                    return;
+                }
+                if (creep.memory.role == 'extractor') {
+                    creep.memory.task['name'] = "harvest";
+                    creep.memory.task['target'] = creep.pos.findClosestByPath(FIND_MINERALS).id;
                     return;
                 }
                 if (creep.find_dropped_rescources()) {
@@ -197,6 +211,8 @@ module.exports = {
         if (code != OK) {
             creep.say(code);
             if (code == ERR_NOT_ENOUGH_ENERGY) {
+                creep.memory.task = undefined;
+            } else if (code == ERR_NO_PATH) {
                 creep.memory.task = undefined;
             }
         }

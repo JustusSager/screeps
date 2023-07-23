@@ -21,7 +21,7 @@ var structTower = require('struct.tower');
 var structLink = require('struct.link');
 
 var taskManager = require('creep-tasks');
-
+var trading = require('trading');
 
 module.exports.loop = function () {
     
@@ -29,6 +29,7 @@ module.exports.loop = function () {
     for (let i in Game.rooms) {
         try {
             Game.rooms[i].handle_memory();
+            trading.run(Game.rooms[i]);
         } catch (error) {
             console.log(error);
         }
@@ -94,7 +95,7 @@ module.exports.loop = function () {
         }
     }
 
-    let creeps_for_tasks = _.filter(Game.creeps, c => c.memory.role == 'generic' || c.memory.role == 'repairer' || c.memory.role == 'upgrader');
+    let creeps_for_tasks = _.filter(Game.creeps, c => c.memory.role == 'generic' || c.memory.role == 'repairer' || c.memory.role == 'upgrader' || c.memory.role == 'extractor');
     for (var i in creeps_for_tasks) {
         taskManager.run(creeps_for_tasks[i]);
     }
