@@ -10,12 +10,16 @@ Creep.prototype.work = function() {
         return -102;
     }
 
-    var target = Game.getObjectById(this.memory.task.target)
+    var target = Game.getObjectById(this.memory.task.target) || Game.rooms[this.memory.task.target] || null
     var range = this.memory.task.range ? this.memory.task.range : 1
     var resource;
     var amount;
 
-    if (this.pos.inRangeTo(target, range)) {
+    if (this.memory.task.name == 'moveToRoom') {
+        var exit_direction = this.room.findExitTo(this.memory.task.target);
+        return this.moveTo(this.pos.findClosestByPath(exit_direction));
+    }
+    else if (this.pos.inRangeTo(target, range)) {
         switch (this.memory.task.name) {
             case 'getRenewed':
                 if (target.store[RESOURCE_ENERGY] <= 100) {
@@ -40,9 +44,6 @@ Creep.prototype.work = function() {
                 resource = this.memory.task.resource ? this.memory.task.resource : Object.keys(creep.store)[0];
                 // amount = this.memory.task.amount ? this.memory.task.amount : this.store[resource];
                 return this.transfer(target, resource);
-            case 'moveToRoom':
-                var exit_direction = creep.room.findExitTo(creep.memory.task.target);
-                return creep.moveTo(creep.pos.findClosestByPath(exit_direction));
             default:
                 return -101;
         }
@@ -109,7 +110,7 @@ Creep.prototype.isValidTarget = function() {
     let target;
     switch (this.memory.task.name) {
         case 'moveToRoom':
-            return this.room.name != this.memory.task.target;
+            return Game.rooms[this.memory.task.target] && this.room.name != this.memory.task.target;
         case 'repair':
             target = Game.getObjectById(this.memory.task.target);
             return target && target.hits < target.hitsMax && target.structureType != STRUCTURE_WALL;
