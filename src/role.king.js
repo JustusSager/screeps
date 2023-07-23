@@ -33,7 +33,7 @@ module.exports = {
                 creep.withdraw(Game.getObjectById(links[0]), RESOURCE_ENERGY);
             }
             else if (terminals.length > 0 && Game.getObjectById(terminals[0]).store[RESOURCE_ENERGY] > config.structureTerminal.energyUpperTheshold) {
-                creep.transfer(terminals[0], RESOURCE_ENERGY);
+                creep.withdraw(terminals[0], RESOURCE_ENERGY);
             }
             else if (storages.length > 0) {
                 creep.withdraw(Game.getObjectById(storages[0]), RESOURCE_ENERGY);
