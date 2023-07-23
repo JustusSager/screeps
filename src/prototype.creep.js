@@ -76,7 +76,7 @@ module.exports = function() {
     function(threshold = 0) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return structure.structureType == STRUCTURE_STORAGE && structure.store.getFreeCapacity() > 0;
+                return structure.structureType == STRUCTURE_STORAGE && structure.store.getFreeCapacity() > threshold;
             }
         });
     }
