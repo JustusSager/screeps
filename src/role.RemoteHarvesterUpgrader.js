@@ -15,7 +15,21 @@ module.exports = {
         // if creep is supposed to transfer energy to the spawn
         if (creep.memory.working == true) {
             if (creep.room.name == creep.memory.room_home) {
-                if (creep.room.name == creep.memory.room_home) {
+                let storage_container_link = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return ((structure.structureType == STRUCTURE_CONTAINER ||
+                                structure.structureType == STRUCTURE_STORAGE ||
+                                structure.structureType == STRUCTURE_LINK) &&
+                                structure.store[RESOURCE_ENERGY] > creep.store.getFreeCapacity([RESOURCE_ENERGY])
+                                )
+                    }
+                });
+                if (storage_container_link) {
+                    if (creep.transfer(storage_container_link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(storage_container_link);
+                    }
+                }
+                else {
                     if(speak){creep.say('Controller');}
                     if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(creep.room.controller);
@@ -30,7 +44,7 @@ module.exports = {
         // if creep is supposed to harvest energy from source
         else {
             if (creep.room.name == creep.memory.room_target) {
-                var container = creep.find_container_not_empty();
+                var container = creep.find_container_storage_not_empty();
                 if (container) {
                     if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(container);
