@@ -10,7 +10,7 @@ Creep.prototype.work = function() {
         return -102;
     }
 
-    var target = Game.getObjectById(this.memory.task.target) || Game.rooms[this.memory.task.target] || null
+    var target = this.memory.task.name != 'moveToRoom' ? Game.getObjectById(this.memory.task.target) : Game.rooms[this.memory.task.target]
     var range = this.memory.task.range ? this.memory.task.range : 1
     var resource;
     var amount;
