@@ -11,7 +11,6 @@ var roleMiner = require('role.miner');
 var roleTransporter = require('role.transporter');
 var roleRemoteHarvestUpgrader = require('role.RemoteHarvestUpgrader');
 var roleClaimer = require('role.claimer');
-const roleSettler = require('role.settler');
 var roleKing = require('role.king');
 var roleQueen = require('role.queen');
 
@@ -76,9 +75,6 @@ module.exports.loop = function () {
         }
         else if (creep.memory.role == 'claimer') {
             roleClaimer.run(creep, false);
-        }
-        else if (creep.memory.role == 'settler') {
-            roleSettler.run(creep, false);
         }
         else if (creep.memory.role == 'king') {
             roleKing.run(creep, false)
