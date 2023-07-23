@@ -52,13 +52,20 @@ module.exports = {
         var numberExtractors = _.sum(Game.creeps, (c) => (c.memory.role == 'extractor' && c.memory.room_home == spawn.room.name));
         var numberTransporters = _.sum(Game.creeps, (c) => (c.memory.role == 'transporter' && c.memory.room_home == spawn.room.name));
         var numberGenerics = _.sum(Game.creeps, (c) => (c.memory.role == 'generic' && c.memory.room_home == spawn.room.name));
-        var numberHarvesters = _.sum(Game.creeps, (c) => (c.memory.role == 'harvester' && c.memory.room_home == spawn.room.name));
         var numberMiners = _.sum(Game.creeps, (c) => (c.memory.role == 'miner' && c.memory.room_home == spawn.room.name));
         var numberRepairers = _.sum(Game.creeps, (c) => (c.memory.role == 'repairer' && c.memory.room_home == spawn.room.name));
         var numberUpgraders = _.sum(Game.creeps, (c) => (c.memory.role == 'upgrader' && c.memory.room_home == spawn.room.name));
         var numberRemoteHarvesters = _.sum(Game.creeps, (c) => (c.memory.role == 'longDistanceHarvester' && c.memory.room_home == spawn.room.name));
         var numberKings = _.sum(Game.creeps, (c) => (c.memory.role == 'king' && c.memory.room_home == spawn.room.name));
         var numberQueens = _.sum(Game.creeps, (c) => (c.memory.role == 'queen' && c.memory.room_home == spawn.room.name));
+
+        var numHarvest = _.sum(Game.creeps, (c) => (c.memory.task && c.memory.task.name == 'harvest' && c.memory.room_home == spawn.room.name));
+        var numUpgrade = _.sum(Game.creeps, (c) => (c.memory.task && c.memory.task.name == 'upgrade' && c.memory.room_home == spawn.room.name));
+        var numBuild = _.sum(Game.creeps, (c) => (c.memory.task && c.memory.task.name == 'build' && c.memory.room_home == spawn.room.name));
+        var numRepair = _.sum(Game.creeps, (c) => (c.memory.task && c.memory.task.name == 'repair' && c.memory.room_home == spawn.room.name));
+        var numWithdraw = _.sum(Game.creeps, (c) => (c.memory.task && c.memory.task.name == 'withdraw' && c.memory.room_home == spawn.room.name));
+        var numPickup = _.sum(Game.creeps, (c) => (c.memory.task && c.memory.task.name == 'pickup' && c.memory.room_home == spawn.room.name));
+        var numTransfer = _.sum(Game.creeps, (c) => (c.memory.task && c.memory.task.name == 'transfer' && c.memory.room_home == spawn.room.name));
 
         //renew creep
         var creeps_in_range = spawn.pos.findInRange(FIND_MY_CREEPS, 1, {
@@ -118,10 +125,6 @@ module.exports = {
                 let target = spawn.memory.target_attack ? spawn.memory.target_attack : spawn.room.name
                 name = spawn.createFighterCreep(energy, 'defender', target);
             }
-            else if (numberMiners < spawn.room.memory.energy_sources.length && numberHarvesters < spawn.memory.maxHarvesters) {
-                let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
-                name = spawn.createBalancedCreep(energy, 'harvester', spawn.room.name);
-            }
             else if (numberGenerics < spawn.memory.maxGenerics) {
                 let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
                 name = spawn.createBalancedCreep(energy, 'generic', spawn.room.name);
@@ -165,20 +168,35 @@ module.exports = {
                 }
             }
         }
-        let text = spawn.room.name + ' (' + spawn.room.controller.level + ') ' + spawn.name +
-          ': E: ' + spawn.room.energyAvailable + '/' + spawn.room.energyCapacityAvailable +
-          ' Def: ' + numberDefenders + '/' + spawn.memory.maxDefenders +
-          ' H: ' + numberHarvesters + '/' + (spawn.room.memory.energy_sources.length - numberMiners) + '/' + spawn.memory.maxHarvesters +
-          ' M: ' + numberMiners + '/' + spawn.room.memory.energy_sources.length +
-          ' G: ' + numberGenerics + '/' + spawn.memory.maxGenerics +
-          ' R: ' + numberRepairers + '/' + spawn.memory.maxRepairers +
-          ' U: ' + numberUpgraders + '/' + spawn.memory.maxUpgraders +
-          ' T: ' + numberTransporters + '/' + ((numberMiners - (spawn.room.memory.source_links ? spawn.room.memory.source_links.length : 0)) * config.structureSpawn.transporterMultiplier + Math.floor(spawn.room.memory.amount_dropped_energy / 1000)) +
-          ' RH: ' + numberRemoteHarvesters + '/' + spawn.memory.maxLongDistanceHarvesters
+        let text_role = spawn.room.name + ' (' + spawn.room.controller.level + ') ' + spawn.name +
+          ': E' + spawn.room.energyAvailable + '/' + spawn.room.energyCapacityAvailable +
+          ' M' + numberMiners + '/' + spawn.room.memory.energy_sources.length +
+          ' Def' + numberDefenders + '/' + spawn.memory.maxDefenders +
+          ' G' + numberGenerics + '/' + spawn.memory.maxGenerics +
+          ' K' + numberKings + 
+          ' Q' + numberQueens +
+          ' U' + numberUpgraders + '/' + spawn.memory.maxUpgraders +
+          ' T' + numberTransporters + '/' + ((numberMiners - (spawn.room.memory.source_links ? spawn.room.memory.source_links.length : 0)) * config.structureSpawn.transporterMultiplier + Math.floor(spawn.room.memory.amount_dropped_energy / 1000)) +
+          ' R' + numberRepairers + '/' + spawn.memory.maxRepairers +
+          ' Ex' + numberExtractors + '/' + spawn.room.memory.mineral_sources.length +
+          ' RH' + numberRemoteHarvesters + '/' + spawn.memory.maxLongDistanceHarvesters
+          
 
-        new RoomVisual(spawn.room.name).text(text, 25, 2, {color: 'green', font: 0.8});
+        let text_task = 'Tasks: ' +
+            ' H' + numHarvest + 
+            ' B' + numBuild + 
+            ' R' + numRepair +
+            ' U'  + numUpgrade +
+            ' W' + numWithdraw + 
+            ' P' + numPickup + 
+            ' T' + numTransfer
 
-        console.log(text);
+
+        new RoomVisual(spawn.room.name).text(text_role, 25, 2, {color: 'green', font: 0.8});
+        new RoomVisual(spawn.room.name).text(text_task, 25, 3, {color: 'green', font: 0.8});
+
+        console.log(text_role);
+        console.log(text_task);
 
         if (name) {
             console.log(name);

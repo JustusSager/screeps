@@ -1,15 +1,14 @@
 require('prototype.room')();
 require('prototype.spawn')();
 require('prototype.flag')();
+require('prototype.creep')();
 
 var basebuilding = require('basebuilding');
 
 var roleCreep = require('role.creep');
 var roleDefender = require('role.defender');
-var roleHarvester = require('role.harvester');
 var roleMiner = require('role.miner');
 var roleTransporter = require('role.transporter');
-var roleDistributor = require('role.distributor');
 var roleRemoteHarvestUpgrader = require('role.RemoteHarvestUpgrader');
 var roleClaimer = require('role.claimer');
 const roleSettler = require('role.settler');
@@ -66,17 +65,11 @@ module.exports.loop = function () {
         if (creep.memory.role == 'defender') {
             roleDefender.run(creep, false);
         }
-        else if (creep.memory.role == 'harvester') {
-            roleHarvester.run(creep, false);
-        }
         else if (creep.memory.role == 'miner') {
             roleMiner.run(creep, false);
         }
         else if (creep.memory.role == 'transporter') {
             roleTransporter.run(creep, false);
-        }
-        else if (creep.memory.role == 'distributor') {
-            roleDistributor.run(creep, false);
         }
         else if (creep.memory.role == 'longDistanceHarvester' || creep.memory.role == 'RemoteHarvestUpgrader') {
             roleRemoteHarvestUpgrader.run(creep, false);
