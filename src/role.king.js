@@ -13,24 +13,27 @@ module.exports = {
         var terminals = Game.flags[creep.memory.target].memory.structureTerminals;
         
         if (creep.store[RESOURCE_ENERGY] > 0) {
-            if (spawns.length > 0) {
+            if (spawns.length > 0 && Game.getObjectById(spawns[0]).store.getFreeCapacity(RESOURCE_ENERGY) > 50) {
                 creep.transfer(Game.getObjectById(spawns[0]), RESOURCE_ENERGY);
             }
-            else if (towers.length > 0) {
+            else if (towers.length > 0 && Game.getObjectById(towers[0]).store.getFreeCapacity(RESOURCE_ENERGY) > 50) {
                 creep.transfer(Game.getObjectById(towers[0]), RESOURCE_ENERGY);
             }
+            else if (towers.length > 1 && Game.getObjectById(towers[1]).store.getFreeCapacity(RESOURCE_ENERGY) > 50) {
+                creep.transfer(Game.getObjectById(towers[1]), RESOURCE_ENERGY);
+            }
             else if (terminals.length > 0 && Game.getObjectById(terminals[0]).store[RESOURCE_ENERGY] < config.structureTerminal.energyLowerThreshold) {
-                creep.transfer(terminals_too_less[0], RESOURCE_ENERGY);
+                creep.transfer(Game.getObjectById(terminals[0]), RESOURCE_ENERGY);
             }
             else if (storages.length > 0){
                 creep.transfer(Game.getObjectById(storages[0]), RESOURCE_ENERGY);
             }
         } else {
-            if (links.length > 0) {
+            if (links.length > 0 && Game.getObjectById(links[0]).store[RESOURCE_ENERGY] > 0) {
                 creep.withdraw(Game.getObjectById(links[0]), RESOURCE_ENERGY);
             }
             else if (terminals.length > 0 && Game.getObjectById(terminals[0]).store[RESOURCE_ENERGY] > config.structureTerminal.energyUpperTheshold) {
-                creep.transfer(terminals_too_full[0], RESOURCE_ENERGY);
+                creep.transfer(terminals[0], RESOURCE_ENERGY);
             }
             else if (storages.length > 0) {
                 creep.withdraw(Game.getObjectById(storages[0]), RESOURCE_ENERGY);
