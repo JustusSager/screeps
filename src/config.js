@@ -35,9 +35,13 @@ module.exports = {
     structureTerminal: {
         energyUpperTheshold: 5000,
         energyLowerThreshold: 3000,
-        mineralLowerThresholds: {
-            H: 2000 // Hydrogen
+        mineralThresholds: {
+            H: 1500, // Hydrogen
+            O: 1500 // Oxygen
         },
+        mineralSellFactor: 1.5,
+        mineralTransportFactor: 0.5,
+        mineralBuyFactor: 0.1,
         maxTransactionCost: 400,
         transactionVolume: 200
     }

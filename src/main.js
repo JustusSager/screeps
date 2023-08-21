@@ -27,11 +27,12 @@ module.exports.loop = function () {
     for (let i in Game.rooms) {
         try {
             Game.rooms[i].handle_memory();
-            trading.run(Game.rooms[i]);
         } catch (error) {
             console.log(error);
         }
     }
+    
+    trading.run();
 
     for (let i in Game.flags) {
         Game.flags[i].handle_memory();
