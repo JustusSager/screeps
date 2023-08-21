@@ -46,7 +46,7 @@ module.exports = {
             var target_lab = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (s) => {
                     s.structureType == STRUCTURE_LAB &&
-                    s.store.getFreeCapacity > 0;
+                    s.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                 }
             })
             if (target_lab) {
