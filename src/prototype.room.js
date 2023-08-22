@@ -56,12 +56,17 @@ module.exports = function() {
         }
     }
 
+    Room.prototype.memory_labs = 
+    function() {
+        this.memory.labs = {};
+    }
+
     Room.prototype.handle_memory = 
     function() {
         if (!this.memory.energy_sources || Game.time % 1000 == 0) {
             this.memory_energy_sources();
         }
-        if (!this.memory.mineral_sources) {
+        if (!this.memory.mineral_sources || Game.time % 1000 == 0) {
             this.memory_mineral_sources();
         }
         if (!this.memory.construction_sites || Game.time % 10 == 0) {
@@ -77,6 +82,11 @@ module.exports = function() {
         }
         if (this.controller.level > 4 && (!this.memory.source_links || Game.time % 10 == 2)) {
             this.memory_source_links();
+        }
+
+        // Labs
+        if (this.controller.level > 5 && !this.memory.labs) {
+            this.memory_labs();
         }
     }
 };
