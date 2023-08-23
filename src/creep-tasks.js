@@ -6,12 +6,13 @@ Creep.prototype.work = function() {
         return -101;
     }
     if (!this.isValidTarget()) {
+        console.log(this.name + ': ' + JSON.stringify(this.memory.task));
         this.memory.task = undefined;
         return -102;
     }
 
-    var target = this.memory.task.name != 'moveToRoom' ? Game.getObjectById(this.memory.task.target) : Game.rooms[this.memory.task.target]
-    var range = this.memory.task.range ? this.memory.task.range : 1
+    var target = Game.getObjectById(this.memory.task.target);
+    var range = this.memory.task.range ? this.memory.task.range : 1;
     var resource;
     var amount;
 
@@ -19,7 +20,13 @@ Creep.prototype.work = function() {
         var exit_direction = this.room.findExitTo(this.memory.task.target);
         return this.moveTo(this.pos.findClosestByPath(exit_direction));
     }
-    else if (this.pos.inRangeTo(target, range)) {
+    // Clear the Edge of the Board
+    if (this.pos.x == 0) return this.move(RIGHT);
+    if (this.pos.x == 49) return this.move(LEFT);
+    if (this.pos.y == 0) return this.move(BOTTOM);
+    if (this.pos.y == 49) return this.move(TOP);
+    
+    if (this.pos.inRangeTo(target, range)) {
         switch (this.memory.task.name) {
             case 'getRenewed':
                 if (target.store[RESOURCE_ENERGY] <= 100) {
@@ -104,13 +111,13 @@ Creep.prototype.isValidTask = function() {
 }
 
 Creep.prototype.isValidTarget = function() {
-    if (!this.memory.task || !this.memory.task.target) {
+    if (!this.memory.task || !this.memory.task.name || !this.memory.task.target) {
         return false;
     }
     let target;
     switch (this.memory.task.name) {
         case 'moveToRoom':
-            return Game.rooms[this.memory.task.target] && this.room.name != this.memory.task.target;
+            return /*Game.rooms[this.memory.task.target] && */this.room.name != this.memory.task.target;
         case 'repair':
             target = Game.getObjectById(this.memory.task.target);
             return target && target.hits < target.hitsMax && target.structureType != STRUCTURE_WALL;
@@ -159,7 +166,7 @@ module.exports = {
                 })
                 if (creep.memory.role == 'extractor') {
                     creep.memory.task['name'] = "transfer";
-                    creep.memory.task['target'] = terminal.length > 0 ? terminal[0].id : creep.find_storage_not_full();
+                    creep.memory.task['target'] = terminal.length > 0 ? terminal[0].id : creep.find_storage_not_full().id;
                     creep.memory.task['resource'] = Object.keys(creep.store)[0];
                     return;
                 }
