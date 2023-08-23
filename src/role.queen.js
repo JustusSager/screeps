@@ -43,18 +43,18 @@ module.exports = {
                 }
                 return;
             }
-            var target_lab = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: (s) => {
-                    s.structureType == STRUCTURE_LAB &&
-                    s.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+
+            var target_labs = [];
+            for (let id of Object.keys(creep.room.memory.labs)) {
+                target_labs.push(Game.getObjectById(id));
+            }
+            for (let lab of target_labs) {
+                if (lab.store[RESOURCE_ENERGY] < 1500) {
+                    if (creep.transfer(lab, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(lab);
+                    }
+                    return;
                 }
-            })
-            if (target_lab) {
-                if(speak){creep.say('Lab');}
-                if (creep.transfer(target_lab, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target_lab);
-                }
-                return;
             }
         }
         // if creep is supposed to get energy from target
