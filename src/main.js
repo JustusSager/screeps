@@ -1,3 +1,4 @@
+require('prototype.spawn')();
 require('roles');
 require('tasks');
 const config = require('config');
@@ -17,29 +18,27 @@ module.exports.loop = function () {
         " B" + builders.length + "/" + config.numBuilders +
         " I" + creeps_without_role.length);
 
+    let energyCapacity = spawn.room.energyCapacityAvailable;
+    let energyAvailable = spawn.room.energyAvailable;
     if (harvesters.length < config.numHarvesters) {
         if (creeps_without_role.length > 0) {
             creeps_without_role[0].memory.role = 'Harvester';
         } else {
-            spawn.spawnCreep([WORK, CARRY, MOVE], undefined, {
-                memory: {role: 'Harvester'}
-            });
+            if (spawn.createGenericCreep(energyCapacity, "Harvester") === ERR_NOT_ENOUGH_ENERGY && harvesters.length === 0) {
+                spawn.createGenericCreep(energyAvailable, "Harvester");
+            }
         }
     } else if (upgraders.length < config.numUpgraders) {
         if (creeps_without_role.length > 0) {
             creeps_without_role[0].memory.role = 'Upgrader';
         } else {
-            spawn.spawnCreep([WORK, CARRY, MOVE], undefined, {
-                memory: {role: 'Upgrader'}
-            });
+            spawn.createGenericCreep(energyCapacity, "Upgrader");
         }
     } else if (builders.length < config.numBuilders) {
         if (creeps_without_role.length > 0) {
-            creeps_without_role[0].memory.role = 'Upgrader';
+            creeps_without_role[0].memory.role = 'Builder';
         } else {
-            spawn.spawnCreep([WORK, CARRY, MOVE], undefined, {
-                memory: {role: 'Builder'}
-            });
+            spawn.createGenericCreep(energyCapacity, "Builder");
         }
     }
 
@@ -50,12 +49,12 @@ module.exports.loop = function () {
     }
 
     // clear memory
-    for (var i in Memory.creeps) {
+    for (let i in Memory.creeps) {
         if (!Game.creeps[i]) {
             delete Memory.creeps[i];
         }
     }
-    for (var i in Memory.spawns) {
+    for (let i in Memory.spawns) {
         if (!Game.spawns[i]) {
             delete Memory.spawns[i];
         }
