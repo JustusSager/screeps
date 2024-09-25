@@ -18,9 +18,18 @@ module.exports = function () {
                         this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
                     }
                     break;
+                case 'Miner':
+                    this.memory.task = {
+                        name: 'mine',
+                        targetID: this.memory.sourceID,
+                        targetRange: 1
+                    }
+                    break;
                 case 'Upgrader':
                     if (this.store[RESOURCE_ENERGY] > 0) {
                         this.switchTaskUpgrade();
+                    } else if (this.findWithdrawEnergy(this.store.getFreeCapacity())) {
+                        this.switchTaskWithdraw(this.findWithdrawEnergy(this.store.getFreeCapacity()).id);
                     } else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
                         this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
                     }
@@ -37,8 +46,8 @@ module.exports = function () {
                     } else {
                         if (this.findDroppedResources()) {
                             this.switchTaskPickup(this.findDroppedResources().id);
-                        } else if (this.findWithdrawEnergy()) {
-                            this.switchTaskWithdraw(this.findWithdrawEnergy().id);
+                        } else if (this.findWithdrawEnergy(this.store.getFreeCapacity())) {
+                            this.switchTaskWithdraw(this.findWithdrawEnergy(this.store.getFreeCapacity()).id);
                         } else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
                             this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
                         }
@@ -103,7 +112,7 @@ module.exports = function () {
         };
     }
     Creep.prototype.switchTaskWithdraw = function (targetID, resource = RESOURCE_ENERGY) {
-        this.say("🚋");
+        this.say("⛽");
         this.memory.task = {
             name: 'withdraw',
             targetID: targetID,
@@ -128,13 +137,13 @@ module.exports = function () {
         )
     }
 
-    Creep.prototype.findWithdrawEnergy = function () {
-        return this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+    Creep.prototype.findWithdrawEnergy = function (amount = 0) {
+        return this.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return ((structure.structureType === STRUCTURE_CONTAINER ||
                             structure.structureType === STRUCTURE_STORAGE ||
                             structure.structureType === STRUCTURE_LINK) &&
-                        structure.store[RESOURCE_ENERGY] > 0)
+                        structure.store[RESOURCE_ENERGY] >= amount)
                 }
             }
         )

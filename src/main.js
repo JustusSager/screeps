@@ -10,6 +10,7 @@ module.exports.loop = function () {
     let creeps = _.values(Game.creeps);
 
     let harvesters = _.filter(creeps, creep => creep.memory.role === 'Harvester');
+    let miners = _.filter(creeps, creep => creep.memory.role === 'Miner');
     let upgraders = _.filter(creeps, creep => creep.memory.role === 'Upgrader');
     let builders = _.filter(creeps, creep => creep.memory.role === 'Builder');
     let creeps_without_role = _.filter(creeps, creep => !creep.memory.role || creep.memory.role === 'idle');
@@ -18,7 +19,20 @@ module.exports.loop = function () {
     let energyCapacity = spawn.room.energyCapacityAvailable;
     let energyAvailable = spawn.room.energyAvailable;
     let spawnResult = undefined;
-    if (harvesters.length < config.numHarvesters) {
+
+    if (harvesters.length > 0) {
+        let sources = spawn.room.find(FIND_SOURCES);
+        for (let source of sources) {
+            if (!_.some(miners, m => m.memory.sourceID === source.id)) {
+                if (source.pos.findInRange(FIND_STRUCTURES, 1, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length > 0) {
+                    spawnResult = spawn.createMinerCreep(energyCapacity, source.id);
+                    break;
+                }
+            }
+        }
+    }
+    if (spawnResult !== undefined) {
+    } else if (harvesters.length < config.numHarvesters) {
         if (creeps_without_role.length > 0) {
             creeps_without_role[0].memory.role = 'Harvester';
         } else {
@@ -60,7 +74,7 @@ module.exports.loop = function () {
             ' U: ' + upgraders.length + '/' + config.numUpgraders +
             ' B: ' + builders.length + '/' + config.numBuilders;
         new RoomVisual(Game.rooms[v.room].name).text(text_general, v.x, v.y, {color: v.color, font: v.font});
-        new RoomVisual(Game.rooms[v.room].name).text(text_creeps, v.x, v.y+1, {color: v.color, font: v.font});
+        new RoomVisual(Game.rooms[v.room].name).text(text_creeps, v.x, v.y + 1, {color: v.color, font: v.font});
     }
 
     // clear memory

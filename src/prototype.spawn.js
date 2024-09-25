@@ -35,4 +35,24 @@ module.exports = function () {
         return this.spawnCreep(body, creepName, {role: role, task: {name: 'idle'}});
 
     }
+
+    StructureSpawn.prototype.createMinerCreep = function (energy, sourceID) {
+        if (energy < 250) {
+            return ERR_NOT_ENOUGH_ENERGY;
+        }
+        let new_energy = energy - 50;
+        let numOfParts = Math.floor(new_energy / 100) > 5 ? 5 : Math.floor(new_energy / 100);
+        let body = [];
+        for (let i = 0; i < numOfParts; i++) {
+            body.push(WORK);
+        }
+        body.push(MOVE);
+        let creepName = config.names[this.memory.nameIndex];
+        this.memory.nameIndex = this.memory.nameIndex + 1;
+        return this.spawnCreep(body, creepName + ' 🧨', {
+            role: 'Miner',
+            sourceID: sourceID,
+            task: {name: 'idle'}
+        })
+    }
 }

@@ -23,6 +23,22 @@ module.exports = function () {
                             this.resetTask(result);
                         }
                         break;
+                    case 'mine':
+                        if (!this.memory.task.containerID) {
+                            this.memory.task.containerID = target.pos.findInRange(FIND_STRUCTURES, 1, {
+                                filter: s => s.structureType === STRUCTURE_CONTAINER
+                            })[0].id;
+                        }
+                        let container = deref(this.memory.task.containerID)
+                        if (this.pos.isEqualTo(container)) {
+                            result = this.harvest(target);
+                            if (result !== OK) {
+                                this.resetTask(result);
+                            }
+                        } else {
+                            this.moveTo(container);
+                        }
+                        break;
                     case 'transfer':
                         resource = options.resource ? options.resource : RESOURCE_ENERGY;
                         result = this.transfer(target, resource);
