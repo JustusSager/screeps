@@ -22,7 +22,8 @@ module.exports.loop = function () {
         if (creeps_without_role.length > 0) {
             creeps_without_role[0].memory.role = 'Harvester';
         } else {
-            if (spawn.createGenericCreep(energyCapacity, "Harvester") === ERR_NOT_ENOUGH_ENERGY && harvesters.length === 0) {
+            spawnResult = spawn.createGenericCreep(energyCapacity, "Harvester");
+            if (spawnResult === ERR_NOT_ENOUGH_ENERGY && harvesters.length === 0) {
                 spawnResult = spawn.createGenericCreep(energyAvailable, "Harvester");
             }
         }
@@ -50,13 +51,16 @@ module.exports.loop = function () {
     }
 
     for (let v of config.roomVisual) {
-        let text = v.room + ' (' + Game.rooms[v.room].controller.level + ') ' + spawn.name +
-            ': E: ' + Game.rooms[v.room].energyAvailable + '/' + Game.rooms[v.room].energyCapacityAvailable +
-            ' C: ' + creeps_without_role.length + "/" + creeps_without_task.length + "/" + creeps.length +
-            ' H: ' + harvesters.length + '/' + config.numHarvesters +
+        let text_general =
+            v.room + ' (' + Game.rooms[v.room].controller.level + ') ' + spawn.name +
+            ': Energy: ' + Game.rooms[v.room].energyAvailable + '/' + Game.rooms[v.room].energyCapacityAvailable +
+            ' Creeps: ' + creeps_without_role.length + "/" + creeps_without_task.length + "/" + creeps.length;
+        let text_creeps =
+            'H: ' + harvesters.length + '/' + config.numHarvesters +
             ' U: ' + upgraders.length + '/' + config.numUpgraders +
             ' B: ' + builders.length + '/' + config.numBuilders;
-        new RoomVisual(Game.rooms[v.room].name).text(text, v.x, v.y, {color: v.color, font: v.font});
+        new RoomVisual(Game.rooms[v.room].name).text(text_general, v.x, v.y, {color: v.color, font: v.font});
+        new RoomVisual(Game.rooms[v.room].name).text(text_creeps, v.x, v.y+1, {color: v.color, font: v.font});
     }
 
     // clear memory

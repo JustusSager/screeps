@@ -19,11 +19,7 @@ module.exports = function () {
         for (let i = 0; i < numOfParts; i++) {
             body.push(MOVE);
         }
-        let nameIndex = this.memory.nameIndex;
-        let creepName = config.names[nameIndex];
-        while (Game.creeps[creepName]) {
-            creepName = config.names[++nameIndex];
-        }
+        let creepName = config.names[this.memory.nameIndex];
         switch(role) {
             case 'Harvester':
                 creepName = creepName + ' ⛏️';
@@ -35,7 +31,7 @@ module.exports = function () {
                 creepName = creepName + ' 🔨';
                 break;
         }
-        this.memory.nameIndex = nameIndex;
+        this.memory.nameIndex = this.memory.nameIndex + 1;
         return this.spawnCreep(body, creepName, {role: role, task: {name: 'idle'}});
 
     }
