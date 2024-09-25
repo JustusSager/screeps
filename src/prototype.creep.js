@@ -14,34 +14,34 @@ module.exports = function () {
                 case 'Harvester':
                     if (this.store[RESOURCE_ENERGY] > 0) {
                         this.switchTaskTransfer(this.findStoreEnergy().id);
-                    }
-                    else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
+                    } else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
                         this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
                     }
                     break;
                 case 'Upgrader':
                     if (this.store[RESOURCE_ENERGY] > 0) {
                         this.switchTaskUpgrade();
-                    }
-                    else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
+                    } else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
                         this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
                     }
                     break;
                 case 'Builder':
-                    if (this.store[RESOURCE_ENERGY] > 0 && this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES)) {
-                        this.switchTaskBuild(this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES).id)
-                    }
-                    else if (this.store[RESOURCE_ENERGY] > 0 && this.findRepairSite()) {
-                        this.switchTaskRepair(this.findRepairSite().id);
-                    }
-                    else if (this.findDroppedResources()) {
-                        this.switchTaskPickup(this.findDroppedResources().id);
-                    }
-                    else if (this.findWithdrawEnergy()) {
-                        this.switchTaskWithdraw(this.findWithdrawEnergy().id);
-                    }
-                    else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
-                        this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
+                    if (this.store[RESOURCE_ENERGY] > 0) {
+                        if (this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES)) {
+                            this.switchTaskBuild(this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES).id)
+                        } else if (this.findRepairSite()) {
+                            this.switchTaskRepair(this.findRepairSite().id);
+                        } else {
+                            this.switchTaskUpgrade();
+                        }
+                    } else {
+                        if (this.findDroppedResources()) {
+                            this.switchTaskPickup(this.findDroppedResources().id);
+                        } else if (this.findWithdrawEnergy()) {
+                            this.switchTaskWithdraw(this.findWithdrawEnergy().id);
+                        } else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
+                            this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
+                        }
                     }
                     break;
                 default:
@@ -50,7 +50,7 @@ module.exports = function () {
         }
     }
 
-    // Creep Task switching functions ----------------------------------------------------------------------------------
+// Creep Task switching functions ----------------------------------------------------------------------------------
     Creep.prototype.switchTaskHarvest = function (targetID) {
         this.say("⛏️");
         this.memory.task = {
@@ -115,7 +115,7 @@ module.exports = function () {
     }
 
 
-    // Creeps find functions -------------------------------------------------------------------------------------------
+// Creeps find functions -------------------------------------------------------------------------------------------
     Creep.prototype.findStoreEnergy = function () {
         return this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
                 filter: (s) => ((
