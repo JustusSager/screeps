@@ -6,6 +6,7 @@ const config = require('config');
 module.exports.loop = function () {
 
     let spawn = Game.spawns['Spawn1'];
+    spawn.initMemory();
     let creeps = _.values(Game.creeps);
 
     let harvesters = _.filter(creeps, creep => creep.memory.role === 'Harvester');
