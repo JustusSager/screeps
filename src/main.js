@@ -1,6 +1,7 @@
 require('prototype.spawn')();
-require('roles');
-require('tasks');
+require('prototype.creep')();
+require('roles')();
+require('tasks')();
 const config = require('config');
 
 module.exports.loop = function () {

@@ -12,5 +12,6 @@ module.exports = function () {
             body.push(MOVE);
         }
         return this.spawnCreep(body, role + Game.time, {role: role, task: {name: 'idle'}});
+
     }
 }
