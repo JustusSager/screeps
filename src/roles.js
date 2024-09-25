@@ -14,7 +14,7 @@ function isStoreStructure(structure) {
 
 Creep.prototype.initTask = function () {
     if (this.memory.role && !this.memory.task) {
-        this.memory.task.name = 'idle';
+        this.memory.task = {name: 'idle'};
     }
 }
 
@@ -45,6 +45,31 @@ Creep.prototype.updateTask = function () {
                     this.memory.task = {
                         name: 'harvest',
                         targetID: this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id
+                    };
+                }
+                break;
+            case 'Builder':
+                if (this.store[RESOURCE_ENERGY] > 0) {
+                    this.memory.task = {
+                        name: 'build',
+                        targetID: this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES).id
+                    };
+                } else if (this.findDroppedResource(RESOURCE_ENERGY)) {
+                    this.memory.task = {
+                        name: 'pickup',
+                        targetID: this.findDroppedResource(RESOURCE_ENERGY).id
+                    };
+                } else if (this.findWithdrawResource(RESOURCE_ENERGY)) {
+                    this.memory.task = {
+                        name: 'withdraw',
+                        targetID: this.findWithdrawResource(RESOURCE_ENERGY).id,
+                        options: {resource: RESOURCE_ENERGY}
+                    };
+                } else {
+                    this.memory.task = {
+                        name: 'withdraw',
+                        targetID: this.findSpawn().id,
+                        options: {resource: RESOURCE_ENERGY}
                     };
                 }
                 break;

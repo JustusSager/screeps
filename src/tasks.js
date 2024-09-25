@@ -18,7 +18,7 @@ Creep.prototype.run = function () {
         let target = deref(this.memory.task.targetID);
         let targetRange = this.memory.task.targetRange ? this.memory.task.targetRange : 1;
         let options = this.memory.task.options ? this.memory.task.options : {};
-        let result = undefined;
+        let result = undefined, resource = undefined;
 
         if (target && !this.pos.inRangeTo(target.pos, targetRange)) {
             this.moveTo(target.pos);
@@ -26,20 +26,39 @@ Creep.prototype.run = function () {
             switch (this.memory.task.name) {
                 case 'harvest':
                     result = this.harvest(target);
-                    if (result !== OK) {
+                    if (result !== OK || this.store.getFreeCapacity() === 0) {
                         this.resetTask(result);
                     }
                     break;
                 case 'transfer':
-                    let resource = options.resource ? options.resource : RESOURCE_ENERGY;
+                    resource = options.resource ? options.resource : RESOURCE_ENERGY;
                     result = this.transfer(target, resource);
-                    if (result !== OK) {
+                    if (result !== OK || this.store[resource] === 0) {
+                        this.resetTask(result);
+                    }
+                    break;
+                case 'withdraw':
+                    resource = options.resource ? options.resource : RESOURCE_ENERGY;
+                    result = this.withdraw(target, resource);
+                    if (result !== OK || this.store.getFreeCapacity() === 0) {
+                        this.resetTask(result);
+                    }
+                    break;
+                case 'pickup':
+                    result = this.pickup(target);
+                    if (result !== OK || this.store.getFreeCapacity() === 0) {
                         this.resetTask(result);
                     }
                     break;
                 case 'upgrade':
                     result = this.upgradeController(target);
-                    if (result !== OK) {
+                    if (result !== OK || this.store[RESOURCE_ENERGY] === 0) {
+                        this.resetTask(result);
+                    }
+                    break;
+                case 'build':
+                    result = this.build(target);
+                    if (result !== OK || this.store[RESOURCE_ENERGY] === 0) {
                         this.resetTask(result);
                     }
                     break;
