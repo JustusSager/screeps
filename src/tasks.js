@@ -1,3 +1,5 @@
+require("prototypes");
+
 function deref(objectID) {
     return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
 }
@@ -20,8 +22,7 @@ Creep.prototype.run = function () {
 
         if (target && !this.pos.inRangeTo(target.pos, targetRange)) {
             this.moveTo(target.pos);
-        }
-        else {
+        } else {
             switch (this.memory.task.name) {
                 case 'harvest':
                     result = this.harvest(target);
@@ -43,12 +44,9 @@ Creep.prototype.run = function () {
                     }
                     break;
                 default:
-                    this.resetTask();
                     break;
             }
         }
-    } else {
-        this.resetTask();
     }
 }
 
@@ -56,50 +54,5 @@ Creep.prototype.resetTask = function (errorCode = 0) {
     if (errorCode !== 0) {
         this.say(errorCode);
     }
-    this.memory.task = undefined;
-}
-
-class Task {
-    constructor(taskName, creepName, targetID, options) {
-        this.taskName = taskName;
-        this.creepName = creepName
-        this.targetID = targetID;
-        this.options = options;
-    }
-
-    constructor(creep) {
-        this.taskName = creep.memory.task.taskName;
-        this.creepName = creep.memory.task.creepName
-        this.targetID = creep.memory.task.targetID;
-        this.options = creep.memory.task.options;
-    }
-
-    get target() {
-        return deref(this.targetID)
-    }
-    get targetPos() {
-        return this.target.pos;
-    }
-    get creep() {
-        deref(this.creepName)
-    }
-
-    toMemory() {
-        this.creep.memory.task = {
-            taskName: this.taskName,
-            creepName: this.creepName,
-            targetID: this.targetID,
-            options: this.options
-        }
-    }
-}
-
-class TaskHarvest extends Task {
-    constructor(targetID, options = {}) {
-        super('harvest', targetID, options);
-    }
-
-    work() {
-        this.creep.harvest(this.target);
-    }
+    this.memory.task = {name: 'idle'};
 }

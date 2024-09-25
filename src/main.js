@@ -31,6 +31,7 @@ module.exports.loop = function () {
     }
 
     for (let creep of creeps) {
+        creep.initTask();
         creep.updateTask();
         creep.run();
     }
