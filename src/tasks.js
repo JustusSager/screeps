@@ -1,15 +1,7 @@
-require("prototypes");
+require("prototype.creep");
 
 function deref(objectID) {
     return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
-}
-
-function isEnergyStructure(structure) {
-    return structure.energy !== undefined && structure.energyCapacity !== undefined;
-}
-
-function isStoreStructure(structure) {
-    return structure.store !== undefined;
 }
 
 Creep.prototype.run = function () {
@@ -23,7 +15,7 @@ Creep.prototype.run = function () {
         if (target && !this.pos.inRangeTo(target.pos, targetRange)) {
             this.moveTo(target.pos);
         } else {
-            switch (this.memory.task.name) {
+            switch (taskName) {
                 case 'harvest':
                     result = this.harvest(target);
                     if (result !== OK || this.store.getFreeCapacity() === 0) {
@@ -58,6 +50,12 @@ Creep.prototype.run = function () {
                     break;
                 case 'build':
                     result = this.build(target);
+                    if (result !== OK || this.store[RESOURCE_ENERGY] === 0) {
+                        this.resetTask(result);
+                    }
+                    break;
+                case 'repair':
+                    result = this.repair(target);
                     if (result !== OK || this.store[RESOURCE_ENERGY] === 0) {
                         this.resetTask(result);
                     }

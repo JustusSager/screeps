@@ -1,16 +1,4 @@
-require("prototypes");
-
-function deref(objectID) {
-    return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
-}
-
-function isEnergyStructure(structure) {
-    return structure.energy !== undefined && structure.energyCapacity !== undefined;
-}
-
-function isStoreStructure(structure) {
-    return structure.store !== undefined;
-}
+require("prototype.creep");
 
 Creep.prototype.initTask = function () {
     if (this.memory.role && !this.memory.task) {
@@ -25,7 +13,7 @@ Creep.prototype.updateTask = function () {
                 if (this.store[RESOURCE_ENERGY] > 0) {
                     this.memory.task = {
                         name: 'transfer',
-                        targetID: this.findSpawn().id,
+                        targetID: this.findStoreEnergy().id,
                         options: {resource: RESOURCE_ENERGY}
                     };
                 } else {
@@ -49,26 +37,32 @@ Creep.prototype.updateTask = function () {
                 }
                 break;
             case 'Builder':
-                if (this.store[RESOURCE_ENERGY] > 0) {
+                if (this.store[RESOURCE_ENERGY] > 0 && this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES)) {
                     this.memory.task = {
                         name: 'build',
                         targetID: this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES).id
                     };
-                } else if (this.findDroppedResource(RESOURCE_ENERGY)) {
+                } else if (this.store[RESOURCE_ENERGY] > 0 && this.findRepairSite()) {
+                    this.memory.task = {
+                        name: 'repair',
+                        targetID: this.findRepairSite().id
+                    };
+                }
+                else if (this.findDroppedResources()) {
                     this.memory.task = {
                         name: 'pickup',
-                        targetID: this.findDroppedResource(RESOURCE_ENERGY).id
+                        targetID: this.findDroppedResources().id
                     };
-                } else if (this.findWithdrawResource(RESOURCE_ENERGY)) {
+                } else if (this.findWithdrawEnergy()) {
                     this.memory.task = {
                         name: 'withdraw',
-                        targetID: this.findWithdrawResource(RESOURCE_ENERGY).id,
+                        targetID: this.findWithdrawEnergy().id,
                         options: {resource: RESOURCE_ENERGY}
                     };
                 } else {
                     this.memory.task = {
-                        name: 'withdraw',
-                        targetID: this.findSpawn().id,
+                        name: 'harvest',
+                        targetID: this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id,
                         options: {resource: RESOURCE_ENERGY}
                     };
                 }
