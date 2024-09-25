@@ -1,6 +1,5 @@
 require('prototype.spawn')();
 require('prototype.creep')();
-require('roles')();
 require('tasks')();
 const config = require('config');
 
