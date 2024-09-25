@@ -1,4 +1,5 @@
 module.exports = function () {
+
     // Creep Task initialise memory
     Creep.prototype.initTask = function () {
         if (this.memory.role && !this.memory.task) {
@@ -12,76 +13,35 @@ module.exports = function () {
             switch (this.memory.role) {
                 case 'Harvester':
                     if (this.store[RESOURCE_ENERGY] > 0) {
-                        this.say("🚋");
-                        this.memory.task = {
-                            name: 'transfer',
-                            targetID: this.findStoreEnergy().id,
-                            targetRange: 1,
-                            options: {resource: RESOURCE_ENERGY}
-                        };
-                    } else {
-                        this.say("⛏️");
-                        this.memory.task = {
-                            name: 'harvest',
-                            targetID: this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id,
-                            targetRange: 1
-                        };
+                        this.switchTaskTransfer(this.findStoreEnergy().id);
+                    }
+                    else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
+                        this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
                     }
                     break;
                 case 'Upgrader':
                     if (this.store[RESOURCE_ENERGY] > 0) {
-                        this.say("🆙");
-                        this.memory.task = {
-                            name: 'upgrade',
-                            targetID: this.room.controller.id,
-                            targetRange: 2
-                        };
-                    } else {
-                        this.say("⛏️");
-                        this.memory.task = {
-                            name: 'harvest',
-                            targetID: this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id,
-                            targetRange: 1
-                        };
+                        this.switchTaskUpgrade();
+                    }
+                    else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
+                        this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
                     }
                     break;
                 case 'Builder':
                     if (this.store[RESOURCE_ENERGY] > 0 && this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES)) {
-                        this.say("🔨");
-                        this.memory.task = {
-                            name: 'build',
-                            targetID: this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES).id,
-                            targetRange: 2
-                        };
-                    } else if (this.store[RESOURCE_ENERGY] > 0 && this.findRepairSite()) {
-                        this.say("🛠️");
-                        this.memory.task = {
-                            name: 'repair',
-                            targetID: this.findRepairSite().id,
-                            targetRange: 2
-                        };
-                    } else if (this.findDroppedResources()) {
-                        this.say("🧺");
-                        this.memory.task = {
-                            name: 'pickup',
-                            targetID: this.findDroppedResources().id,
-                            targetRange: 1
-                        };
-                    } else if (this.findWithdrawEnergy()) {
-                        this.say("🚋");
-                        this.memory.task = {
-                            name: 'withdraw',
-                            targetID: this.findWithdrawEnergy().id,
-                            targetRange: 1,
-                            options: {resource: RESOURCE_ENERGY}
-                        };
-                    } else {
-                        this.say("⛏️");
-                        this.memory.task = {
-                            name: 'harvest',
-                            targetID: this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id,
-                            targetRange: 1
-                        };
+                        this.switchTaskBuild(this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES).id)
+                    }
+                    else if (this.store[RESOURCE_ENERGY] > 0 && this.findRepairSite()) {
+                        this.switchTaskRepair(this.findRepairSite().id);
+                    }
+                    else if (this.findDroppedResources()) {
+                        this.switchTaskPickup(this.findDroppedResources().id);
+                    }
+                    else if (this.findWithdrawEnergy()) {
+                        this.switchTaskWithdraw(this.findWithdrawEnergy().id);
+                    }
+                    else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
+                        this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
                     }
                     break;
                 default:
@@ -90,7 +50,72 @@ module.exports = function () {
         }
     }
 
-    // Creeps Basic functions -------------------------------------------------------------------------------------
+    // Creep Task switching functions ----------------------------------------------------------------------------------
+    Creep.prototype.switchTaskHarvest = function (targetID) {
+        this.say("⛏️");
+        this.memory.task = {
+            name: 'harvest',
+            targetID: targetID,
+            targetRange: 1
+        };
+    }
+    Creep.prototype.switchTaskUpgrade = function () {
+        this.say("🆙");
+        this.memory.task = {
+            name: 'upgrade',
+            targetID: this.room.controller.id,
+            targetRange: 2
+        };
+    }
+    Creep.prototype.switchTaskBuild = function (targetID) {
+        this.say("🔨");
+        this.memory.task = {
+            name: 'build',
+            targetID: targetID,
+            targetRange: 2
+        };
+    }
+    Creep.prototype.switchTaskRepair = function (targetID) {
+        this.say("🛠️");
+        this.memory.task = {
+            name: 'repair',
+            targetID: targetID,
+            targetRange: 2
+        };
+    }
+    Creep.prototype.switchTaskTransfer = function (targetID, resource = RESOURCE_ENERGY) {
+        this.say("🚋");
+        this.memory.task = {
+            name: 'transfer',
+            targetID: targetID,
+            targetRange: 1,
+            options: {
+                resource: resource
+            }
+        };
+    }
+    Creep.prototype.switchTaskPickup = function (targetID) {
+        this.say("🧺");
+        this.memory.task = {
+            name: 'pickup',
+            targetID: targetID,
+            targetRange: 1
+        };
+    }
+    Creep.prototype.switchTaskWithdraw = function (targetID, resource = RESOURCE_ENERGY) {
+        this.say("🚋");
+        this.memory.task = {
+            name: 'withdraw',
+            targetID: targetID,
+            targetRange: 1,
+            options: {
+                resource: resource
+            }
+        };
+    }
+
+
+    // Creeps find functions -------------------------------------------------------------------------------------------
     Creep.prototype.findStoreEnergy = function () {
         return this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
                 filter: (s) => ((
