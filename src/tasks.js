@@ -75,6 +75,7 @@ module.exports = function () {
                         }
                         break;
                     case 'repair':
+                        if(target.hits === target.hitsMax) this.resetTask();
                         result = this.repair(target);
                         if (result !== OK || this.store[RESOURCE_ENERGY] === 0) {
                             this.resetTask(result);

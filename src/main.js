@@ -19,7 +19,7 @@ module.exports.loop = function () {
     let transporters = _.filter(creeps, creep => creep.memory.role === 'Transporter');
     let upgraders = _.filter(creeps, creep => creep.memory.role === 'Upgrader');
     let builders = _.filter(creeps, creep => creep.memory.role === 'Builder');
-    let repairers = _.filter(creeps, creep => creep.memory.role === 'Repairers');
+    let repairers = _.filter(creeps, creep => creep.memory.role === 'Repairer');
     let creeps_without_role = _.filter(creeps, creep => !creep.memory.role || creep.memory.role === 'idle');
     let creeps_without_task = _.filter(creeps, creep => !creep.memory.task || !creep.memory.task.name || creep.memory.task.name === 'idle');
 
@@ -47,7 +47,7 @@ module.exports.loop = function () {
                 spawnResult = spawn.createTransporterCreep(energyAvailable);
                 console.log('Spawn microTransporter: ' + spawnResult);
             }
-        } else if (harvesters.length < config.numHarvesters) {
+        } else if (harvesters.length < config.stageOptions.numHarvesters[room_stage]) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Harvester");
             console.log('Spawn Harvester: ' + spawnResult);
             if (spawnResult === ERR_NOT_ENOUGH_ENERGY && harvesters.length === 0) {
@@ -78,7 +78,7 @@ module.exports.loop = function () {
             ': Energy: ' + Game.rooms[v.room].energyAvailable + '/' + Game.rooms[v.room].energyCapacityAvailable +
             ' Creeps: ' + creeps_without_role.length + "/" + creeps_without_task.length + "/" + creeps.length;
         let text_creeps =
-            'H: ' + harvesters.length + '/' + config.numHarvesters +
+            'H: ' + harvesters.length + '/' + config.stageOptions.numHarvesters[room_stage] +
             ' U: ' + upgraders.length + '/' + config.stageOptions.numUpgraders[room_stage] +
             ' B: ' + builders.length + '/' + config.stageOptions.numBuilders[room_stage] +
             ' R: ' + repairers.length + '/' + config.stageOptions.numRepairers[room_stage] +

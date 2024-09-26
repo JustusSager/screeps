@@ -1,14 +1,12 @@
 module.exports = {
     roomStage: {
-        'W23S33': 3
+        'W23S33': 4
     },
-
-    numHarvesters: 2,
 
     maxSizeHarvester: 4,
     maxSizeUpgrader: 6,
     maxSizeBuilder: 6,
-    maxSizeRepairers: 6,
+    maxSizeRepairer: 6,
     maxSizeTransporter: 5,
 
     roomVisual: [
@@ -27,14 +25,18 @@ module.exports = {
             5000, 10000, 100000, 1000000,
             2000000, 3000000, 4000000, 5000000
         ],
-        numUpgraders: [
+        numHarvesters: [
+            0, 4, 2, 2,
+            1, 1, 1, 1,
+            1, 1, 1, 1
+        ],numUpgraders: [
             1, 4, 1, 2,
-            2, 2, 4, 1,
+            1, 2, 4, 1,
             1, 1, 1, 1
         ],
         numBuilders: [
             0, 0, 6, 6,
-            4, 4, 2, 1,
+            5, 4, 2, 1,
             1, 1, 1, 1
         ],
         numRepairers: [

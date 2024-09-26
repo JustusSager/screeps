@@ -25,6 +25,9 @@ module.exports = function () {
                 creepName = creepName + ' 🔨';
                 maxSize = config.maxSizeBuilder;
                 break;
+            case 'Repairer':
+                creepName = creepName + ' 🛠️';
+                maxSize = config.maxSizeRepairer;
         }
         this.memory.nameIndex = this.memory.nameIndex + 1;
         for (let i = 0; i < numOfParts && i < maxSize; i++) {

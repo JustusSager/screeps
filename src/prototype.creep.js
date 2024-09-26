@@ -312,11 +312,16 @@ module.exports = function () {
     }
     Creep.prototype.findRepairSite = function () {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: (s) => s.structureType !== STRUCTURE_WALL && s.hits < s.hitsMax
+            filter: (s) => s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART
+                && s.hits < s.hitsMax
         });
 
     }
     Creep.prototype.findWallRepairSite = function (maxHits) {
+        let rampart = this.pos.findClosestByPath(FIND_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_RAMPART && s.hits < s.hitsMax && s.hits < maxHits
+        });
+        if (rampart) return rampart;
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (s) => s.structureType === STRUCTURE_WALL && s.hits < s.hitsMax && s.hits < maxHits
         });
