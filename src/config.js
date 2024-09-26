@@ -1,14 +1,16 @@
 module.exports = {
     roomStage: {
-        'W23S33': 2
+        'W23S33': 3
     },
+
     numHarvesters: 2,
-    numUpgraders: 1,
-    numBuilders: 6,
+
     maxSizeHarvester: 4,
     maxSizeUpgrader: 6,
     maxSizeBuilder: 6,
+    maxSizeRepairers: 6,
     maxSizeTransporter: 5,
+
     roomVisual: [
         {
             room: 'W23S33',
@@ -18,5 +20,29 @@ module.exports = {
             font: 1
         }
     ],
+
+    stageOptions: {
+        wallRepairs: [
+            1, 1, 1, 1,
+            5000, 10000, 100000, 1000000,
+            2000000, 3000000, 4000000, 5000000
+        ],
+        numUpgraders: [
+            1, 4, 1, 2,
+            2, 2, 4, 1,
+            1, 1, 1, 1
+        ],
+        numBuilders: [
+            0, 0, 6, 6,
+            4, 4, 2, 1,
+            1, 1, 1, 1
+        ],
+        numRepairers: [
+            0, 0, 0, 0,
+            2, 2, 2, 1,
+            1, 1, 1, 1
+        ]
+    },
+
     names: ['Emma', 'Noah', 'Ethan', 'Olivia', 'Isabella', 'Jacob', 'Ava', 'Liam', 'Logan', 'Sophia', 'Emily', 'Michael', 'Madison', 'Matthew', 'Jack', 'Mia', 'Hannah', 'Ryan', 'Abigail', 'Mason', 'Chloe', 'Joshua', 'Aiden', 'Ella', 'James', 'Lily', 'Amelia', 'Elijah', 'Grace', 'Jackson', 'Charlotte', 'Tyler', 'Alexander', 'Elizabeth', 'Andrew', 'Avery', 'Lucas', 'Sarah', 'Benjamin', 'Samantha', 'Alexis', 'Daniel', 'Dylan', 'My', 'Taylor', 'Alyssa', 'William', 'Natalie', 'Nathan', 'Nicholas', 'Sofia', 'Addison', 'Gabriel', 'Hailey', 'Luke', 'Caleb', 'Zoe', 'Anna', 'Jayden', 'Anthony', 'Victoria', 'Joseph', 'Riley', 'David', 'Harper', 'Connor', 'Lauren', 'Evelyn', 'Owen', 'Christopher', 'Ellie', 'Oliver', 'Savannah', 'Kayla', 'Zachary', 'Carter', 'Sydney', 'Austin', 'Layla', 'Hunter', 'Julia', 'Audrey', 'Christian', 'Evan', 'Sophie', 'Maya', 'Samuel', 'Aubrey', 'John', 'Cameron', 'Mackenzie', 'Alex', 'Zoey', 'Gavin', 'Morgan', 'Claire', 'Wyatt', 'Brianna', 'Isaac', 'Brooklyn', 'Henry', 'Jordan', 'Leah', 'Aria', 'Sebastian', 'Isaiah', 'Lillian', 'Adam', 'Kaylee', 'Gabriella', 'Landon', 'Scarlett', 'Thomas', 'Brandon', 'Lucy', 'Ashley', 'Max', 'Bella', 'Julian', 'Jonathan', 'Kaitlyn', 'Levi', 'Mila', 'Aaron', 'Madeline', 'Brayden', 'Kylie', 'Aidan', 'Allison', 'Eli', 'Gianna', 'Justin', 'Madelyn', 'Ian', 'Stella', 'Chase', 'Peyton', 'Brooke', 'Grayson', 'Dominic', 'Megan', 'Cole', 'Jasmine', 'Caroline', 'Charlie', 'Autumn', 'Cooper', 'Eva', 'Jaxon', 'Alexandra', 'Leo', 'Nora', 'Parker', 'Jake', 'Luna', 'Aaliyah', 'Adrian', 'Isabelle', 'Xavier', 'Kyle', 'Paige', 'Josiah', 'Kennedy', 'Blake', 'Jessica', 'Arianna', 'Jason', 'Colton', 'Rachel', 'Carson', 'Violet', 'Skylar', 'Tristan', 'Maria', 'Nolan', 'Ariana', 'Asher', 'Penelope', 'Robert', 'Jeremiah', 'Sara', 'Abby', 'Muhammad', 'Faith', 'Hudson', 'Camila', 'Nathaniel', 'Katie', 'Sean', 'Aurora', 'Mateo', 'Bailey', 'Hayden', 'Makayla', 'Lincoln', 'Nevaeh', 'Ayden', 'Sadie', 'Alexa', 'Ezra', 'Kai', 'Molly', 'Elena', 'Jace', 'Lilly', 'Miles', 'Micah', 'Naomi', 'Gabrielle', 'Sam', 'Brody', 'Rylee', 'Elias', 'Isabel', 'Colin', 'Kate', 'Bryce', 'Eleanor', 'Gracie', 'Luca', 'Ben', 'Ruby', 'Caden', 'Jade', 'Eric', 'Haley', 'Kevin', 'Trinity', 'Ashton', 'Nicole', 'Easton', 'Hazel', 'Eliana', 'Vincent', 'Lydia', 'Patrick', 'Brady', 'Katelyn', 'Kayden', 'Alice', 'Jaden', 'Jaxson', 'Reagan', 'Paisley', 'Roman', 'Jonah', 'Piper', 'Cody', 'Serenity', 'Rebecca', 'Ryder', 'Maggie', 'Seth', 'Harrison', 'Mary', 'Emilia', 'Kaleb', 'Jenna', 'Kaden', 'Charles', 'Willow', 'Bryson', 'Clara', 'Declan', 'Isla', 'Amanda', 'Will', 'Natalia', 'Wesley', 'Destiny', 'Greyson', 'Katherine', 'Marcus', 'Annabelle', 'Damian', 'Jordyn', 'Preston', 'Devin', 'Payton', 'Grant', 'Ivy', 'George', 'Mya', 'Erin', 'Sawyer', 'Jesse', 'Quinn', 'Cora', 'Nicolas', 'Bentley', 'Delilah', 'Amber', 'Ezekiel', 'Maverick', 'Nova', 'Aj', 'Aubree', 'Summer', 'Timothy', 'Kendall', 'Xander', 'Kinsley', 'Trevor', 'Brielle', 'Santiago', 'Angel', 'Reese', 'Camden', 'Valentina', 'Andrea', 'Joey', 'Danielle', 'Kaiden', 'Liliana', 'Theodore', 'Angelina', 'Diego', 'Jameson', 'Melanie', 'Antonio', 'Lyla', 'Brian', 'Jude', 'Sienna', 'Laila', 'Braxton', 'Mikayla', 'Drew', 'Eden', 'Jeremy', 'Sierra', 'Garrett', 'Mariah', 'Jocelyn', 'Spencer', 'Elise', 'Weston', 'Shelby', 'Theo', 'Mckenzie', 'Silas', 'Athena', 'Tanner', 'Juliana', 'Everett', 'Leilani', 'Maxwell', 'Vivian', 'Hadley', 'Omar', 'Alana', 'Steven', 'Finn', 'Khloe', 'Adeline', 'Mark', 'Bennett', 'Josie', 'Alexandria', 'Maddox', 'Amaya', 'Malachi', 'Giovanni', 'Melody', 'Jose', 'Keira', 'Bradley', 'Everly', 'Eliza', 'Gage', 'Ana', 'Collin', 'Caitlin', 'Joel', 'Ali', 'Laura', 'Emery', 'Emmett', 'Adriana', 'Juan', 'Brendan', 'Rose', 'Mckenna', 'Paul', 'Delaney', 'Ashlyn', 'Zane', 'Alaina', 'Myles', 'Calvin', 'London', 'Conner', 'Ryleigh', 'Luis', 'Nur', 'Rowan', 'Arya', 'Cayden', 'Carlos', 'Lexi', 'Ayla', 'Jared', 'Callie', 'Kingston', 'Ariel', 'Ivan', 'Amir', 'Josephine', 'Griffin', 'Vanessa', 'Cassidy', 'Zion', 'Aliyah', 'Jayce', 'Lila', 'Peter', 'Genesis', 'Shane', 'Kelsey', 'Tucker', 'Lukas', 'Marissa', 'Anastasia', 'Ryker', 'Georgia', 'Trey', 'Elliot', 'Nina', 'Michelle', 'Miguel', 'Leila', 'Victor', 'Norah', 'Travis', 'Jada', 'Richard', 'Caitlyn', 'Derek', 'Dean', 'Hope', 'Julianna', 'Leonardo', 'Dakota', 'Kiara', 'Beau', 'Makenzie', 'Lola', 'Lorenzo', 'Catherine', 'Damien', 'Brooklynn', 'Dawson', 'Iris', 'King', 'Jasper', 'Jillian', 'Oscar', 'Allie', 'Axel', 'Valerie', 'Stephen', 'Elliott', 'Kylee', 'Bryan', 'Evie', 'Courtney', 'Rylan', 'Amy', 'Braden', 'Tessa', 'Waylon', 'Cheyenne', 'Jax', 'Graham', 'Makenna', 'Adalynn', 'Alejandro', 'Edward', 'Matteo', 'Sabrina', 'Daisy', 'Enzo', 'Kayleigh', 'Keegan', 'Marley', 'Shawn', 'Alina', 'Brooks', 'Teagan', 'Ty', 'Alayna', 'Milo', 'Alicia', 'Tommy', 'Donovan', 'Emerson', 'Jaiden', 'Zara', 'Emmanuel', 'Genevieve']
 }

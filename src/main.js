@@ -9,6 +9,7 @@ module.exports.loop = function () {
     let spawn = Game.spawns['Spawn1'];
     spawn.initMemory();
     let room = spawn.room;
+    let room_stage = room.memory.stage;
     room.updateMemory();
     room.updateConstructionSites();
     let creeps = _.values(Game.creeps);
@@ -18,6 +19,7 @@ module.exports.loop = function () {
     let transporters = _.filter(creeps, creep => creep.memory.role === 'Transporter');
     let upgraders = _.filter(creeps, creep => creep.memory.role === 'Upgrader');
     let builders = _.filter(creeps, creep => creep.memory.role === 'Builder');
+    let repairers = _.filter(creeps, creep => creep.memory.role === 'Repairers');
     let creeps_without_role = _.filter(creeps, creep => !creep.memory.role || creep.memory.role === 'idle');
     let creeps_without_task = _.filter(creeps, creep => !creep.memory.task || !creep.memory.task.name || creep.memory.task.name === 'idle');
 
@@ -38,7 +40,7 @@ module.exports.loop = function () {
         }
     }
     if (spawnResult === undefined) {
-        if (room.memory.stage > 1 && transporters.length < miners.length) {
+        if (room_stage > 1 && transporters.length < miners.length) {
             spawnResult = spawn.createTransporterCreep(energyCapacity);
             console.log('Spawn Transporter: ' + spawnResult);
             if (spawnResult === ERR_NOT_ENOUGH_ENERGY && transporters.length === 0) {
@@ -52,12 +54,15 @@ module.exports.loop = function () {
                 spawnResult = spawn.createGenericCreep(energyAvailable, "Harvester");
                 console.log('Spawn microHarvester: ' + spawnResult);
             }
-        } else if (upgraders.length < config.numUpgraders) {
+        } else if (upgraders.length < config.stageOptions.numUpgraders[room_stage]) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Upgrader");
             console.log('Spawn Upgrader: ' + spawnResult);
-        } else if (room.memory.stage > 1 && builders.length < config.numBuilders) {
+        } else if (builders.length < config.stageOptions.numBuilders[room_stage]) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Builder");
             console.log('Spawn Builder: ' + spawnResult);
+        } else if (repairers.length < config.stageOptions.numRepairers[room_stage]) {
+            spawnResult = spawn.createGenericCreep(energyCapacity, "Repairer");
+            console.log('Spawn Repairer: ' + spawnResult);
         }
     }
 
@@ -69,13 +74,14 @@ module.exports.loop = function () {
 
     for (let v of config.roomVisual) {
         let text_general =
-            v.room + ' (' + Game.rooms[v.room].controller.level + ') ' + spawn.name +
+            v.room + ' (RCL ' + Game.rooms[v.room].controller.level + ' Stage ' + room_stage + ') ' + spawn.name +
             ': Energy: ' + Game.rooms[v.room].energyAvailable + '/' + Game.rooms[v.room].energyCapacityAvailable +
             ' Creeps: ' + creeps_without_role.length + "/" + creeps_without_task.length + "/" + creeps.length;
         let text_creeps =
             'H: ' + harvesters.length + '/' + config.numHarvesters +
-            ' U: ' + upgraders.length + '/' + config.numUpgraders +
-            ' B: ' + builders.length + '/' + config.numBuilders +
+            ' U: ' + upgraders.length + '/' + config.stageOptions.numUpgraders[room_stage] +
+            ' B: ' + builders.length + '/' + config.stageOptions.numBuilders[room_stage] +
+            ' R: ' + repairers.length + '/' + config.stageOptions.numRepairers[room_stage] +
             ' TM: ' + transporters.length + "/" + miners.length;
         new RoomVisual(Game.rooms[v.room].name).text(text_general, v.x, v.y, {color: v.color, font: v.font});
         new RoomVisual(Game.rooms[v.room].name).text(text_creeps, v.x, v.y + 1, {color: v.color, font: v.font});

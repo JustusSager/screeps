@@ -1,3 +1,5 @@
+const config = require('config');
+
 module.exports = function () {
 
     // Creep Task initialise memory
@@ -110,6 +112,40 @@ module.exports = function () {
                         } else {
                             this.switchTaskUpgrade();
                         }
+                    } else {
+                        // get dropped energy
+                        target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                        if (target) {
+                            return this.switchTaskPickup(target.id);
+                        }
+                        // get energy from containers
+                        target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                        if (target) {
+                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                        }
+                        // get energy from storage
+                        target = this.findGetStorage(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                        if (target) {
+                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                        }
+                        // get energy by harvesting
+                        target = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+                        if (target) {
+                            return this.switchTaskHarvest(target.id);
+                        }
+                    }
+                    break;
+                case 'Repairer':
+                    if (this.store[RESOURCE_ENERGY] > 0) {
+                        target = this.findRepairSite();
+                        if (target) {
+                            return this.switchTaskRepair(target.id);
+                        }
+                        target = this.findWallRepairSite(config.stageOptions.wallRepairs[this.room.memory.stage]);
+                        if (target){
+                            this.switchTaskRepair(target.id);
+                        }
+                        return this.switchTaskUpgrade();
                     } else {
                         // get dropped energy
                         target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
@@ -259,9 +295,7 @@ module.exports = function () {
         });
     }
 
-
-
-
+// Find construction/repair sites --------------------------------------------------------------------------------------
     Creep.prototype.findConstructionSite = function () {
         if (this.room.memory.construction_sites) {
             let mem = this.room.memory.construction_sites;
@@ -276,10 +310,15 @@ module.exports = function () {
             return this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
         }
     }
-
     Creep.prototype.findRepairSite = function () {
-        return this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+        return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (s) => s.structureType !== STRUCTURE_WALL && s.hits < s.hitsMax
+        });
+
+    }
+    Creep.prototype.findWallRepairSite = function (maxHits) {
+        return this.pos.findClosestByPath(FIND_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_WALL && s.hits < s.hitsMax && s.hits < maxHits
         });
 
     }
