@@ -17,7 +17,7 @@ module.exports = function () {
         if (this.memory.role && this.memory.task.name === 'idle') {
             switch (this.memory.role) {
                 case 'Transporter':
-                    if (this.store[RESOURCE_ENERGY] > 0) {
+                    if (this.store[RESOURCE_ENERGY] > 0 && this.findStoreEnergy()) {
                         this.switchTaskTransfer(this.findStoreEnergy().id);
                     } else if (this.findDroppedResources(RESOURCE_ENERGY, this.store.getFreeCapacity())) {
                         this.switchTaskPickup(this.findDroppedResources(RESOURCE_ENERGY, this.store.getFreeCapacity()).id);
@@ -26,7 +26,7 @@ module.exports = function () {
                     }
                     break;
                 case 'Harvester':
-                    if (this.store[RESOURCE_ENERGY] > 0) {
+                    if (this.store[RESOURCE_ENERGY] > 0 && this.findStoreEnergy()) {
                         this.switchTaskTransfer(this.findStoreEnergy().id);
                     } else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
                         this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
@@ -52,8 +52,8 @@ module.exports = function () {
                     break;
                 case 'Builder':
                     if (this.store[RESOURCE_ENERGY] > 0) {
-                        if (this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES)) {
-                            this.switchTaskBuild(this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES).id)
+                        if (this.findConstructionSite()) {
+                            this.switchTaskBuild(this.findConstructionSite().id)
                         } else if (this.findRepairSite()) {
                             this.switchTaskRepair(this.findRepairSite().id);
                         } else {
@@ -144,11 +144,26 @@ module.exports = function () {
 
 
 // Creeps find functions -------------------------------------------------------------------------------------------
+    Creep.prototype.findConstructionSite = function () {
+        if (this.room.memory.constructionSites) {
+            let mem = this.room.memory.constructionSites;
+            if (mem.tower && mem.tower.length > 0) {
+                return this.pos.findClosestByPath(mem.tower);
+            } else if (mem.energy_storage && mem.energy_storage.length > 0) {
+                return this.pos.findClosestByPath(mem.energy_storage);
+            } else {
+                return this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+            }
+        } else {
+            return this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+        }
+    }
     Creep.prototype.findStoreEnergy = function () {
         return this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
                 filter: (s) => ((
                         s.structureType === STRUCTURE_SPAWN ||
                         s.structureType === STRUCTURE_EXTENSION)
+                    && s.store.getCapacity(RESOURCE_ENERGY) - s.store[RESOURCE_ENERGY] > 0
                 )
                 // TODO: filtern nach freiem Platz
                 // structure.store.getFreeCapacity() > 0 funktioniert nicht

@@ -1,5 +1,6 @@
 require('prototype.spawn')();
 require('prototype.creep')();
+require('prototype.room')();
 require('tasks')();
 const config = require('config');
 
@@ -7,6 +8,8 @@ module.exports.loop = function () {
 
     let spawn = Game.spawns['Spawn1'];
     spawn.initMemory();
+    let room = spawn.room;
+    room.updateConstructionSites();
     let creeps = _.values(Game.creeps);
 
     let harvesters = _.filter(creeps, creep => creep.memory.role === 'Harvester');
