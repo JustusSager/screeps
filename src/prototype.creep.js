@@ -19,8 +19,8 @@ module.exports = function () {
                 case 'Transporter':
                     if (this.store[RESOURCE_ENERGY] > 0) {
                         this.switchTaskTransfer(this.findStoreEnergy().id);
-                    } else if (this.findDroppedResources()) {
-                        this.switchTaskPickup(this.findDroppedResources().id);
+                    } else if (this.findDroppedResources(RESOURCE_ENERGY, this.store.getFreeCapacity())) {
+                        this.switchTaskPickup(this.findDroppedResources(RESOURCE_ENERGY, this.store.getFreeCapacity()).id);
                     } else if (this.findWithdrawEnergy(this.store.getFreeCapacity())) {
                         this.switchTaskWithdraw(this.findWithdrawEnergy(this.store.getFreeCapacity()).id);
                     }
@@ -60,8 +60,8 @@ module.exports = function () {
                             this.switchTaskUpgrade();
                         }
                     } else {
-                        if (this.findDroppedResources()) {
-                            this.switchTaskPickup(this.findDroppedResources().id);
+                        if (this.findDroppedResources(RESOURCE_ENERGY, this.store.getFreeCapacity())) {
+                            this.switchTaskPickup(this.findDroppedResources(RESOURCE_ENERGY, this.store.getFreeCapacity()).id);
                         } else if (this.findWithdrawEnergy(this.store.getFreeCapacity())) {
                             this.switchTaskWithdraw(this.findWithdrawEnergy(this.store.getFreeCapacity()).id);
                         } else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
@@ -168,8 +168,11 @@ module.exports = function () {
         )
     }
 
-    Creep.prototype.findDroppedResources = function () {
-        return this.pos.findClosestByPath(FIND_DROPPED_RESOURCES || FIND_TOMBSTONES)
+    Creep.prototype.findDroppedResources = function (resource = RESOURCE_ENERGY, amount = 0) {
+        return this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
+            filter:
+                s => s.amount > amount && s.resourceType === resource
+        })
     }
 
     Creep.prototype.findSpawn = function () {

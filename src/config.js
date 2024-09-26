@@ -1,5 +1,5 @@
 module.exports = {
-    numHarvesters: 3,
+    numHarvesters: 2,
     numUpgraders: 1,
     numBuilders: 6,
     maxSizeTransporter: 4,

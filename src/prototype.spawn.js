@@ -56,12 +56,13 @@ module.exports = function () {
         }});
     }
     StructureSpawn.prototype.createTransporterCreep = function (energy) {
-        if (energy < 100) return ERR_NOT_ENOUGH_ENERGY;
+        if (energy < 150) return ERR_NOT_ENOUGH_ENERGY;
 
-        let numOfParts = Math.floor(energy / 100);
+        let numOfParts = Math.floor(energy / 150);
         let body = [];
         for (let i = 0; i < numOfParts && i < config.maxSizeTransporter; i++) {
             body.push(CARRY);
+            body.push(CARRY)
         }
         for (let i = 0; i < numOfParts && i < config.maxSizeTransporter; i++) {
             body.push(MOVE);
