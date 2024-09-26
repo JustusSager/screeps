@@ -1,8 +1,14 @@
 module.exports = {
+    roomStage: {
+        'W23S33': 2
+    },
     numHarvesters: 2,
     numUpgraders: 1,
     numBuilders: 6,
-    maxSizeTransporter: 4,
+    maxSizeHarvester: 4,
+    maxSizeUpgrader: 6,
+    maxSizeBuilder: 6,
+    maxSizeTransporter: 5,
     roomVisual: [
         {
             room: 'W23S33',

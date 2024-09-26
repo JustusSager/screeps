@@ -10,28 +10,33 @@ module.exports = function () {
     StructureSpawn.prototype.createGenericCreep = function (energy, role) {
         const numOfParts = Math.floor(energy / 200);
         let body = [];
-        for (let i = 0; i < numOfParts; i++) {
-            body.push(WORK);
-        }
-        for (let i = 0; i < numOfParts; i++) {
-            body.push(CARRY);
-        }
-        for (let i = 0; i < numOfParts; i++) {
-            body.push(MOVE);
-        }
+        let maxSize = 15;
         let creepName = config.names[this.memory.nameIndex];
         switch (role) {
             case 'Harvester':
                 creepName = creepName + ' ⛏️';
+                maxSize = config.maxSizeHarvester;
                 break;
             case 'Upgrader':
                 creepName = creepName + ' 🆙';
+                maxSize = config.maxSizeUpgrader;
                 break;
             case 'Builder':
                 creepName = creepName + ' 🔨';
+                maxSize = config.maxSizeBuilder;
                 break;
         }
         this.memory.nameIndex = this.memory.nameIndex + 1;
+        for (let i = 0; i < numOfParts && i < maxSize; i++) {
+            body.push(WORK);
+        }
+        for (let i = 0; i < numOfParts && i < maxSize; i++) {
+            body.push(CARRY);
+        }
+        for (let i = 0; i < numOfParts && i < maxSize; i++) {
+            body.push(MOVE);
+        }
+
         return this.spawnCreep(body, creepName, {memory: {
             role: role, task: {name: 'idle'}
         }});

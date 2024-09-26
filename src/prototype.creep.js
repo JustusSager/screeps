@@ -54,7 +54,7 @@ module.exports = function () {
                     if (this.store[RESOURCE_ENERGY] > 0) {
                         if (this.findConstructionSite()) {
                             this.switchTaskBuild(this.findConstructionSite().id)
-                        } else if (this.findRepairSite()) {
+                        } else if (this.room.memory.stage < 4 && this.findRepairSite()) {
                             this.switchTaskRepair(this.findRepairSite().id);
                         } else {
                             this.switchTaskUpgrade();
@@ -64,7 +64,7 @@ module.exports = function () {
                             this.switchTaskPickup(this.findDroppedResources(RESOURCE_ENERGY, this.store.getFreeCapacity()).id);
                         } else if (this.findWithdrawEnergy(this.store.getFreeCapacity())) {
                             this.switchTaskWithdraw(this.findWithdrawEnergy(this.store.getFreeCapacity()).id);
-                        } else if (this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
+                        } else if (this.room.memory.stage < 3 && this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)) {
                             this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
                         }
                     }
@@ -145,8 +145,8 @@ module.exports = function () {
 
 // Creeps find functions -------------------------------------------------------------------------------------------
     Creep.prototype.findConstructionSite = function () {
-        if (this.room.memory.constructionSites) {
-            let mem = this.room.memory.constructionSites;
+        if (this.room.memory.construction_sites) {
+            let mem = this.room.memory.construction_sites;
             if (mem.tower && mem.tower.length > 0) {
                 return this.pos.findClosestByPath(mem.tower);
             } else if (mem.energy_storage && mem.energy_storage.length > 0) {

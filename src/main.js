@@ -9,6 +9,7 @@ module.exports.loop = function () {
     let spawn = Game.spawns['Spawn1'];
     spawn.initMemory();
     let room = spawn.room;
+    room.updateMemory();
     room.updateConstructionSites();
     let creeps = _.values(Game.creeps);
 
@@ -37,7 +38,7 @@ module.exports.loop = function () {
         }
     }
     if (spawnResult === undefined) {
-        if (transporters.length < miners.length) {
+        if (room.memory.stage > 1 && transporters.length < miners.length) {
             spawnResult = spawn.createTransporterCreep(energyCapacity);
             console.log('Spawn Transporter: ' + spawnResult);
             if (spawnResult === ERR_NOT_ENOUGH_ENERGY && transporters.length === 0) {
@@ -54,7 +55,7 @@ module.exports.loop = function () {
         } else if (upgraders.length < config.numUpgraders) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Upgrader");
             console.log('Spawn Upgrader: ' + spawnResult);
-        } else if (builders.length < config.numBuilders) {
+        } else if (room.memory.stage > 1 && builders.length < config.numBuilders) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Builder");
             console.log('Spawn Builder: ' + spawnResult);
         }
