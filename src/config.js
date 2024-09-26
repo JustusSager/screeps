@@ -2,6 +2,7 @@ module.exports = {
     numHarvesters: 3,
     numUpgraders: 1,
     numBuilders: 6,
+    maxSizeTransporter: 4,
     roomVisual: [
         {
             room: 'W23S33',

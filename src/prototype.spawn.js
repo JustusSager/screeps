@@ -20,7 +20,7 @@ module.exports = function () {
             body.push(MOVE);
         }
         let creepName = config.names[this.memory.nameIndex];
-        switch(role) {
+        switch (role) {
             case 'Harvester':
                 creepName = creepName + ' ⛏️';
                 break;
@@ -32,27 +32,45 @@ module.exports = function () {
                 break;
         }
         this.memory.nameIndex = this.memory.nameIndex + 1;
-        return this.spawnCreep(body, creepName, {role: role, task: {name: 'idle'}});
+        return this.spawnCreep(body, creepName, {memory: {
+            role: role, task: {name: 'idle'}
+        }});
 
     }
-
     StructureSpawn.prototype.createMinerCreep = function (energy, sourceID) {
-        if (energy < 250) {
-            return ERR_NOT_ENOUGH_ENERGY;
-        }
+        if (energy < 250) return ERR_NOT_ENOUGH_ENERGY;
+
         let new_energy = energy - 50;
-        let numOfParts = Math.floor(new_energy / 100) > 5 ? 5 : Math.floor(new_energy / 100);
+        let numOfParts = Math.floor(new_energy / 100);
         let body = [];
-        for (let i = 0; i < numOfParts; i++) {
+        for (let i = 0; i < numOfParts && i < 5; i++) {
             body.push(WORK);
         }
         body.push(MOVE);
         let creepName = config.names[this.memory.nameIndex];
         this.memory.nameIndex = this.memory.nameIndex + 1;
-        return this.spawnCreep(body, creepName + ' 🧨', {
+        return this.spawnCreep(body, creepName + ' 🧨', {memory: {
             role: 'Miner',
             sourceID: sourceID,
             task: {name: 'idle'}
-        })
+        }});
+    }
+    StructureSpawn.prototype.createTransporterCreep = function (energy) {
+        if (energy < 100) return ERR_NOT_ENOUGH_ENERGY;
+
+        let numOfParts = Math.floor(energy / 100);
+        let body = [];
+        for (let i = 0; i < numOfParts && i < config.maxSizeTransporter; i++) {
+            body.push(CARRY);
+        }
+        for (let i = 0; i < numOfParts && i < config.maxSizeTransporter; i++) {
+            body.push(MOVE);
+        }
+        let creepName = config.names[this.memory.nameIndex];
+        this.memory.nameIndex = this.memory.nameIndex + 1;
+        return this.spawnCreep(body, creepName + ' 🚋', {memory: {
+            role: 'Transporter',
+            task: {name: 'idle'}
+        }});
     }
 }

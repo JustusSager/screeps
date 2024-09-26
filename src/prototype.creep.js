@@ -2,8 +2,13 @@ module.exports = function () {
 
     // Creep Task initialise memory
     Creep.prototype.initTask = function () {
-        if (this.memory.role && !this.memory.task) {
-            this.memory.task = {name: 'idle'};
+        if (!this.memory.role) {
+            this.memory.role = 'idle';
+        }
+        if (!this.memory.task) {
+            this.memory.task = {
+                name: 'idle'
+            };
         }
     }
 
@@ -11,6 +16,15 @@ module.exports = function () {
     Creep.prototype.updateTask = function () {
         if (this.memory.role && this.memory.task.name === 'idle') {
             switch (this.memory.role) {
+                case 'Transporter':
+                    if (this.store[RESOURCE_ENERGY] > 0) {
+                        this.switchTaskTransfer(this.findStoreEnergy().id);
+                    } else if (this.findDroppedResources()) {
+                        this.switchTaskPickup(this.findDroppedResources().id);
+                    } else if (this.findWithdrawEnergy(this.store.getFreeCapacity())) {
+                        this.switchTaskWithdraw(this.findWithdrawEnergy(this.store.getFreeCapacity()).id);
+                    }
+                    break;
                 case 'Harvester':
                     if (this.store[RESOURCE_ENERGY] > 0) {
                         this.switchTaskTransfer(this.findStoreEnergy().id);
@@ -19,10 +33,12 @@ module.exports = function () {
                     }
                     break;
                 case 'Miner':
-                    this.memory.task = {
-                        name: 'mine',
-                        targetID: this.memory.sourceID,
-                        targetRange: 1
+                    if (this.memory.sourceID) {
+                        this.memory.task = {
+                            name: 'mine',
+                            targetID: this.memory.sourceID,
+                            targetRange: 1
+                        }
                     }
                     break;
                 case 'Upgrader':
@@ -52,6 +68,9 @@ module.exports = function () {
                             this.switchTaskHarvest(this.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id);
                         }
                     }
+                    break;
+                case 'idle':
+                    this.say("⚠️");
                     break;
                 default:
                     break;

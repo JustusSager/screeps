@@ -24,6 +24,9 @@ module.exports = function () {
                         }
                         break;
                     case 'mine':
+                        if (!target) {
+                            break;
+                        }
                         if (!this.memory.task.containerID) {
                             this.memory.task.containerID = target.pos.findInRange(FIND_STRUCTURES, 1, {
                                 filter: s => s.structureType === STRUCTURE_CONTAINER
@@ -76,6 +79,9 @@ module.exports = function () {
                         if (result !== OK || this.store[RESOURCE_ENERGY] === 0) {
                             this.resetTask(result);
                         }
+                        break;
+                    case 'idle':
+                        this.say("⚠️");
                         break;
                     default:
                         break;
