@@ -9,6 +9,7 @@ module.exports = function () {
         if (this.memory.task) {
             let taskName = this.memory.task.name;
             let target = deref(this.memory.task.targetID);
+            if (!target) this.resetTask();
             let targetRange = this.memory.task.targetRange ? this.memory.task.targetRange : 1;
             let options = this.memory.task.options ? this.memory.task.options : {};
             let result = undefined, resource = undefined;
