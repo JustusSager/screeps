@@ -82,6 +82,11 @@ module.exports = function () {
                             this.resetTask(result);
                         }
                         break;
+                    case 'moveTo':
+                        if (this.pos.getRangeTo(target, targetRange)) {
+                            this.resetTask();
+                        }
+                        break;
                     case 'idle':
                         this.say("⚠️");
                         break;

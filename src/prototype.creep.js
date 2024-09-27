@@ -40,6 +40,10 @@ module.exports = function () {
                     if (target) {
                         return this.switchTaskWithdraw(target.id);
                     }
+                    target = Game.flags['Gathering'];
+                    if (target) {
+                        return this.switchTaskMoveTo(target.id)
+                    }
                     break;
                 case 'Harvester':
                     // Transfer energy to Spawn or Extensions
@@ -105,13 +109,18 @@ module.exports = function () {
                     break;
                 case 'Builder':
                     if (this.store[RESOURCE_ENERGY] > 0) {
-                        if (this.findConstructionSite()) {
-                            this.switchTaskBuild(this.findConstructionSite().id)
-                        } else if (this.room.memory.stage < 4 && this.findRepairSite()) {
-                            this.switchTaskRepair(this.findRepairSite().id);
-                        } else {
-                            this.switchTaskUpgrade();
+                        // Work at construction site
+                        target = this.findConstructionSite();
+                        if (target) {
+                            return this.switchTaskBuild(target.id)
                         }
+                        // repair damaged structures
+                        target = this.findRepairSite(0.9)
+                        if (this.room.memory.stage < 4 && target) {
+                            return this.switchTaskRepair(target.id);
+                        }
+                        // upgrade controller
+                        return this.switchTaskUpgrade();
                     } else {
                         // get dropped energy
                         target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
@@ -248,6 +257,15 @@ module.exports = function () {
         };
         return 0;
     }
+    Creep.prototype.switchTaskMoveTo = function (targetID) {
+        this.say("🥾");
+        this.memory.task = {
+            name: 'moveTo',
+            targetID: targetID,
+            targetRange: 4
+        };
+        return 0;
+    }
 
 
 // Find places to transfer resources to --------------------------------------------------------------------------------
@@ -310,10 +328,10 @@ module.exports = function () {
             return this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
         }
     }
-    Creep.prototype.findRepairSite = function () {
+    Creep.prototype.findRepairSite = function (threshold = 1.0) {
         return this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (s) => s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART
-                && s.hits < s.hitsMax
+                && s.hits < s.hitsMax * threshold
         });
 
     }
