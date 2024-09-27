@@ -185,7 +185,7 @@ module.exports = function () {
                         if (roomStage >= 3) {
                             target = this.findWallRepairSite(config.stageOptions.wallRepairs[roomStage]);
                             if (target) {
-                                this.switchTaskRepair(target.id);
+                                return this.switchTaskRepair(target.id);
                             }
                         }
                         return this.switchTaskUpgrade();

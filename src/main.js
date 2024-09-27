@@ -14,6 +14,30 @@ module.exports.loop = function () {
     room.updateConstructionSites();
     let creeps = _.values(Game.creeps);
 
+    for (let creep of creeps) {
+        creep.initTask();
+        creep.updateTask();
+        creep.run();
+    }
+
+    let towers = room.find(FIND_MY_STRUCTURES, {filter: s => s.structureType === STRUCTURE_TOWER});
+    for (let tower of towers) {
+        let target = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        if (target) {
+            tower.attack(target);
+        } else if (tower.store[RESOURCE_ENERGY] > 750) {
+            target = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter:
+                    s => s.hits < s.hitsMax &&
+                        s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART
+                        && tower.pos.inRangeTo(s, 10)
+            }) // TODO: fixe werte durch config ersetzen
+            if (target) {
+                tower.repair(target);
+            }
+        }
+    }
+
     let harvesters = _.filter(creeps, creep => creep.memory.role === 'Harvester');
     let miners = _.filter(creeps, creep => creep.memory.role === 'Miner');
     let transporters = _.filter(creeps, creep => creep.memory.role === 'Transporter');
@@ -64,12 +88,6 @@ module.exports.loop = function () {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Repairer");
             console.log('Spawn Repairer: ' + spawnResult);
         }
-    }
-
-    for (let creep of creeps) {
-        creep.initTask();
-        creep.updateTask();
-        creep.run();
     }
 
     for (let v of config.roomVisual) {
