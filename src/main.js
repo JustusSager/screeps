@@ -30,7 +30,7 @@ module.exports.loop = function () {
                 filter:
                     s => s.hits < s.hitsMax &&
                         s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART
-                        && tower.pos.inRangeTo(s, 10)
+                        && tower.pos.inRangeTo(s, 8)
             }) // TODO: fixe werte durch config ersetzen
             if (target) {
                 tower.repair(target);
