@@ -18,6 +18,7 @@ module.exports = function () {
     Creep.prototype.updateTask = function () {
         if (this.memory.role && this.memory.task.name === 'idle') {
             let target = undefined;
+            let roomStage = this.room.memory.stage;
             switch (this.memory.role) {
                 case 'Transporter':
                     // Transfer energy to Spawn or Extensions
@@ -25,21 +26,33 @@ module.exports = function () {
                     if (this.store[RESOURCE_ENERGY] > 0 && target) {
                         return this.switchTaskTransfer(target.id);
                     }
-                    // transfer energy into storage
-                    target = this.findStoreStorage();
-                    if (this.store[RESOURCE_ENERGY] > 0 && target) {
-                        return this.switchTaskTransfer(target.id);
+                    if (roomStage >= 3) {
+                        // transfer energy into tower
+                        target = this.findStoreTower();
+                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                            return this.switchTaskTransfer(target.id);
+                        }
+                    }
+                    if (roomStage >= 4) {
+                        // transfer energy into storage
+                        target = this.findStoreStorage();
+                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                            return this.switchTaskTransfer(target.id);
+                        }
                     }
                     // get dropped energy
                     target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
                     if (target) {
                         return this.switchTaskPickup(target.id);
                     }
-                    // get energy from containers
-                    target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                    if (target) {
-                        return this.switchTaskWithdraw(target.id);
+                    if (roomStage >= 2) {
+                        // get energy from containers
+                        target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                        if (target) {
+                            return this.switchTaskWithdraw(target.id);
+                        }
                     }
+                    // move to gathering point, to stop Clustering in front of container
                     target = Game.flags['Gathering'];
                     if (target) {
                         return this.switchTaskMoveTo(target.id)
@@ -51,10 +64,19 @@ module.exports = function () {
                     if (this.store[RESOURCE_ENERGY] > 0 && target) {
                         return this.switchTaskTransfer(target.id);
                     }
-                    // transfer energy into storage
-                    target = this.findStoreStorage();
-                    if (this.store[RESOURCE_ENERGY] > 0 && target) {
-                        return this.switchTaskTransfer(target.id);
+                    if (roomStage >= 3) {
+                        // transfer energy into tower
+                        target = this.findStoreTower();
+                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                            return this.switchTaskTransfer(target.id);
+                        }
+                    }
+                    if (roomStage >= 4) {
+                        // transfer energy into storage
+                        target = this.findStoreStorage();
+                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                            return this.switchTaskTransfer(target.id);
+                        }
                     }
                     // get dropped energy
                     target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
@@ -62,9 +84,11 @@ module.exports = function () {
                         return this.switchTaskPickup(target.id);
                     }
                     // get energy from containers
-                    target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity())
-                    if (target) {
-                        return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                    if (roomStage >= 2) {
+                        target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity())
+                        if (target) {
+                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                        }
                     }
                     // get energy by harvesting
                     target = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
@@ -91,15 +115,19 @@ module.exports = function () {
                     if (target) {
                         return this.switchTaskPickup(target.id);
                     }
-                    // get energy from containers
-                    target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                    if (target) {
-                        return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                    if (roomStage >= 2) {
+                        // get energy from containers
+                        target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                        if (target) {
+                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                        }
                     }
-                    // get energy from storage
-                    target = this.findGetStorage(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                    if (target) {
-                        return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                    if (roomStage >= 4) {
+                        // get energy from storage
+                        target = this.findGetStorage(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                        if (target) {
+                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                        }
                     }
                     // get energy by harvesting
                     target = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
@@ -116,7 +144,7 @@ module.exports = function () {
                         }
                         // repair damaged structures
                         target = this.findRepairSite(0.9)
-                        if (this.room.memory.stage < 4 && target) {
+                        if (target) {
                             return this.switchTaskRepair(target.id);
                         }
                         // upgrade controller
@@ -127,15 +155,19 @@ module.exports = function () {
                         if (target) {
                             return this.switchTaskPickup(target.id);
                         }
-                        // get energy from containers
-                        target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                        if (target) {
-                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                        if (roomStage >= 2) {
+                            // get energy from containers
+                            target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                            if (target) {
+                                return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                            }
                         }
-                        // get energy from storage
-                        target = this.findGetStorage(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                        if (target) {
-                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                        if (roomStage >= 4) {
+                            // get energy from storage
+                            target = this.findGetStorage(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                            if (target) {
+                                return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                            }
                         }
                         // get energy by harvesting
                         target = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
@@ -146,13 +178,15 @@ module.exports = function () {
                     break;
                 case 'Repairer':
                     if (this.store[RESOURCE_ENERGY] > 0) {
-                        target = this.findRepairSite();
+                        target = this.findRepairSite(0.95);
                         if (target) {
                             return this.switchTaskRepair(target.id);
                         }
-                        target = this.findWallRepairSite(config.stageOptions.wallRepairs[this.room.memory.stage]);
-                        if (target){
-                            this.switchTaskRepair(target.id);
+                        if (roomStage >= 3) {
+                            target = this.findWallRepairSite(config.stageOptions.wallRepairs[roomStage]);
+                            if (target) {
+                                this.switchTaskRepair(target.id);
+                            }
                         }
                         return this.switchTaskUpgrade();
                     } else {
@@ -161,15 +195,19 @@ module.exports = function () {
                         if (target) {
                             return this.switchTaskPickup(target.id);
                         }
-                        // get energy from containers
-                        target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                        if (target) {
-                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                        if (roomStage >= 2) {
+                            // get energy from containers
+                            target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                            if (target) {
+                                return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                            }
                         }
-                        // get energy from storage
-                        target = this.findGetStorage(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                        if (target) {
-                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                        if (roomStage >= 4) {
+                            // get energy from storage
+                            target = this.findGetStorage(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                            if (target) {
+                                return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
+                            }
                         }
                         // get energy by harvesting
                         target = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
@@ -274,6 +312,11 @@ module.exports = function () {
             filter: (s) =>
                 (s.structureType === STRUCTURE_SPAWN || s.structureType === STRUCTURE_EXTENSION)
                 && s.store.getCapacity(resource) - s.store[resource] > 0
+        });
+    }
+    Creep.prototype.findStoreTower = function (resource = RESOURCE_ENERGY) {
+        return this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_TOWER && s.store.getCapacity(resource) - s.store[resource] > 0
         });
     }
     Creep.prototype.findStoreStorage = function (resource = RESOURCE_ENERGY) {
