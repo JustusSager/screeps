@@ -40,9 +40,12 @@ module.exports = function () {
             body.push(MOVE);
         }
 
-        return this.spawnCreep(body, creepName, {memory: {
-            role: role, task: {name: 'idle'}
-        }});
+        return this.spawnCreep(body, creepName, {
+            memory: {
+                role: role, task: {name: 'idle'}
+            },
+            directions: [TOP_RIGHT]
+        });
 
     }
     StructureSpawn.prototype.createMinerCreep = function (energy, sourceID) {
@@ -57,13 +60,16 @@ module.exports = function () {
         body.push(MOVE);
         let creepName = config.names[this.memory.nameIndex];
         this.memory.nameIndex = this.memory.nameIndex + 1;
-        return this.spawnCreep(body, creepName + ' 🧨', {memory: {
-            role: 'Miner',
-            sourceID: sourceID,
-            task: {name: 'idle'}
-        }});
+        return this.spawnCreep(body, creepName + ' 🧨', {
+            memory: {
+                role: 'Miner',
+                sourceID: sourceID,
+                task: {name: 'idle'}
+            },
+            directions: [TOP_RIGHT]
+        });
     }
-    StructureSpawn.prototype.createTransporterCreep = function (energy) {
+    StructureSpawn.prototype.createTransporterCreep = function (energy, role) {
         if (energy < 150) return ERR_NOT_ENOUGH_ENERGY;
 
         let numOfParts = Math.floor(energy / 150);
@@ -76,10 +82,33 @@ module.exports = function () {
             body.push(MOVE);
         }
         let creepName = config.names[this.memory.nameIndex];
+        if (role === 'Transporter') creepName = creepName + ' 🚋';
+        if (role === 'Secretary') creepName = creepName + ' 🗒️';
         this.memory.nameIndex = this.memory.nameIndex + 1;
-        return this.spawnCreep(body, creepName + ' 🚋', {memory: {
-            role: 'Transporter',
-            task: {name: 'idle'}
-        }});
+        return this.spawnCreep(body, creepName, {
+            memory: {
+                role: role,
+                task: {name: 'idle'}
+            },
+            directions: [TOP_RIGHT]
+        });
+    }
+    StructureSpawn.prototype.createManagerCreep = function (energy) {
+        if (energy < 150) return ERR_NOT_ENOUGH_ENERGY;
+
+        let numOfParts = Math.floor(energy / 50);
+        let body = [];
+        for (let i = 0; i < numOfParts && i < config.maxSizeManager; i++) {
+            body.push(CARRY);
+        }
+        let creepName = config.names[this.memory.nameIndex];
+        this.memory.nameIndex = this.memory.nameIndex + 1;
+        return this.spawnCreep(body, creepName + ' 📓', {
+            memory: {
+                role: 'Manager',
+                task: {name: 'idle'}
+            },
+            directions: [BOTTOM_LEFT]
+        });
     }
 }

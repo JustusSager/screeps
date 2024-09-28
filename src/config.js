@@ -8,6 +8,7 @@ module.exports = {
     maxSizeBuilder: 6,
     maxSizeRepairer: 6,
     maxSizeTransporter: 5,
+    maxSizeManager: 6,
 
     roomVisual: [
         {
@@ -36,8 +37,8 @@ module.exports = {
         ],
         numBuilders: [
             0, 0, 6, /*0, 1, 2*/
-            4, 3, 3, /*3, 4, 5*/
-            3, 3, 3  /*6, 7, 8*/
+            4, 4, 4, /*3, 4, 5*/
+            4, 4, 2  /*6, 7, 8*/
         ],
         numRepairers: [
             0, 0, 0, /*0, 1, 2*/

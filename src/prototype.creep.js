@@ -21,6 +21,13 @@ module.exports = function () {
             let roomStage = this.room.memory.stage;
             switch (this.memory.role) {
                 case 'Transporter':
+                    if (roomStage >= 4) {
+                        // transfer energy into storage
+                        target = this.findStoreStorage();
+                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                            return this.switchTaskTransfer(target.id);
+                        }
+                    }
                     // Transfer energy to Spawn or Extensions
                     target = this.findStoreSpawnExtension();
                     if (this.store[RESOURCE_ENERGY] > 0 && target) {
@@ -29,13 +36,6 @@ module.exports = function () {
                     if (roomStage >= 3) {
                         // transfer energy into tower
                         target = this.findStoreTower();
-                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
-                            return this.switchTaskTransfer(target.id);
-                        }
-                    }
-                    if (roomStage >= 4) {
-                        // transfer energy into storage
-                        target = this.findStoreStorage();
                         if (this.store[RESOURCE_ENERGY] > 0 && target) {
                             return this.switchTaskTransfer(target.id);
                         }
@@ -53,10 +53,10 @@ module.exports = function () {
                         }
                     }
                     // move to gathering point, to stop Clustering in front of container
-                    target = Game.flags['Gathering'];
+                    /*target = Game.flags['Gathering'];
                     if (target) {
                         return this.switchTaskMoveTo(target.id)
-                    }
+                    }*/
                     break;
                 case 'Harvester':
                     // Transfer energy to Spawn or Extensions
@@ -216,6 +216,66 @@ module.exports = function () {
                         }
                     }
                     break;
+                case 'Manager':
+                    if (this.store[RESOURCE_ENERGY] > 0) {
+                        target = this.pos.findInRange(FIND_MY_STRUCTURES, 1, {
+                            filter: (s) => s.structureType === STRUCTURE_TOWER && s.store.getCapacity(RESOURCE_ENERGY) - s.store[RESOURCE_ENERGY] > 0
+                        });
+                        if (target && target.length > 0) {
+                            return this.switchTaskTransfer(target[0].id, RESOURCE_ENERGY);
+                        }
+                        target = this.pos.findInRange(FIND_MY_STRUCTURES, 1, {
+                            filter: s => s.structureType === STRUCTURE_SPAWN && s.store.getCapacity(RESOURCE_ENERGY) - s.store[RESOURCE_ENERGY] > 0
+                        })
+                        if (target && target.length > 0) {
+                            return this.switchTaskTransfer(target[0].id, RESOURCE_ENERGY);
+                        }
+                        target = this.pos.findInRange(FIND_MY_STRUCTURES, 1, {
+                            filter: s => s.structureType === STRUCTURE_STORAGE && s.store.getCapacity(RESOURCE_ENERGY) - s.store[RESOURCE_ENERGY] > 0
+                        })
+                        if (target && target.length > 0) {
+                            return this.switchTaskTransfer(target[0].id, RESOURCE_ENERGY);
+                        }
+                    } else {
+                        target = this.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
+                        if (target && target.length > 0) {
+                            return this.switchTaskPickup(target);
+                        }
+                        if (roomStage >= 5) {
+                            target = this.pos.findInRange(FIND_MY_STRUCTURES, 1, {
+                                filter: (s) => s.structureType === STRUCTURE_LINK && s.store.getCapacity(RESOURCE_ENERGY) - s.store[RESOURCE_ENERGY] > 0
+                            });
+                            if (target && target.length > 0) {
+                                return this.switchTaskWithdraw(target[0].id, RESOURCE_ENERGY);
+                            }
+                        }
+                        target = this.pos.findInRange(FIND_MY_STRUCTURES, 1, {
+                            filter: s => s.structureType === STRUCTURE_STORAGE && s.store.getCapacity(RESOURCE_ENERGY) - s.store[RESOURCE_ENERGY] > 0
+                        })
+                        if (target && target.length > 0) {
+                            return this.switchTaskWithdraw(target[0].id, RESOURCE_ENERGY);
+                        }
+                    }
+                    break;
+                case 'Secretary':
+                    if (this.store[RESOURCE_ENERGY] > 0) {
+                        // Transfer energy to Spawn or Extensions
+                        target = this.findStoreSpawnExtension();
+                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                            return this.switchTaskTransfer(target.id);
+                        }
+                        // transfer energy into tower
+                        target = this.findStoreTower();
+                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                            return this.switchTaskTransfer(target.id);
+                        }
+                    } else {
+                        target = this.findGetStorage(RESOURCE_ENERGY, 0);
+                        if (target) {
+                            this.switchTaskWithdraw(target, RESOURCE_ENERGY);
+                        }
+                    }
+                    break;
                 case 'idle':
                     this.say("⚠️");
                     break;
@@ -314,9 +374,9 @@ module.exports = function () {
                 && s.store.getCapacity(resource) - s.store[resource] > 0
         });
     }
-    Creep.prototype.findStoreTower = function (resource = RESOURCE_ENERGY) {
+    Creep.prototype.findStoreTower = function () {
         return this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-            filter: (s) => s.structureType === STRUCTURE_TOWER && s.store.getCapacity(resource) - s.store[resource] > 0
+            filter: (s) => s.structureType === STRUCTURE_TOWER && s.store.getCapacity(RESOURCE_ENERGY) - s.store[RESOURCE_ENERGY] > 0
         });
     }
     Creep.prototype.findStoreStorage = function (resource = RESOURCE_ENERGY) {
