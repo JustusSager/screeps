@@ -1,4 +1,5 @@
 module.exports = {
+    debug: true,
     roomStage: {
         'W23S33': 4
     },

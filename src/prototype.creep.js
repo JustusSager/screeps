@@ -1,5 +1,9 @@
 const config = require('config');
 
+function deref(objectID) {
+    return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
+}
+
 module.exports = function () {
 
     // Creep Task initialise memory
@@ -14,9 +18,117 @@ module.exports = function () {
         }
     }
 
+    // Creep executes task
+    Creep.prototype.run = function () {
+        if (this.memory.task) {
+            let taskName = this.memory.task.name;
+            let target = deref(this.memory.task.targetID);
+            if (!target) this.updateTask();
+            let targetRange = this.memory.task.targetRange ? this.memory.task.targetRange : 1;
+            let options = this.memory.task.options ? this.memory.task.options : {};
+            let result = undefined, resource = undefined;
+
+            if (target && !this.pos.inRangeTo(target.pos, targetRange)) {
+                this.moveTo(target.pos);
+            } else {
+                switch (taskName) {
+                    case 'harvest':
+                        result = this.harvest(target);
+                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        if (result < 0 || this.store.getFreeCapacity() === 0) {
+                            console.log("test")
+                            this.updateTask(result);
+                        }
+                        break;
+                    case 'mine':
+                        if (!target) {
+                            break;
+                        }
+                        if (!this.memory.task.containerID) {
+                            this.memory.task.containerID = target.pos.findInRange(FIND_STRUCTURES, 1, {
+                                filter: s => s.structureType === STRUCTURE_CONTAINER
+                            })[0].id;
+                        }
+                        let container = deref(this.memory.task.containerID)
+                        if (this.pos.isEqualTo(container)) {
+                            result = this.harvest(target);
+                            if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                            if (result !== OK) {
+                                this.updateTask(result);
+                            }
+                        } else {
+                            this.moveTo(container);
+                        }
+                        break;
+                    case 'transfer':
+                        resource = options.resource ? options.resource : RESOURCE_ENERGY;
+                        result = this.transfer(target, resource);
+                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        if (result < 0 || this.store[resource] === 0) {
+                            this.updateTask();
+                        }
+                        break;
+                    case 'withdraw':
+                        resource = options.resource ? options.resource : RESOURCE_ENERGY;
+                        result = this.withdraw(target, resource);
+                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        if (result < 0 || this.store.getCapacity() === this.store.getUsedCapacity()) {
+                            this.updateTask();
+                        }
+                        break;
+                    case 'pickup':
+                        result = this.pickup(target);
+                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        if (result < 0 || this.store.getFreeCapacity() === 0) {
+                            this.updateTask();
+                        }
+                        break;
+                    case 'upgrade':
+                        result = this.upgradeController(target);
+                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
+                            this.updateTask();
+                        }
+                        break;
+                    case 'build':
+                        result = this.build(target);
+                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
+                            this.updateTask();
+                        }
+                        break;
+                    case 'repair':
+                        if(target.hits === target.hitsMax) this.updateTask();
+                        result = this.repair(target);
+                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
+                            this.updateTask();
+                        }
+                        break;
+                    case 'moveTo':
+                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        this.updateTask();
+                        if (this.pos.getRangeTo(target, targetRange)) {
+                            this.updateTask();
+                        }
+                        break;
+                    case 'idle':
+                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        this.say("⚠️");
+                        this.updateTask();
+                        break;
+                    default:
+                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        this.updateTask();
+                        break;
+                }
+            }
+        }
+    }
+
     // Creep Task update memory to new Task
     Creep.prototype.updateTask = function () {
-        if (this.memory.role && this.memory.task.name === 'idle') {
+        if (this.memory.role) {
             let target = undefined;
             let roomStage = this.room.memory.stage;
             switch (this.memory.role) {
@@ -261,18 +373,18 @@ module.exports = function () {
                     if (this.store[RESOURCE_ENERGY] > 0) {
                         // Transfer energy to Spawn or Extensions
                         target = this.findStoreSpawnExtension();
-                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                        if (target) {
                             return this.switchTaskTransfer(target.id);
                         }
                         // transfer energy into tower
                         target = this.findStoreTower();
-                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                        if (target) {
                             return this.switchTaskTransfer(target.id);
                         }
                     } else {
                         target = this.findGetStorage(RESOURCE_ENERGY, 0);
                         if (target) {
-                            this.switchTaskWithdraw(target, RESOURCE_ENERGY);
+                            this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
                         }
                     }
                     break;

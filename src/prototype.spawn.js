@@ -44,7 +44,7 @@ module.exports = function () {
             memory: {
                 role: role, task: {name: 'idle'}
             },
-            directions: [TOP_RIGHT]
+            directions: [TOP, RIGHT]
         });
 
     }
@@ -66,7 +66,7 @@ module.exports = function () {
                 sourceID: sourceID,
                 task: {name: 'idle'}
             },
-            directions: [TOP_RIGHT]
+            directions: [TOP, RIGHT]
         });
     }
     StructureSpawn.prototype.createTransporterCreep = function (energy, role) {
@@ -90,7 +90,7 @@ module.exports = function () {
                 role: role,
                 task: {name: 'idle'}
             },
-            directions: [TOP_RIGHT]
+            directions: [TOP, RIGHT]
         });
     }
     StructureSpawn.prototype.createManagerCreep = function (energy) {

@@ -1,7 +1,6 @@
 require('prototype.spawn')();
 require('prototype.creep')();
 require('prototype.room')();
-require('tasks')();
 const config = require('config');
 
 module.exports.loop = function () {
@@ -16,7 +15,6 @@ module.exports.loop = function () {
 
     for (let creep of creeps) {
         creep.initTask();
-        creep.updateTask();
         creep.run();
     }
 
@@ -70,10 +68,10 @@ module.exports.loop = function () {
             filter: s => s.structureType === STRUCTURE_STORAGE
         })) {
             if (managers.length === 0) {
-                spawnResult = spawn.createManagerCreep(energyCapacity);
+                spawnResult = spawn.createManagerCreep(energyAvailable);
             }
             if (secretaries.length < 1) {
-                spawnResult = spawn.createTransporterCreep(energyCapacity, 'Secretary');
+                spawnResult = spawn.createTransporterCreep(energyAvailable, 'Secretary');
             }
         }
         if (room_stage >= 2 && transporters.length < miners.length) {
