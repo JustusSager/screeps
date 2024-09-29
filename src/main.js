@@ -1,6 +1,7 @@
 require('prototype.spawn')();
 require('prototype.creep')();
 require('prototype.room')();
+require('prototype.tower')();
 const config = require('config');
 
 module.exports.loop = function () {
