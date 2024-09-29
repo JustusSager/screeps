@@ -11,29 +11,25 @@ module.exports.loop = function () {
     let room_stage = room.memory.stage;
     room.updateMemory();
     room.updateConstructionSites();
-    let creeps = _.values(Game.creeps);
 
+    let creeps = _.values(Game.creeps);
     for (let creep of creeps) {
-        creep.initTask();
-        creep.run();
+        try {
+            creep.initTask();
+            creep.run();
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     let towers = room.find(FIND_MY_STRUCTURES, {filter: s => s.structureType === STRUCTURE_TOWER});
     for (let tower of towers) {
-        let target = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if (target) {
-            tower.attack(target);
-        } else if (tower.store[RESOURCE_ENERGY] > 750) {
-            target = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-                filter:
-                    s => s.hits < s.hitsMax &&
-                        s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART
-                        && tower.pos.inRangeTo(s, 8)
-            }) // TODO: fixe werte durch config ersetzen
-            if (target) {
-                tower.repair(target);
-            }
+        try {
+            tower.run();
+        } catch (e) {
+            console.log(e);
         }
+
     }
 
     let harvesters = _.filter(creeps, creep => creep.memory.role === 'Harvester');
