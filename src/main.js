@@ -4,6 +4,10 @@ require('prototype.room')();
 require('prototype.tower')();
 const config = require('config');
 
+function deref(objectID) {
+    return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
+}
+
 module.exports.loop = function () {
 
     let spawn = Game.spawns['Spawn1'];
@@ -33,6 +37,16 @@ module.exports.loop = function () {
 
     }
 
+    for (let link_source_id of room.memory.link_source_ids) {
+        try {
+            let link_source = deref(link_source_id);
+            if (link_source.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
+                link_source.transferEnergy(deref(room.memory.link_storage_id));
+            }
+
+        } catch (e) {}
+    }
+
     let harvesters = _.filter(creeps, creep => creep.memory.role === 'Harvester');
     let miners = _.filter(creeps, creep => creep.memory.role === 'Miner');
     let transporters = _.filter(creeps, creep => creep.memory.role === 'Transporter');
@@ -48,12 +62,26 @@ module.exports.loop = function () {
     let energyAvailable = spawn.room.energyAvailable;
     let spawnResult = undefined;
 
+    if (room_stage >= 4 && spawn.pos.findInRange(FIND_MY_STRUCTURES, 2, {
+        filter: s => s.structureType === STRUCTURE_STORAGE
+    })) {
+        if (managers.length === 0) {
+            spawnResult = spawn.createManagerCreep(energyAvailable);
+        }
+        if (secretaries.length < 1) {
+            spawnResult = spawn.createTransporterCreep(energyAvailable, 'Secretary');
+        }
+    }
     if (room_stage >= 2 && harvesters.length > 0) {
         let sources = spawn.room.find(FIND_SOURCES);
         for (let source of sources) {
             if (!_.some(creeps, m => m.memory.sourceID === source.id && m.memory.role === 'Miner')) {
                 if (source.pos.findInRange(FIND_STRUCTURES, 1, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length > 0) {
-                    spawnResult = spawn.createMinerCreep(energyCapacity, source.id);
+                    if (source.pos.findInRange(FIND_STRUCTURES, 2, {filter: s => s.structureType === STRUCTURE_LINK}).length > 0) {
+                        spawnResult = spawn.createMinerCreep(energyCapacity, source.id, true);
+                    } else {
+                        spawnResult = spawn.createMinerCreep(energyCapacity, source.id, false);
+                    }
                     console.log('Spawn Miner: ' + spawnResult);
                     break;
                 }
@@ -61,16 +89,6 @@ module.exports.loop = function () {
         }
     }
     if (spawnResult === undefined) {
-        if (room_stage >= 4 && spawn.pos.findInRange(FIND_MY_STRUCTURES, 2, {
-            filter: s => s.structureType === STRUCTURE_STORAGE
-        })) {
-            if (managers.length === 0) {
-                spawnResult = spawn.createManagerCreep(energyAvailable);
-            }
-            if (secretaries.length < 1) {
-                spawnResult = spawn.createTransporterCreep(energyAvailable, 'Secretary');
-            }
-        }
         if (room_stage >= 2 && transporters.length < miners.length) {
             spawnResult = spawn.createTransporterCreep(energyCapacity, 'Transporter');
             console.log('Spawn Transporter: ' + spawnResult);

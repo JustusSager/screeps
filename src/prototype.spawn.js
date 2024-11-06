@@ -48,15 +48,18 @@ module.exports = function () {
         });
 
     }
-    StructureSpawn.prototype.createMinerCreep = function (energy, sourceID) {
-        if (energy < 250) return ERR_NOT_ENOUGH_ENERGY;
+    StructureSpawn.prototype.createMinerCreep = function (energy, sourceID, linkMiner) {
+        if (linkMiner && energy < 300) return ERR_NOT_ENOUGH_ENERGY;
+        if (!linkMiner && energy < 250) return ERR_NOT_ENOUGH_ENERGY;
 
         let new_energy = energy - 50;
+        if (linkMiner) new_energy -= 50;
         let numOfParts = Math.floor(new_energy / 100);
         let body = [];
-        for (let i = 0; i < numOfParts && i < 5; i++) {
+        for (let i = 0; i < numOfParts && i < 6; i++) {
             body.push(WORK);
         }
+        if (linkMiner) body.push(CARRY)
         body.push(MOVE);
         let creepName = config.names[this.memory.nameIndex];
         this.memory.nameIndex = this.memory.nameIndex + 1;

@@ -1,5 +1,9 @@
 const config = require('config')
 
+function deref(objectID) {
+    return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
+}
+
 module.exports = function () {
     Room.prototype.updateConstructionSites = function () {
         this.memory.construction_sites = {
@@ -90,10 +94,47 @@ module.exports = function () {
             this.memory.stage = 0;
         }
 
-        this.memory.full_containers = this.find(FIND_MY_STRUCTURES, {
+        this.memory.source_ids = []
+        for (let source of this.find(FIND_SOURCES)) {
+            this.memory.source_ids.push(source.id)
+        }
+
+        this.memory.full_containers = this.find(FIND_STRUCTURES, {
             filter: (s) =>
                 s.structureType === STRUCTURE_CONTAINER
                 && s.store.getUsedCapacity() > s.store.getCapacity() * 0.8
         });
+
+
+        try {
+            this.memory.storage_id = this.find(FIND_MY_STRUCTURES, {
+                filter: (l) =>
+                    l.structureType === STRUCTURE_STORAGE
+            })[0].id;
+        } catch (e) {
+            this.memory.storage_id = undefined;
+        }
+
+        if (this.memory.stage >= 4) {
+            try {
+                this.memory.link_storage_id = deref(this.memory.storage_id).pos.findInRange(FIND_MY_STRUCTURES, 2, {
+                    filter: (l) =>
+                        l.structureType === STRUCTURE_LINK
+                })[0].id;
+            } catch (e) {
+                this.memory.link_storage_id = undefined;
+            }
+
+            this.memory.link_source_ids = [];
+            for (let source_id of this.memory.source_ids) {
+                try {
+                    this.memory.link_source_ids.push(deref(source_id).pos.findInRange(FIND_MY_STRUCTURES, 2, {
+                        filter: (l) =>
+                            l.structureType === STRUCTURE_LINK
+                    })[0].id);
+                } catch (e) {}
+            }
+        }
+
     }
 }

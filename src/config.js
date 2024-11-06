@@ -5,8 +5,8 @@ module.exports = {
     },
 
     maxSizeHarvester: 4,
-    maxSizeUpgrader: 6,
-    maxSizeBuilder: 6,
+    maxSizeUpgrader: 4,
+    maxSizeBuilder: 12,
     maxSizeRepairer: 6,
     maxSizeTransporter: 5,
     maxSizeManager: 6,
@@ -28,7 +28,7 @@ module.exports = {
             10000000, 20000000, 300000000 /*6, 7, 8*/
         ],
         numHarvesters: [
-            1, 4, 3, /*0, 1, 2*/
+            4, 4, 3, /*0, 1, 2*/
             1, 1, 1, /*3, 4, 5*/
             1, 1, 1  /*6, 7, 8*/
         ],numUpgraders: [

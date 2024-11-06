@@ -21,6 +21,7 @@ module.exports = function () {
     // Creep executes task
     Creep.prototype.run = function () {
         if (this.memory.task) {
+            let roomStage = this.room.memory.stage;
             let taskName = this.memory.task.name;
             let target = deref(this.memory.task.targetID);
             if (!target) this.updateTask();
@@ -34,9 +35,8 @@ module.exports = function () {
                 switch (taskName) {
                     case 'harvest':
                         result = this.harvest(target);
-                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store.getFreeCapacity() === 0) {
-                            console.log("test")
                             this.updateTask(result);
                         }
                         break;
@@ -49,12 +49,29 @@ module.exports = function () {
                                 filter: s => s.structureType === STRUCTURE_CONTAINER
                             })[0].id;
                         }
+                        if (roomStage >= 5 && !this.memory.task.linkID) {
+                            let links = target.pos.findInRange(FIND_STRUCTURES, 2, {
+                                filter: s => s.structureType === STRUCTURE_LINK
+                            });
+                            if (links.length > 0) {
+                                this.memory.task.linkID = links[0].id;
+                            }
+                        }
                         let container = deref(this.memory.task.containerID)
                         if (this.pos.isEqualTo(container)) {
-                            result = this.harvest(target);
-                            if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
-                            if (result !== OK) {
-                                this.updateTask(result);
+                            let link = deref(this.memory.task.linkID);
+                            if (
+                                roomStage >= 5 &&
+                                link &&
+                                this.store.getCapacity() > 0 &&
+                                this.store.getUsedCapacity(RESOURCE_ENERGY) === this.store.getCapacity() &&
+                                link.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                            ) {
+                                result = this.transfer(link, RESOURCE_ENERGY, this.store[RESOURCE_ENERGY]);
+                                console.log(this.name, JSON.stringify(this.memory), result);
+                            } else {
+                                result = this.harvest(target);
+                                // console.log(this.name, JSON.stringify(this.memory), result);
                             }
                         } else {
                             this.moveTo(container);
@@ -63,62 +80,62 @@ module.exports = function () {
                     case 'transfer':
                         resource = options.resource ? options.resource : RESOURCE_ENERGY;
                         result = this.transfer(target, resource);
-                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
-                        if (result < 0 || this.store[resource] === 0) {
+                        // console.log(this.name, JSON.stringify(this.memory), result);
+                        if (result < 0 || this.store.getUsedCapacity(resource) === 0 || !this.store.getUsedCapacity(resource)) {
                             this.updateTask();
                         }
                         break;
                     case 'withdraw':
                         resource = options.resource ? options.resource : RESOURCE_ENERGY;
                         result = this.withdraw(target, resource);
-                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store.getCapacity() === this.store.getUsedCapacity()) {
                             this.updateTask();
                         }
                         break;
                     case 'pickup':
                         result = this.pickup(target);
-                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store.getFreeCapacity() === 0) {
                             this.updateTask();
                         }
                         break;
                     case 'upgrade':
                         result = this.upgradeController(target);
-                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
                             this.updateTask();
                         }
                         break;
                     case 'build':
                         result = this.build(target);
-                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
                             this.updateTask();
                         }
                         break;
                     case 'repair':
-                        if(target.hits === target.hitsMax) this.updateTask();
+                        if (target.hits === target.hitsMax) this.updateTask();
                         result = this.repair(target);
-                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
                             this.updateTask();
                         }
                         break;
                     case 'moveTo':
-                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        // console.log(this.name, JSON.stringify(this.memory), result);
                         this.updateTask();
                         if (this.pos.getRangeTo(target, targetRange)) {
                             this.updateTask();
                         }
                         break;
                     case 'idle':
-                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        // console.log(this.name, JSON.stringify(this.memory), result);
                         this.say("⚠️");
                         this.updateTask();
                         break;
                     default:
-                        if (config.debug) console.log(this.name, JSON.stringify(this.memory), result);
+                        // console.log(this.name, JSON.stringify(this.memory), result);
                         this.updateTask();
                         break;
                 }
@@ -133,35 +150,37 @@ module.exports = function () {
             let roomStage = this.room.memory.stage;
             switch (this.memory.role) {
                 case 'Transporter':
-                    if (roomStage >= 4) {
-                        // transfer energy into storage
-                        target = this.findStoreStorage();
-                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
-                            return this.switchTaskTransfer(target.id);
-                        }
-                    }
-                    // Transfer energy to Spawn or Extensions
-                    target = this.findStoreSpawnExtension();
-                    if (this.store[RESOURCE_ENERGY] > 0 && target) {
-                        return this.switchTaskTransfer(target.id);
-                    }
-                    if (roomStage >= 3) {
-                        // transfer energy into tower
-                        target = this.findStoreTower();
-                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
-                            return this.switchTaskTransfer(target.id);
-                        }
-                    }
-                    // get dropped energy
-                    target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                    if (target) {
-                        return this.switchTaskPickup(target.id);
-                    }
-                    if (roomStage >= 2) {
-                        // get energy from containers
-                        target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                    if (this.store.getUsedCapacity() === 0) {
+                        target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
                         if (target) {
-                            return this.switchTaskWithdraw(target.id);
+                            return this.switchTaskPickup(target.id);
+                        }
+                        if (roomStage >= 2) {
+                            // get energy from containers
+                            target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
+                            if (target) {
+                                return this.switchTaskWithdraw(target.id);
+                            }
+                        }
+                    } else {
+                        if (roomStage >= 4) {
+                            // transfer energy into storage
+                            target = this.findStoreStorage();
+                            if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                                return this.switchTaskTransfer(target.id);
+                            }
+                        }
+                        // Transfer energy to Spawn or Extensions
+                        target = this.findStoreSpawnExtension();
+                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                            return this.switchTaskTransfer(target.id);
+                        }
+                        if (roomStage >= 3) {
+                            // transfer energy into tower
+                            target = this.findStoreTower();
+                            if (this.store[RESOURCE_ENERGY] > 0 && target) {
+                                return this.switchTaskTransfer(target.id);
+                            }
                         }
                     }
                     // move to gathering point, to stop Clustering in front of container
@@ -510,13 +529,13 @@ module.exports = function () {
         let full_containers = this.room.memory.full_containers;
         if (full_containers && full_containers.length > 0) {
             return this.pos.findClosestByPath(full_containers, {
-                filter: (s) => s.store[resource] > amount
+                filter: (s) => s.store.getUsedCapacity(resource) > amount
             });
         } else {
-            return this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+            return this.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (s) =>
                     s.structureType === STRUCTURE_CONTAINER
-                    && s.store[resource] > amount
+                    && s.store.getUsedCapacity(resource) > amount
             });
         }
     }
