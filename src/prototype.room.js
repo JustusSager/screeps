@@ -22,6 +22,31 @@ module.exports = function () {
     }
 
     Room.prototype.updateMemory = function () {
+
+        if (!this.memory.stage || Game.time % 50 === 0) {
+            this.updateMemoryStage();
+        }
+
+        if (!this.memory.source_metas || Game.time % 50 === 1) {
+            this.updateMemorySources();
+        }
+
+        if (this.memory.stage >= 4 && !this.memory.storage_id || Game.time % 50 === 2) {
+            this.updateMemoryStorage();
+        }
+
+        if (this.memory.stage >= 5 && (!this.memory.link_storage_id || !this.memory.link_source_ids || Game.time % 50 === 3)) {
+            this.updateMemoryLinks();
+        }
+
+        this.memory.full_containers = this.find(FIND_STRUCTURES, {
+            filter: (s) =>
+                s.structureType === STRUCTURE_CONTAINER
+                && s.store.getUsedCapacity() > s.store.getCapacity() * 0.8
+        });
+    }
+
+    Room.prototype.updateMemoryStage = function () {
         let rcl = this.controller.level;
         let roomStage = config.roomStage[this.name];
         if (this.memory.stage) {
@@ -33,6 +58,7 @@ module.exports = function () {
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length >= 2 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_TOWER}).length >= 2 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_STORAGE}).length >= 1 &&
+                this.find(FIND_MY_STRUCTURES, {filter: s => s.structureType === STRUCTURE_LINK}).length >= 2 &&
                 false // TODO: Extractor, Lab, Terminal
             ) {
                 this.memory.stage = 7;
@@ -43,7 +69,7 @@ module.exports = function () {
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length >= 2 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_TOWER}).length >= 2 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_STORAGE}).length >= 1 &&
-                false // TODO: Link
+                this.find(FIND_MY_STRUCTURES, {filter: s => s.structureType === STRUCTURE_LINK}).length >= 2
             ) {
                 this.memory.stage = 6;
             }
@@ -93,19 +119,19 @@ module.exports = function () {
         } else {
             this.memory.stage = 0;
         }
+    }
 
-        this.memory.source_ids = []
+    Room.prototype.updateMemorySources = function () {
+        this.memory.source_metas = {}
         for (let source of this.find(FIND_SOURCES)) {
-            this.memory.source_ids.push(source.id)
+            this.memory.source_metas[source.id] = {
+                num_containers: source.pos.findInRange(FIND_STRUCTURES, 1, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length,
+                num_links: source.pos.findInRange(FIND_STRUCTURES, 2, {filter: s => s.structureType === STRUCTURE_LINK}).length
+            }
         }
+    }
 
-        this.memory.full_containers = this.find(FIND_STRUCTURES, {
-            filter: (s) =>
-                s.structureType === STRUCTURE_CONTAINER
-                && s.store.getUsedCapacity() > s.store.getCapacity() * 0.8
-        });
-
-
+    Room.prototype.updateMemoryStorage = function () {
         try {
             this.memory.storage_id = this.find(FIND_MY_STRUCTURES, {
                 filter: (l) =>
@@ -114,27 +140,30 @@ module.exports = function () {
         } catch (e) {
             this.memory.storage_id = undefined;
         }
+    }
 
-        if (this.memory.stage >= 4) {
-            try {
-                this.memory.link_storage_id = deref(this.memory.storage_id).pos.findInRange(FIND_MY_STRUCTURES, 2, {
-                    filter: (l) =>
-                        l.structureType === STRUCTURE_LINK
-                })[0].id;
-            } catch (e) {
-                this.memory.link_storage_id = undefined;
-            }
-
-            this.memory.link_source_ids = [];
-            for (let source_id of this.memory.source_ids) {
-                try {
-                    this.memory.link_source_ids.push(deref(source_id).pos.findInRange(FIND_MY_STRUCTURES, 2, {
-                        filter: (l) =>
-                            l.structureType === STRUCTURE_LINK
-                    })[0].id);
-                } catch (e) {}
-            }
+    Room.prototype.updateMemoryLinks = function () {
+        try {
+            this.memory.link_storage_id = deref(this.memory.storage_id).pos.findInRange(FIND_MY_STRUCTURES, 2, {
+                filter: (l) =>
+                    l.structureType === STRUCTURE_LINK
+            })[0].id;
+        } catch (e) {
+            this.memory.link_storage_id = undefined;
         }
 
+        this.memory.link_source_ids = [];
+        for (const [source_id, source_meta] of Object.entries(this.memory.source_metas)) {
+            try {
+                this.memory.link_source_ids.push(deref(source_id).pos.findInRange(FIND_MY_STRUCTURES, 2, {
+                    filter: (l) =>
+                        l.structureType === STRUCTURE_LINK
+                })[0].id);
+            } catch (e) {}
+        }
+        if (this.memory.link_source_ids.length === 0) {
+            this.memory.link_source_ids.length = undefined;
+        }
     }
+
 }

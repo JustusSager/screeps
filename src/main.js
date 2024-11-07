@@ -44,11 +44,14 @@ module.exports.loop = function () {
                 link_source.transferEnergy(deref(room.memory.link_storage_id));
             }
 
-        } catch (e) {}
+        } catch (e) {
+        }
     }
 
     let harvesters = _.filter(creeps, creep => creep.memory.role === 'Harvester');
     let miners = _.filter(creeps, creep => creep.memory.role === 'Miner');
+    let miners_container = _.filter(creeps, creep => creep.memory.role === 'Miner' && creep.memory.task.linkID === undefined);
+    let miners_link = _.filter(creeps, creep => creep.memory.role === 'Miner' && creep.memory.task.linkID !== undefined);
     let transporters = _.filter(creeps, creep => creep.memory.role === 'Transporter');
     let upgraders = _.filter(creeps, creep => creep.memory.role === 'Upgrader');
     let builders = _.filter(creeps, creep => creep.memory.role === 'Builder');
@@ -62,9 +65,7 @@ module.exports.loop = function () {
     let energyAvailable = spawn.room.energyAvailable;
     let spawnResult = undefined;
 
-    if (room_stage >= 4 && spawn.pos.findInRange(FIND_MY_STRUCTURES, 2, {
-        filter: s => s.structureType === STRUCTURE_STORAGE
-    })) {
+    if (room_stage >= 4 && room.memory.storage_id !== undefined) {
         if (managers.length === 0) {
             spawnResult = spawn.createManagerCreep(energyAvailable);
         }
@@ -73,23 +74,20 @@ module.exports.loop = function () {
         }
     }
     if (room_stage >= 2 && harvesters.length > 0) {
-        let sources = spawn.room.find(FIND_SOURCES);
-        for (let source of sources) {
-            if (!_.some(creeps, m => m.memory.sourceID === source.id && m.memory.role === 'Miner')) {
-                if (source.pos.findInRange(FIND_STRUCTURES, 1, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length > 0) {
-                    if (source.pos.findInRange(FIND_STRUCTURES, 2, {filter: s => s.structureType === STRUCTURE_LINK}).length > 0) {
-                        spawnResult = spawn.createMinerCreep(energyCapacity, source.id, true);
-                    } else {
-                        spawnResult = spawn.createMinerCreep(energyCapacity, source.id, false);
-                    }
-                    console.log('Spawn Miner: ' + spawnResult);
-                    break;
+        for (const [source_id, source_meta] of Object.entries(room.memory.source_metas)) {
+            if (!_.some(miners, m => m.memory.sourceID === source_id)) {
+                if (source_meta.num_links > 0) {
+                    spawnResult = spawn.createMinerCreep(energyCapacity, source_id, true);
+                } else if (source_meta.num_containers > 0) {
+                    spawnResult = spawn.createMinerCreep(energyCapacity, source_id, false);
                 }
+                console.log('Spawn Miner: ' + spawnResult);
+                break;
             }
         }
     }
     if (spawnResult === undefined) {
-        if (room_stage >= 2 && transporters.length < miners.length) {
+        if (room_stage >= 2 && transporters.length < miners_container.length) {
             spawnResult = spawn.createTransporterCreep(energyCapacity, 'Transporter');
             console.log('Spawn Transporter: ' + spawnResult);
             if (spawnResult === ERR_NOT_ENOUGH_ENERGY && transporters.length === 0) {
@@ -125,7 +123,7 @@ module.exports.loop = function () {
             ' U: ' + upgraders.length + '/' + config.stageOptions.numUpgraders[room_stage] +
             ' B: ' + builders.length + '/' + config.stageOptions.numBuilders[room_stage] +
             ' R: ' + repairers.length + '/' + config.stageOptions.numRepairers[room_stage] +
-            ' TM: ' + transporters.length + "/" + miners.length;
+            ' TM: ' + transporters.length + "/" + miners_container.length;
         new RoomVisual(Game.rooms[v.room].name).text(text_general, v.x, v.y, {color: v.color, font: v.font});
         new RoomVisual(Game.rooms[v.room].name).text(text_creeps, v.x, v.y + 1, {color: v.color, font: v.font});
     }

@@ -67,8 +67,8 @@ module.exports = function () {
                                 this.store.getUsedCapacity(RESOURCE_ENERGY) === this.store.getCapacity() &&
                                 link.store.getFreeCapacity(RESOURCE_ENERGY) > 0
                             ) {
-                                result = this.transfer(link, RESOURCE_ENERGY, this.store[RESOURCE_ENERGY]);
-                                console.log(this.name, JSON.stringify(this.memory), result);
+                                result = this.transfer(link, RESOURCE_ENERGY);
+                                // console.log(this.name, JSON.stringify(this.memory), result);
                             } else {
                                 result = this.harvest(target);
                                 // console.log(this.name, JSON.stringify(this.memory), result);
