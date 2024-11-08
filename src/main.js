@@ -49,13 +49,22 @@ module.exports.loop = function () {
     }
 
     let harvesters = _.filter(creeps, creep => creep.memory.role === 'Harvester');
+    let max_num_harvesters = _.filter(room.memory.source_metas, s => s['num_containers'] === 0 && s['num_links'] === 0).length + 1;
+
     let miners = _.filter(creeps, creep => creep.memory.role === 'Miner');
-    let miners_container = _.filter(creeps, creep => creep.memory.role === 'Miner' && creep.memory.task.linkID === undefined);
-    let miners_link = _.filter(creeps, creep => creep.memory.role === 'Miner' && creep.memory.task.linkID !== undefined);
+
     let transporters = _.filter(creeps, creep => creep.memory.role === 'Transporter');
+    let max_num_transporters = _.filter(room.memory.source_metas, s => s['num_containers'] > 0 && s['num_links'] === 0).length;
+
     let upgraders = _.filter(creeps, creep => creep.memory.role === 'Upgrader');
+    let max_num_upgraders = config.stageOptions.numUpgraders[room_stage];
+
     let builders = _.filter(creeps, creep => creep.memory.role === 'Builder');
+    let max_num_builders = config.stageOptions.numBuilders[room_stage];
+
     let repairers = _.filter(creeps, creep => creep.memory.role === 'Repairer');
+    let max_num_repairers = config.stageOptions.numRepairers[room_stage];
+
     let managers = _.filter(creeps, creep => creep.memory.role === 'Manager');
     let secretaries = _.filter(creeps, creep => creep.memory.role === 'Secretary');
     let creeps_without_role = _.filter(creeps, creep => !creep.memory.role || creep.memory.role === 'idle');
@@ -87,27 +96,27 @@ module.exports.loop = function () {
         }
     }
     if (spawnResult === undefined) {
-        if (room_stage >= 2 && transporters.length < miners_container.length) {
+        if (room_stage >= 2 && transporters.length < max_num_transporters) {
             spawnResult = spawn.createTransporterCreep(energyCapacity, 'Transporter');
             console.log('Spawn Transporter: ' + spawnResult);
             if (spawnResult === ERR_NOT_ENOUGH_ENERGY && transporters.length === 0) {
                 spawnResult = spawn.createTransporterCreep(energyAvailable, 'Transporter');
                 console.log('Spawn microTransporter: ' + spawnResult);
             }
-        } else if (harvesters.length < config.stageOptions.numHarvesters[room_stage]) {
+        } else if (harvesters.length < max_num_harvesters) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Harvester");
             console.log('Spawn Harvester: ' + spawnResult);
             if (spawnResult === ERR_NOT_ENOUGH_ENERGY && harvesters.length === 0) {
                 spawnResult = spawn.createGenericCreep(energyAvailable, "Harvester");
                 console.log('Spawn microHarvester: ' + spawnResult);
             }
-        } else if (upgraders.length < config.stageOptions.numUpgraders[room_stage]) {
+        } else if (upgraders.length < max_num_upgraders) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Upgrader");
             console.log('Spawn Upgrader: ' + spawnResult);
-        } else if (builders.length < config.stageOptions.numBuilders[room_stage]) {
+        } else if (builders.length < max_num_builders) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Builder");
             console.log('Spawn Builder: ' + spawnResult);
-        } else if (repairers.length < config.stageOptions.numRepairers[room_stage]) {
+        } else if (repairers.length < max_num_repairers) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Repairer");
             console.log('Spawn Repairer: ' + spawnResult);
         }
@@ -119,11 +128,11 @@ module.exports.loop = function () {
             ': Energy: ' + Game.rooms[v.room].energyAvailable + '/' + Game.rooms[v.room].energyCapacityAvailable +
             ' Creeps: ' + creeps_without_role.length + "/" + creeps_without_task.length + "/" + creeps.length;
         let text_creeps =
-            'H: ' + harvesters.length + '/' + config.stageOptions.numHarvesters[room_stage] +
-            ' U: ' + upgraders.length + '/' + config.stageOptions.numUpgraders[room_stage] +
-            ' B: ' + builders.length + '/' + config.stageOptions.numBuilders[room_stage] +
-            ' R: ' + repairers.length + '/' + config.stageOptions.numRepairers[room_stage] +
-            ' TM: ' + transporters.length + "/" + miners_container.length;
+            'H: ' + harvesters.length + '/' + max_num_harvesters +
+            ' U: ' + upgraders.length + '/' + max_num_upgraders +
+            ' B: ' + builders.length + '/' + max_num_builders +
+            ' R: ' + repairers.length + '/' + max_num_repairers +
+            ' TM: ' + transporters.length + "/" + max_num_transporters;
         new RoomVisual(Game.rooms[v.room].name).text(text_general, v.x, v.y, {color: v.color, font: v.font});
         new RoomVisual(Game.rooms[v.room].name).text(text_creeps, v.x, v.y + 1, {color: v.color, font: v.font});
     }
