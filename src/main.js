@@ -65,7 +65,7 @@ module.exports.loop = function () {
         0 :
         (
             room_stage === 8 ?
-            Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10)) :
+            Math.min(4, Math.ceil(room.memory.construction_sites.all.length / 10)) :
             2 + Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10))
         )
 
