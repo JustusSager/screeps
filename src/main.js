@@ -49,7 +49,8 @@ module.exports.loop = function () {
     }
 
     let harvesters = _.filter(creeps, creep => creep.memory.role === 'Harvester');
-    let max_num_harvesters = _.filter(room.memory.source_metas, s => s['num_containers'] === 0 && s['num_links'] === 0).length + 1;
+    let max_num_harvesters = _.filter(room.memory.source_metas, s => s['num_containers'] === 0 && s['num_links'] === 0).length +
+        (room_stage < 3 ? 3 : 1);
 
     let miners = _.filter(creeps, creep => creep.memory.role === 'Miner');
 
