@@ -60,7 +60,14 @@ module.exports.loop = function () {
     let max_num_upgraders = config.stageOptions.numUpgraders[room_stage];
 
     let builders = _.filter(creeps, creep => creep.memory.role === 'Builder');
-    let max_num_builders = room_stage < 2 ? 0 : 2 + Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10));
+    let max_num_builders =
+        room_stage < 2 ?
+        0 :
+        (
+            room_stage === 8 ?
+            Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10)) :
+            2 + Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10))
+        )
 
     let repairers = _.filter(creeps, creep => creep.memory.role === 'Repairer');
     let max_num_repairers = config.stageOptions.numRepairers[room_stage];
