@@ -15,7 +15,6 @@ module.exports.loop = function () {
     let room = spawn.room;
     let room_stage = room.memory.stage;
     room.updateMemory();
-    room.updateConstructionSites();
 
     let creeps = _.values(Game.creeps);
     for (let creep of creeps) {
@@ -61,7 +60,7 @@ module.exports.loop = function () {
     let max_num_upgraders = config.stageOptions.numUpgraders[room_stage];
 
     let builders = _.filter(creeps, creep => creep.memory.role === 'Builder');
-    let max_num_builders = config.stageOptions.numBuilders[room_stage];
+    let max_num_builders = room_stage < 2 ? 0 : 2 + Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10));
 
     let repairers = _.filter(creeps, creep => creep.memory.role === 'Repairer');
     let max_num_repairers = config.stageOptions.numRepairers[room_stage];

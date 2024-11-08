@@ -5,23 +5,10 @@ function deref(objectID) {
 }
 
 module.exports = function () {
-    Room.prototype.updateConstructionSites = function () {
-        this.memory.construction_sites = {
-            'tower': this.find(FIND_CONSTRUCTION_SITES, {
-                filter:
-                    c => c.structureType === STRUCTURE_TOWER
-            }),
-            'energy_storage': this.find(FIND_CONSTRUCTION_SITES, {
-                filter:
-                    c => c.structureType === STRUCTURE_EXTENSION ||
-                        c.structureType === STRUCTURE_CONTAINER ||
-                        c.structureType === STRUCTURE_STORAGE ||
-                        c.structureType === STRUCTURE_LINK
-            })
-        }
-    }
-
     Room.prototype.updateMemory = function () {
+        if (!this.memory.construction_sites || Game.time % 5 === 0) {
+            this.updateMemoryConstructionSites();
+        }
 
         if (!this.memory.stage || Game.time % 50 === 0) {
             this.updateMemoryStage();
@@ -163,6 +150,23 @@ module.exports = function () {
         }
         if (this.memory.link_source_ids.length === 0) {
             this.memory.link_source_ids.length = undefined;
+        }
+    }
+
+    Room.prototype.updateMemoryConstructionSites = function () {
+        this.memory.construction_sites = {
+            'tower': this.find(FIND_CONSTRUCTION_SITES, {
+                filter:
+                    c => c.structureType === STRUCTURE_TOWER
+            }),
+            'energy_storage': this.find(FIND_CONSTRUCTION_SITES, {
+                filter:
+                    c => c.structureType === STRUCTURE_EXTENSION ||
+                        c.structureType === STRUCTURE_CONTAINER ||
+                        c.structureType === STRUCTURE_STORAGE ||
+                        c.structureType === STRUCTURE_LINK
+            }),
+            'all': this.find(FIND_CONSTRUCTION_SITES)
         }
     }
 
