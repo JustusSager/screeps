@@ -543,7 +543,7 @@ module.exports = function () {
         return this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
             filter: (s) =>
                 s.structureType === STRUCTURE_STORAGE
-                && s.store[resource] > amount
+                && s.store.getUsedCapacity(resource) > amount
         });
     }
 
