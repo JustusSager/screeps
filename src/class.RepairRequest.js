@@ -37,7 +37,7 @@ class RepairRequest {
 
     toObj() {
         return {
-            type: config.REPAIR_REQUEST,
+            type: config.REQUEST_REPAIR,
             target: this.target.id,
             priority: this.priority,
             structureType: this.structureType,

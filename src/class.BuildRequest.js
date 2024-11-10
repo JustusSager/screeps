@@ -37,7 +37,7 @@ class BuildRequest {
 
     toObj() {
         return {
-            type: config.BUILD_REQUEST,
+            type: config.REQUEST_BUILD,
             target: this.target.id,
             priority: this.priority,
             structureType: this.structureType,

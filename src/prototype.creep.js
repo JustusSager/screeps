@@ -239,6 +239,7 @@ module.exports = function () {
                         }
                     }
                     break;
+                case 'Worker':
                 case 'Upgrader':
                 case 'Builder':
                 case 'Repairer':

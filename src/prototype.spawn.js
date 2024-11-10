@@ -13,17 +13,13 @@ module.exports = function () {
         let maxSize = 15;
         let creepName = config.names[this.memory.nameIndex];
         switch (role) {
-            case 'Harvester':
+            case config.CREEP_HARVESTER:
                 creepName = creepName + ' ⛏️';
                 maxSize = config.maxSizeHarvester;
                 break;
-            case 'Upgrader':
-                creepName = creepName + ' 🆙';
-                maxSize = config.maxSizeUpgrader;
-                break;
-            case 'Builder':
+            case config.CREEP_WORKER:
                 creepName = creepName + ' 🛠️';
-                maxSize = config.maxSizeBuilder;
+                maxSize = config.maxSizeWorker;
                 break;
         }
         this.memory.nameIndex = this.memory.nameIndex + 1;
@@ -62,7 +58,7 @@ module.exports = function () {
         this.memory.nameIndex = this.memory.nameIndex + 1;
         return this.spawnCreep(body, creepName + ' 🧨', {
             memory: {
-                role: 'Miner',
+                role: config.CREEP_MINER,
                 sourceID: sourceID,
                 task: {name: 'idle'}
             },
@@ -82,8 +78,8 @@ module.exports = function () {
             body.push(MOVE);
         }
         let creepName = config.names[this.memory.nameIndex];
-        if (role === 'Transporter') creepName = creepName + ' 🚋';
-        if (role === 'Secretary') creepName = creepName + ' 🗒️';
+        if (role === config.CREEP_TRANSPORTER) creepName = creepName + ' 🚋';
+        if (role === config.CREEP_SECRETARY) creepName = creepName + ' 🗒️';
         this.memory.nameIndex = this.memory.nameIndex + 1;
         return this.spawnCreep(body, creepName, {
             memory: {
@@ -105,7 +101,7 @@ module.exports = function () {
         this.memory.nameIndex = this.memory.nameIndex + 1;
         return this.spawnCreep(body, creepName + ' 📓', {
             memory: {
-                role: 'Manager',
+                role: config.CREEP_MANAGER,
                 task: {name: 'idle'}
             },
             directions: [BOTTOM_LEFT]

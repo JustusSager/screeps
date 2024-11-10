@@ -35,7 +35,7 @@ class UpgradeRequest {
 
     toObj() {
         return {
-            type: config.UPGRADE_REQUEST,
+            type: config.REQUEST_UPGRADE,
             target: this.target.id,
             priority: this.priority,
             pos: this.pos,

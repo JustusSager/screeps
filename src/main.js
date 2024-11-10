@@ -64,18 +64,9 @@ module.exports.loop = function () {
     let transporters = _.filter(creeps, creep => creep.memory.role === 'Transporter');
     let max_num_transporters = _.filter(room.memory.source_metas, s => s['num_containers'] > 0 && s['num_links'] === 0).length;
 
-    let upgraders = _.filter(creeps, creep => creep.memory.role === 'Upgrader');
-    let max_num_upgraders = config.stageOptions.numUpgraders[room_stage];
-
-    let builders = _.filter(creeps, creep => creep.memory.role === 'Builder');
-    let max_num_builders =
-        room_stage < 2 ?
-        0 :
-        (
-            room_stage === 8 ?
-            1 + Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10)) :
-            3 + Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10))
-        )
+    let workers = _.filter(creeps, creep => creep.memory.role === 'Worker' || creep.memory.role === 'Upgrader' || creep.memory.role === 'Builder' || creep.memory.role === 'Repairer');
+    let max_num_workers = (room_stage === 8 ? 1 : 3) +
+        Math.min(4, Math.floor(room.memory.requests.length / 10));
 
     let managers = _.filter(creeps, creep => creep.memory.role === 'Manager');
     let secretaries = _.filter(creeps, creep => creep.memory.role === 'Secretary');
@@ -122,12 +113,9 @@ module.exports.loop = function () {
                 spawnResult = spawn.createGenericCreep(energyAvailable, "Harvester");
                 console.log('Spawn microHarvester: ' + spawnResult);
             }
-        } else if (upgraders.length < max_num_upgraders) {
-            spawnResult = spawn.createGenericCreep(energyCapacity, "Upgrader");
-            console.log('Spawn Upgrader: ' + spawnResult);
-        } else if (builders.length < max_num_builders) {
-            spawnResult = spawn.createGenericCreep(energyCapacity, "Builder");
-            console.log('Spawn Builder: ' + spawnResult);
+        } else if (workers.length < max_num_workers) {
+            spawnResult = spawn.createGenericCreep(energyCapacity, "Worker");
+            console.log('Spawn Worker: ' + spawnResult);
         }
     }
 
@@ -138,8 +126,7 @@ module.exports.loop = function () {
             ' Creeps: ' + creeps_without_role.length + "/" + creeps_without_task.length + "/" + creeps.length;
         let text_creeps =
             'H: ' + harvesters.length + '/' + max_num_harvesters +
-            ' U: ' + upgraders.length + '/' + max_num_upgraders +
-            ' B: ' + builders.length + '/' + max_num_builders +
+            ' W: ' + workers.length + '/' + max_num_workers +
             ' TM: ' + transporters.length + "/" + max_num_transporters;
         new RoomVisual(Game.rooms[v.room].name).text(text_general, v.x, v.y, {color: v.color, font: v.font});
         new RoomVisual(Game.rooms[v.room].name).text(text_creeps, v.x, v.y + 1, {color: v.color, font: v.font});
