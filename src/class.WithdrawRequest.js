@@ -51,7 +51,7 @@ class WithdrawRequest {
 
     toObj() {
         return {
-            type: config.REQUEST_PICKUP,
+            type: config.REQUEST_WITHDRAW,
             target: this.target.id,
             priority: this.priority,
             resource: this.resource,
