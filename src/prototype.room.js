@@ -1,4 +1,6 @@
-const config = require('config')
+const BuildRequest = require('class.BuildRequest');
+
+const config = require('config');
 
 function deref(objectID) {
     return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
@@ -31,6 +33,8 @@ module.exports = function () {
                 s.structureType === STRUCTURE_CONTAINER
                 && s.store.getUsedCapacity() > s.store.getCapacity() * 0.8
         });
+
+        this.updateMemoryRequests()
     }
 
     Room.prototype.updateMemoryStage = function () {
@@ -146,7 +150,8 @@ module.exports = function () {
                     filter: (l) =>
                         l.structureType === STRUCTURE_LINK
                 })[0].id);
-            } catch (e) {}
+            } catch (e) {
+            }
         }
         if (this.memory.link_source_ids.length === 0) {
             this.memory.link_source_ids.length = undefined;
@@ -170,4 +175,48 @@ module.exports = function () {
         }
     }
 
+    Room.prototype.updateMemoryRequests = function () {
+        if (!this.memory.requests) {
+            this.memory.requests = [];
+        }
+        let requests = [];
+
+        for (let _request of this.memory.requests) {
+            if (!deref(_request.target)) continue
+            let request = null;
+            switch (_request.type) {
+                case config.BUILD_REQUEST:
+                    request = new BuildRequest(_request.target);
+                    break;
+            }
+            if (request != null && !request.invalid() && !_.some(requests, req => req.target.id === request.target.id)) {
+                requests.push(request)
+            }
+        }
+
+        for (let construction_site of this.find(FIND_CONSTRUCTION_SITES)) {
+            if (!_.some(requests, req => req.target.id === construction_site.id)) {
+                let priority = 1;
+                if (
+                    construction_site.structureType === STRUCTURE_TOWER ||
+                    construction_site.structureType === STRUCTURE_SPAWN
+                ) {
+                    priority = 5;
+                } else if (
+                    construction_site.structureType === STRUCTURE_EXTENSION ||
+                    construction_site.structureType === STRUCTURE_STORAGE ||
+                    construction_site.structureType === STRUCTURE_LINK ||
+                    construction_site.structureType === STRUCTURE_CONTAINER
+                ) {
+                    priority = 3;
+                }
+                requests.push(new BuildRequest(construction_site.id, priority));
+            }
+        }
+
+        this.memory.requests = [];
+        requests.sort((a, b) => b.priority - a.priority).forEach(request => {
+            this.memory.requests.push(request.toObj());
+        })
+    }
 }

@@ -549,17 +549,11 @@ module.exports = function () {
 
 // Find construction/repair sites --------------------------------------------------------------------------------------
     Creep.prototype.findConstructionSite = function () {
-        if (this.room.memory.construction_sites) {
-            let mem = this.room.memory.construction_sites;
-            if (mem.tower && mem.tower.length > 0) {
-                return this.pos.findClosestByPath(mem.tower);
-            } else if (mem.energy_storage && mem.energy_storage.length > 0) {
-                return this.pos.findClosestByPath(mem.energy_storage);
-            } else {
-                return this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
-            }
-        } else {
-            return this.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+        let _build_req = this.room.memory.requests.filter(req => req.type === config.BUILD_REQUEST)
+        let max_priority = Math.max(..._build_req.map(_req => _req.priority));
+        _build_req = _build_req.filter(req => req.priority === max_priority);
+        if (_build_req.length > 0) {
+            return this.pos.findClosestByPath(_build_req.map(req => deref(req.target)));
         }
     }
     Creep.prototype.findRepairSite = function (threshold = 1.0) {
