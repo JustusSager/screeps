@@ -2,6 +2,7 @@ const config = require("config");
 const BuildRequest = require("class.BuildRequest");
 const RepairRequest = require("class.RepairRequest");
 const UpgradeRequest = require("class.UpgradeRequest");
+const PickupRequest = require("class.PickupRequest");
 
 class RequestManager {
     constructor(room) {
@@ -9,6 +10,12 @@ class RequestManager {
         this.room_stage = this.room.memory.stage;
         this.requests = [];
         this.max_priority = 0;
+
+        this.load_construction_site_requests();
+        this.load_repair_site_requests();
+        this.load_controller_requests();
+        this.load_pickup_requests();
+        this.update_max_priority();
     }
 
     load_construction_site_requests() {
@@ -33,7 +40,6 @@ class RequestManager {
                 this.requests.push(new BuildRequest(construction_site.id, priority));
             }
         }
-        this.update_max_priority();
     }
 
     load_repair_site_requests() {
@@ -61,7 +67,6 @@ class RequestManager {
                 this.requests.push(new RepairRequest(repair_site.id, priority));
             }
         }
-        this.update_max_priority();
     }
 
     load_controller_requests() {
@@ -72,7 +77,12 @@ class RequestManager {
         } else {
             this.requests.push(new UpgradeRequest(controller.id, 1))
         }
-        this.update_max_priority();
+    }
+
+    load_pickup_requests() {
+        for (let dropped_resource of this.room.find(FIND_DROPPED_RESOURCES)) {
+            this.requests.push(new PickupRequest(dropped_resource.id, 1));
+        }
     }
 
     update_max_priority() {
@@ -81,9 +91,14 @@ class RequestManager {
     }
 
     getRequest(creep) {
-        let request = creep.pos.findClosestByPath(this.requests.filter(req => req.priority >= this.max_priority));
+        let possible_requests = this.requests.filter(req => req.prerequisites_fulfilled(creep) && req.workLeft > 0);
+        let max = Math.max(...possible_requests.map(req => req.priority));
+        possible_requests = possible_requests.filter(req => req.priority === max);
+        let request = creep.pos.findClosestByPath(possible_requests);
         if (request instanceof UpgradeRequest) {
             request.priority = 1;
+        } else if (request instanceof PickupRequest) {
+            request.workLeft -= creep.store.getFreeCapacity();
         }
         return request
     }

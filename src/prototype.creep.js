@@ -243,11 +243,9 @@ module.exports = function () {
                 case 'Upgrader':
                 case 'Builder':
                 case 'Repairer':
-                    if (this.store[RESOURCE_ENERGY] > 0) {
-                        let request = requestManager.getRequest(this);
-                        if (request && request.prerequisites_fulfilled(this)) {
-                            return request.switchTask(this);
-                        }
+                    let request = requestManager.getRequest(this);
+                    if (request) {
+                        return request.switchTask(this);
                     } else {
                         // get dropped energy
                         target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());

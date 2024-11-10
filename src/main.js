@@ -17,9 +17,6 @@ module.exports.loop = function () {
     let room_stage = room.memory.stage;
 
     let requestManager = new RequestManager(room);
-    requestManager.load_construction_site_requests();
-    requestManager.load_repair_site_requests();
-    requestManager.load_controller_requests();
     requestManager.toMemory();
 
     room.updateMemory();
@@ -119,15 +116,26 @@ module.exports.loop = function () {
         }
     }
 
+    let creeps_upgrading = _.filter(creeps, c => c.memory.task && c.memory.task.name === 'upgrade').length;
+    let creeps_building = _.filter(creeps, c => c.memory.task && c.memory.task.name === 'build').length;
+    let creeps_repairing = _.filter(creeps, c => c.memory.task && c.memory.task.name === 'repair').length;
+    let creeps_harvest = _.filter(creeps, c => c.memory.task && c.memory.task.name === 'harvest').length;
+    let creeps_transfer = _.filter(creeps, c => c.memory.task && c.memory.task.name === 'transfer').length;
+    let creeps_pickup = _.filter(creeps, c => c.memory.task && c.memory.task.name === 'pickup').length;
+    let creeps_withdraw = _.filter(creeps, c => c.memory.task && c.memory.task.name === 'withdraw').length;
+    let creeps_idle = _.filter(creeps, c => c.memory.task && c.memory.task.name === 'idle').length;
+
     for (let v of config.roomVisual) {
         let text_general =
             v.room + ' (RCL ' + Game.rooms[v.room].controller.level + ' Stage ' + room_stage + ') ' + spawn.name +
             ': Energy: ' + Game.rooms[v.room].energyAvailable + '/' + Game.rooms[v.room].energyCapacityAvailable +
-            ' Creeps: ' + creeps_without_role.length + "/" + creeps_without_task.length + "/" + creeps.length;
-        let text_creeps =
-            'H: ' + harvesters.length + '/' + max_num_harvesters +
+            ' Creeps: ' + creeps_without_role.length + "/" + creeps_without_task.length + "/" + creeps.length +
+            ' H: ' + harvesters.length + '/' + max_num_harvesters +
             ' W: ' + workers.length + '/' + max_num_workers +
             ' TM: ' + transporters.length + "/" + max_num_transporters;
+        let text_creeps = 'U: ' + creeps_upgrading + ' B: ' + creeps_building + ' R: ' + creeps_repairing +
+            ' H: ' + creeps_harvest + ' T: ' + creeps_transfer + ' P: ' + creeps_pickup + ' W: ' + creeps_withdraw +
+            ' I: ' + creeps_idle;
         new RoomVisual(Game.rooms[v.room].name).text(text_general, v.x, v.y, {color: v.color, font: v.font});
         new RoomVisual(Game.rooms[v.room].name).text(text_creeps, v.x, v.y + 1, {color: v.color, font: v.font});
     }
