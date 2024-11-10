@@ -1,6 +1,8 @@
 const BuildRequest = require('class.BuildRequest');
+const RepairRequest = require('class.RepairRequest');
 
 const config = require('config');
+const {roomStage} = require("./config");
 
 function deref(objectID) {
     return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
@@ -39,12 +41,12 @@ module.exports = function () {
 
     Room.prototype.updateMemoryStage = function () {
         let rcl = this.controller.level;
-        let roomStage = config.roomStage[this.name];
+        let room_stage = config.roomStage[this.name];
         if (this.memory.stage) {
             // Von unten nach oben lesen
 
             // Bedingungen abschluss Stage 6
-            if (rcl >= 7 && roomStage >= 7 &&
+            if (rcl >= 7 && room_stage >= 7 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_EXTENSION}).length >= 40 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length >= 2 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_TOWER}).length >= 2 &&
@@ -55,7 +57,7 @@ module.exports = function () {
                 this.memory.stage = 7;
             }
             // Bedingungen abschluss Stage 5
-            else if (rcl >= 6 && roomStage >= 6 &&
+            else if (rcl >= 6 && room_stage >= 6 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_EXTENSION}).length >= 30 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length >= 2 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_TOWER}).length >= 2 &&
@@ -65,7 +67,7 @@ module.exports = function () {
                 this.memory.stage = 6;
             }
             // Bedingungen abschluss Stage 4
-            else if (rcl >= 5 && roomStage >= 5 &&
+            else if (rcl >= 5 && room_stage >= 5 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_EXTENSION}).length >= 20 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length >= 2 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_TOWER}).length >= 1 &&
@@ -74,7 +76,7 @@ module.exports = function () {
                 this.memory.stage = 5;
             }
             // Bedingungen abschluss Stage 3
-            else if (rcl >= 4 && roomStage >= 4 &&
+            else if (rcl >= 4 && room_stage >= 4 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_EXTENSION}).length >= 10 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length >= 2 &&
                 this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_TOWER}).length >= 1
@@ -84,7 +86,7 @@ module.exports = function () {
                 this.memory.stage = 4;
             }
             // Bedingungen abschluss Stage 2
-            else if (rcl >= 3 && roomStage >= 3
+            else if (rcl >= 3 && room_stage >= 3
                 && this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_EXTENSION}).length >= 5
                 && this.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length >= 2) {
                 // Stage 3 ist erreicht, wenn die Extensions gebaut sind und die Container neben den Sources stehen,
@@ -93,12 +95,12 @@ module.exports = function () {
                 this.memory.stage = 3;
             }
             // Bedingungen abschluss Stage 1
-            else if (rcl >= 2 && roomStage >= 2) {
+            else if (rcl >= 2 && room_stage >= 2) {
                 // Stage 2 ist erreicht, wenn RCL 2 erreicht ist
                 this.memory.stage = 2;
             }
             // Bedingungen abschluss Stage 0
-            else if (rcl >= 1 && roomStage >= 1 &&
+            else if (rcl >= 1 && room_stage >= 1 &&
                 this.find(FIND_MY_STRUCTURES, {filter: s => s.structureType === STRUCTURE_SPAWN})
             ) {
                 this.memory.stage = 1;
@@ -180,13 +182,17 @@ module.exports = function () {
             this.memory.requests = [];
         }
         let requests = [];
+        let room_stage = this.memory.stage;
 
         for (let _request of this.memory.requests) {
             if (!deref(_request.target)) continue
             let request = null;
             switch (_request.type) {
                 case config.BUILD_REQUEST:
-                    request = new BuildRequest(_request.target);
+                    request = new BuildRequest(_request.target, _request.priority);
+                    break;
+                case config.REPAIR_REQUEST:
+                    request = new RepairRequest(_request.target, _request.priority);
                     break;
             }
             if (request != null && !request.invalid() && !_.some(requests, req => req.target.id === request.target.id)) {
@@ -202,16 +208,48 @@ module.exports = function () {
                     construction_site.structureType === STRUCTURE_TOWER ||
                     construction_site.structureType === STRUCTURE_SPAWN
                 ) {
-                    priority = 5;
+                    priority = 9;
                 } else if (
                     construction_site.structureType === STRUCTURE_EXTENSION ||
                     construction_site.structureType === STRUCTURE_STORAGE ||
                     construction_site.structureType === STRUCTURE_LINK ||
                     construction_site.structureType === STRUCTURE_CONTAINER
                 ) {
-                    priority = 3;
+                    priority = 5;
+                } else if (construction_site.structureType !== STRUCTURE_ROAD) {
+                    priority = 2;
                 }
-                requests.push(new BuildRequest(construction_site.id, priority));
+                if (priority >= 0) {
+                    requests.push(new BuildRequest(construction_site.id, priority));
+                }
+            }
+        }
+
+        // update requests for repair sites
+        for (let repair_site of this.find(FIND_STRUCTURES, {filter: s => s.hits < s.hitsMax * config.repairThreshold})) {
+            if (!_.some(requests, req => req.target.id === repair_site.id)) {
+                let priority = 1;
+                if (repair_site.hits < config.quickRepairThreshold) {
+                    priority = 10;
+                } else if (repair_site.structureType !== STRUCTURE_RAMPART && repair_site.structureType !== STRUCTURE_WALL) {
+                    priority = 4;
+                } else if (
+                    repair_site.structureType === STRUCTURE_RAMPART &&
+                    repair_site.structureType === STRUCTURE_WALL &&
+                    repair_site.hits < config.stageOptions.wallRepairs[room_stage]
+                ) {
+                    priority = 3;
+                } else if (
+                    repair_site.structureType === STRUCTURE_RAMPART &&
+                    repair_site.structureType === STRUCTURE_WALL &&
+                    repair_site.hits >= config.stageOptions.wallRepairs[room_stage]
+                ) {
+                    priority = -1;
+                }
+
+                if (priority >= 0) {
+                    requests.push(new RepairRequest(repair_site.id, priority));
+                }
             }
         }
 

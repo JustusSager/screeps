@@ -118,7 +118,7 @@ module.exports = function () {
                         if (target.hits === target.hitsMax) this.updateTask();
                         result = this.repair(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
-                        if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
+                        if (result < 0 || this.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
                             this.updateTask();
                         }
                         break;
@@ -267,58 +267,16 @@ module.exports = function () {
                     }
                     break;
                 case 'Builder':
-                    if (this.store[RESOURCE_ENERGY] > 0) {
-                        // Work at construction site
-                        target = this.findConstructionSite();
-                        if (target) {
-                            return this.switchTaskBuild(target.id)
-                        }
-                        // repair damaged structures
-                        target = this.findRepairSite(0.9)
-                        if (target) {
-                            return this.switchTaskRepair(target.id);
-                        }
-                        // upgrade controller
-                        return this.switchTaskUpgrade();
-                    } else {
-                        // get dropped energy
-                        target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                        if (target) {
-                            return this.switchTaskPickup(target.id);
-                        }
-                        if (roomStage >= 2) {
-                            // get energy from containers
-                            target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                            if (target) {
-                                return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
-                            }
-                        }
-                        if (roomStage >= 4) {
-                            // get energy from storage
-                            target = this.findGetStorage(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                            if (target) {
-                                return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
-                            }
-                        }
-                        // get energy by harvesting
-                        target = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
-                        if (target) {
-                            return this.switchTaskHarvest(target.id);
-                        }
-                    }
-                    break;
                 case 'Repairer':
                     if (this.store[RESOURCE_ENERGY] > 0) {
-                        target = this.findRepairSite(0.95);
-                        if (target) {
-                            return this.switchTaskRepair(target.id);
+                        // Work at construction site
+                        let _req = this.findConstructionSite();
+                        if (_req && _req.type === config.BUILD_REQUEST) {
+                            return this.switchTaskBuild(_req.target)
+                        } else if (_req && _req.type === config.REPAIR_REQUEST) {
+                            return this.switchTaskRepair(_req.target)
                         }
-                        if (roomStage >= 3) {
-                            target = this.findWallRepairSite(config.stageOptions.wallRepairs[roomStage]);
-                            if (target) {
-                                return this.switchTaskRepair(target.id);
-                            }
-                        }
+                        // upgrade controller
                         return this.switchTaskUpgrade();
                     } else {
                         // get dropped energy
@@ -549,28 +507,11 @@ module.exports = function () {
 
 // Find construction/repair sites --------------------------------------------------------------------------------------
     Creep.prototype.findConstructionSite = function () {
-        let _build_req = this.room.memory.requests.filter(req => req.type === config.BUILD_REQUEST)
-        let max_priority = Math.max(..._build_req.map(_req => _req.priority));
-        _build_req = _build_req.filter(req => req.priority === max_priority);
-        if (_build_req.length > 0) {
-            return this.pos.findClosestByPath(_build_req.map(req => deref(req.target)));
+        let _req = this.room.memory.requests.filter(req => req.type === config.BUILD_REQUEST || req.type === config.REPAIR_REQUEST);
+        let max_priority = Math.max(..._req.map(_req => _req.priority));
+        _req = _req.filter(req => req.priority === max_priority);
+        if (_req.length > 0) {
+            return this.pos.findClosestByPath(_req);
         }
-    }
-    Creep.prototype.findRepairSite = function (threshold = 1.0) {
-        return this.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: (s) => s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART
-                && s.hits < s.hitsMax * threshold
-        });
-
-    }
-    Creep.prototype.findWallRepairSite = function (maxHits) {
-        let rampart = this.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: (s) => s.structureType === STRUCTURE_RAMPART && s.hits < s.hitsMax && s.hits < maxHits
-        });
-        if (rampart) return rampart;
-        return this.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: (s) => s.structureType === STRUCTURE_WALL && s.hits < s.hitsMax && s.hits < maxHits
-        });
-
     }
 }
