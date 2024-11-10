@@ -1,14 +1,8 @@
-const config = require("config");
-const BuildRequest = require("class.BuildRequest");
-const RepairRequest = require("class.RepairRequest");
-const UpgradeRequest = require("class.UpgradeRequest");
-
 function deref(objectID) {
     return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
 }
 
 module.exports = function () {
-
     // Creep executes task
     Creep.prototype.run = function (requestManager) {
         if (!this.memory.task) {
@@ -16,10 +10,7 @@ module.exports = function () {
                 name: 'idle'
             };
         }
-    }
 
-    // Creep executes task
-    Creep.prototype.run = function (requestManager) {
         if (this.memory.task) {
             let roomStage = this.room.memory.stage;
             let taskName = this.memory.task.name;
@@ -134,6 +125,10 @@ module.exports = function () {
                     case 'idle':
                         // console.log(this.name, JSON.stringify(this.memory), result);
                         this.say("⚠️");
+                        let idle_flag = Game.flags['Idle']
+                        if (idle_flag) {
+                            this.moveTo(idle_flag);
+                        }
                         this.updateTask(requestManager);
                         break;
                     default:
@@ -246,13 +241,8 @@ module.exports = function () {
                     if (request) {
                         return request.switchTask(this);
                     } else {
-                        // get energy by harvesting
-                        target = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
-                        if (target) {
-                            return this.switchTaskHarvest(target.id);
-                        }
+                        return this.switchTaskIdle();
                     }
-                    break;
                 case 'Manager':
                     if (this.store[RESOURCE_ENERGY] > 0) {
                         target = this.pos.findInRange(FIND_MY_STRUCTURES, 1, {
@@ -362,6 +352,14 @@ module.exports = function () {
             options: {
                 resource: resource
             }
+        };
+        return 0;
+    }
+
+    Creep.prototype.switchTaskIdle = function () {
+        this.say("⚠️");
+        this.memory.task = {
+            name: 'idle'
         };
         return 0;
     }

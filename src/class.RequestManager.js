@@ -1,8 +1,9 @@
 const config = require("config");
 const BuildRequest = require("class.BuildRequest");
+const HarvestRequest = require("class.HarvestRequest");
+const PickupRequest = require("class.PickupRequest");
 const RepairRequest = require("class.RepairRequest");
 const UpgradeRequest = require("class.UpgradeRequest");
-const PickupRequest = require("class.PickupRequest");
 const WithdrawRequest = require("class.WithdrawRequest");
 
 class RequestManager {
@@ -16,6 +17,7 @@ class RequestManager {
         this.load_controller_requests();
         this.load_pickup_requests();
         this.load_withdraw_requests();
+        this.load_harvest_requests();
     }
 
     load_construction_site_requests() {
@@ -81,7 +83,7 @@ class RequestManager {
 
     load_pickup_requests() {
         for (let dropped_resource of this.room.find(FIND_DROPPED_RESOURCES, {filter: r => r.amount > 0})) {
-            let priority = Math.max(5, Math.min(1, dropped_resource.amount / 1000))
+            let priority = Math.max(5, Math.min(2, dropped_resource.amount / 100))
             this.requests.push(new PickupRequest(dropped_resource.id, priority));
         }
     }
@@ -91,8 +93,16 @@ class RequestManager {
             filter: s => (s.structureType === STRUCTURE_CONTAINER || s.structureType === STRUCTURE_STORAGE) &&
                 s.store.getUsedCapacity() > 100
         })) {
-            let priority = Math.round((container.store.getUsedCapacity() / container.store.getCapacity()) * 5)
+            let priority = 1 + Math.round((container.store.getUsedCapacity() / container.store.getCapacity()) * 5)
             this.requests.push(new WithdrawRequest(container.id, RESOURCE_ENERGY, priority));
+        }
+    }
+
+    load_harvest_requests() {
+        for (let source of this.room.find(FIND_SOURCES_ACTIVE, {
+            filter: s => !_.some(Game.creeps, c => c.memory.role === config.CREEP_MINER && c.memory.sourceID === s.id)
+        })) {
+            this.requests.push(new HarvestRequest(source.id), 1);
         }
     }
 
