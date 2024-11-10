@@ -9,11 +9,8 @@ function deref(objectID) {
 
 module.exports = function () {
 
-    // Creep Task initialise memory
-    Creep.prototype.initTask = function () {
-        if (!this.memory.role) {
-            this.memory.role = 'idle';
-        }
+    // Creep executes task
+    Creep.prototype.run = function (requestManager) {
         if (!this.memory.task) {
             this.memory.task = {
                 name: 'idle'
@@ -27,7 +24,9 @@ module.exports = function () {
             let roomStage = this.room.memory.stage;
             let taskName = this.memory.task.name;
             let target = deref(this.memory.task.targetID);
-            if (!target) this.updateTask(requestManager);
+            if (!target ) {
+                this.updateTask(requestManager);
+            }
             let targetRange = this.memory.task.targetRange ? this.memory.task.targetRange : 1;
             let options = this.memory.task.options ? this.memory.task.options : {};
             let result = undefined, resource = undefined;
@@ -39,7 +38,7 @@ module.exports = function () {
                     case 'harvest':
                         result = this.harvest(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
-                        if (result < 0 || this.store.getFreeCapacity() === 0) {
+                        if (result !== 0 || this.store.getFreeCapacity() === 0) {
                             this.updateTask(requestManager);
                         }
                         break;
@@ -84,7 +83,7 @@ module.exports = function () {
                         resource = options.resource ? options.resource : RESOURCE_ENERGY;
                         result = this.transfer(target, resource);
                         // console.log(this.name, JSON.stringify(this.memory), result);
-                        if (result < 0 || this.store.getUsedCapacity(resource) === 0 || !this.store.getUsedCapacity(resource)) {
+                        if (result !== 0 || this.store[resource] === 0) {
                             this.updateTask(requestManager);
                         }
                         break;
@@ -92,28 +91,28 @@ module.exports = function () {
                         resource = options.resource ? options.resource : RESOURCE_ENERGY;
                         result = this.withdraw(target, resource);
                         // console.log(this.name, JSON.stringify(this.memory), result);
-                        if (result < 0 || this.store.getCapacity() === this.store.getUsedCapacity()) {
+                        if (result !== 0 || this.store.getFreeCapacity() === 0) {
                             this.updateTask(requestManager);
                         }
                         break;
                     case 'pickup':
                         result = this.pickup(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
-                        if (result < 0 || this.store.getFreeCapacity() === 0) {
+                        if (result !== 0 || this.store.getFreeCapacity() === 0) {
                             this.updateTask(requestManager);
                         }
                         break;
                     case 'upgrade':
                         result = this.upgradeController(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
-                        if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
+                        if (result !== 0 || this.store[RESOURCE_ENERGY] === 0) {
                             this.updateTask(requestManager);
                         }
                         break;
                     case 'build':
                         result = this.build(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
-                        if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
+                        if (result !== 0 || this.store[RESOURCE_ENERGY] === 0) {
                             this.updateTask(requestManager);
                         }
                         break;
@@ -121,7 +120,7 @@ module.exports = function () {
                         if (target.hits === target.hitsMax) this.updateTask(requestManager);
                         result = this.repair(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
-                        if (result < 0 || this.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
+                        if (result !== 0 || this.store[RESOURCE_ENERGY] === 0) {
                             this.updateTask(requestManager);
                         }
                         break;
@@ -247,25 +246,6 @@ module.exports = function () {
                     if (request) {
                         return request.switchTask(this);
                     } else {
-                        // get dropped energy
-                        target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                        if (target) {
-                            return this.switchTaskPickup(target.id);
-                        }
-                        if (roomStage >= 2) {
-                            // get energy from containers
-                            target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                            if (target) {
-                                return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
-                            }
-                        }
-                        if (roomStage >= 4) {
-                            // get energy from storage
-                            target = this.findGetStorage(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                            if (target) {
-                                return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
-                            }
-                        }
                         // get energy by harvesting
                         target = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
                         if (target) {

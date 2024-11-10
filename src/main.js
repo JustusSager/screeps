@@ -24,7 +24,6 @@ module.exports.loop = function () {
     let creeps = _.values(Game.creeps);
     for (let creep of creeps) {
         try {
-            creep.initTask();
             creep.run(requestManager);
         } catch (e) {
             console.log(e);

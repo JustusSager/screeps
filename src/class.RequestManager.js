@@ -3,19 +3,19 @@ const BuildRequest = require("class.BuildRequest");
 const RepairRequest = require("class.RepairRequest");
 const UpgradeRequest = require("class.UpgradeRequest");
 const PickupRequest = require("class.PickupRequest");
+const WithdrawRequest = require("class.WithdrawRequest");
 
 class RequestManager {
     constructor(room) {
         this.room = room;
         this.room_stage = this.room.memory.stage;
         this.requests = [];
-        this.max_priority = 0;
 
         this.load_construction_site_requests();
         this.load_repair_site_requests();
         this.load_controller_requests();
         this.load_pickup_requests();
-        this.update_max_priority();
+        this.load_withdraw_requests();
     }
 
     load_construction_site_requests() {
@@ -73,21 +73,27 @@ class RequestManager {
         let controller = this.room.controller;
         let num_current_upgrader = _.filter(Game.creeps, c => c.room === this.room && c.memory.task && c.memory.task.name === 'upgrade').length;
         if (num_current_upgrader === 0) {
-            this.requests.push(new UpgradeRequest(controller.id, 10))
+            this.requests.push(new UpgradeRequest(controller.id, 10));
         } else {
-            this.requests.push(new UpgradeRequest(controller.id, 1))
+            this.requests.push(new UpgradeRequest(controller.id, 1));
         }
     }
 
     load_pickup_requests() {
-        for (let dropped_resource of this.room.find(FIND_DROPPED_RESOURCES)) {
-            this.requests.push(new PickupRequest(dropped_resource.id, 1));
+        for (let dropped_resource of this.room.find(FIND_DROPPED_RESOURCES, {filter: r => r.amount > 0})) {
+            let priority = Math.max(5, Math.min(1, dropped_resource.amount / 1000))
+            this.requests.push(new PickupRequest(dropped_resource.id, priority));
         }
     }
 
-    update_max_priority() {
-        this.requests.sort((a, b) => b.priority - a.priority);
-        this.max_priority = Math.max(...this.requests.map(req => req.priority));
+    load_withdraw_requests() {
+        for (let container of this.room.find(FIND_STRUCTURES, {
+            filter: s => (s.structureType === STRUCTURE_CONTAINER || s.structureType === STRUCTURE_STORAGE) &&
+                s.store.getUsedCapacity() > 100
+        })) {
+            let priority = Math.round((container.store.getUsedCapacity() / container.store.getCapacity()) * 5)
+            this.requests.push(new WithdrawRequest(container.id, RESOURCE_ENERGY, priority));
+        }
     }
 
     getRequest(creep) {
@@ -99,7 +105,11 @@ class RequestManager {
             request.priority = 1;
         } else if (request instanceof PickupRequest) {
             request.workLeft -= creep.store.getFreeCapacity();
+        } else if (request instanceof WithdrawRequest) {
+            request.workLeft -= creep.store.getFreeCapacity();
         }
+        if (request) creep.memory.request = request.toObj();
+        else creep.memory.request = undefined;
         return request
     }
 

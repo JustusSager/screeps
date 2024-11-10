@@ -12,13 +12,14 @@ function sum(...values) {
     return result
 }
 
-class PickupRequest {
-    constructor(targetID, priority = 1) {
+class WithdrawRequest {
+    constructor(targetID, resource, priority = 1) {
         this.target = deref(targetID);
         this.priority = priority;
+        this.resource = resource;
         this.pos = this.target.pos;
-        this.workLeft = this.target.amount - sum(..._.filter(Game.creeps, c =>
-            c.memory.task.name === 'pickup' &&
+        this.workLeft = this.target.store.getUsedCapacity(resource) - sum(..._.filter(Game.creeps, c =>
+            c.memory.task.name === 'withdraw' &&
             c.memory.task.target === this.target.id
         ).map(c => c.store.getFreeCapacity()));
     }
@@ -36,11 +37,14 @@ class PickupRequest {
     }
 
     switchTask(creep) {
-        creep.say("🧺");
+        creep.say("⛽");
         creep.memory.task = {
-            name: 'pickup',
+            name: 'withdraw',
             targetID: this.target.id,
-            targetRange: 1
+            targetRange: 1,
+            options: {
+                resource: this.resource
+            }
         };
         return 0;
     }
@@ -50,10 +54,11 @@ class PickupRequest {
             type: config.REQUEST_PICKUP,
             target: this.target.id,
             priority: this.priority,
+            resource: this.resource,
             pos: this.pos,
             workLeft: this.workLeft
         }
     }
 }
 
-module.exports = PickupRequest;
+module.exports = WithdrawRequest;
