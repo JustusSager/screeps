@@ -65,12 +65,9 @@ module.exports.loop = function () {
         0 :
         (
             room_stage === 8 ?
-            Math.min(4, Math.ceil(room.memory.construction_sites.all.length / 10)) :
-            2 + Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10))
+            1 + Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10)) :
+            3 + Math.min(4, Math.floor(room.memory.construction_sites.all.length / 10))
         )
-
-    let repairers = _.filter(creeps, creep => creep.memory.role === 'Repairer');
-    let max_num_repairers = config.stageOptions.numRepairers[room_stage];
 
     let managers = _.filter(creeps, creep => creep.memory.role === 'Manager');
     let secretaries = _.filter(creeps, creep => creep.memory.role === 'Secretary');
@@ -123,9 +120,6 @@ module.exports.loop = function () {
         } else if (builders.length < max_num_builders) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Builder");
             console.log('Spawn Builder: ' + spawnResult);
-        } else if (repairers.length < max_num_repairers) {
-            spawnResult = spawn.createGenericCreep(energyCapacity, "Repairer");
-            console.log('Spawn Repairer: ' + spawnResult);
         }
     }
 
@@ -138,7 +132,6 @@ module.exports.loop = function () {
             'H: ' + harvesters.length + '/' + max_num_harvesters +
             ' U: ' + upgraders.length + '/' + max_num_upgraders +
             ' B: ' + builders.length + '/' + max_num_builders +
-            ' R: ' + repairers.length + '/' + max_num_repairers +
             ' TM: ' + transporters.length + "/" + max_num_transporters;
         new RoomVisual(Game.rooms[v.room].name).text(text_general, v.x, v.y, {color: v.color, font: v.font});
         new RoomVisual(Game.rooms[v.room].name).text(text_creeps, v.x, v.y + 1, {color: v.color, font: v.font});

@@ -146,7 +146,7 @@ module.exports = function () {
         }
 
         this.memory.link_source_ids = [];
-        for (const [source_id, source_meta] of Object.entries(this.memory.source_metas)) {
+        for (const source_id of Object.keys(this.memory.source_metas)) {
             try {
                 this.memory.link_source_ids.push(deref(source_id).pos.findInRange(FIND_MY_STRUCTURES, 2, {
                     filter: (l) =>
