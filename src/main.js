@@ -63,7 +63,7 @@ module.exports.loop = function () {
 
     let workers = _.filter(creeps, creep => creep.memory.role === 'Worker' || creep.memory.role === 'Upgrader' || creep.memory.role === 'Builder' || creep.memory.role === 'Repairer');
     let max_num_workers = (room_stage === 8 ? 1 : 3) +
-        Math.min(4, Math.floor(room.memory.requests.length / 10));
+        Math.min(4, Math.ceil(room.memory.requests.length / 20));
 
     let managers = _.filter(creeps, creep => creep.memory.role === 'Manager');
     let secretaries = _.filter(creeps, creep => creep.memory.role === 'Secretary');
