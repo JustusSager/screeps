@@ -14,7 +14,7 @@ class BuildRequest {
     }
 
     prerequisites_fulfilled(creep) {
-        return this.prerequisites_fulfillable(creep) && creep.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
+        return this.prerequisites_fulfillable(creep) && creep.store[RESOURCE_ENERGY] > 0;
     }
 
     prerequisites_fulfillable(creep) {

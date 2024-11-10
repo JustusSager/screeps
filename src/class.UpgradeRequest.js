@@ -9,10 +9,11 @@ class UpgradeRequest {
         this.target = deref(targetID);
         this.priority = priority;
         this.pos = this.target.pos;
+        this.workLeft = 10;
     }
 
     prerequisites_fulfilled(creep) {
-        return this.prerequisites_fulfillable(creep) && creep.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
+        return this.prerequisites_fulfillable(creep) && creep.store[RESOURCE_ENERGY] > 0;
     }
 
     prerequisites_fulfillable(creep) {
@@ -39,6 +40,7 @@ class UpgradeRequest {
             target: this.target.id,
             priority: this.priority,
             pos: this.pos,
+            workLeft: this.workLeft
         }
     }
 }
