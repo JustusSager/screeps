@@ -1,7 +1,8 @@
-const BuildRequest = require('class.BuildRequest');
-const RepairRequest = require('class.RepairRequest');
+const config = require("config");
+const BuildRequest = require("class.BuildRequest");
+const RepairRequest = require("class.RepairRequest");
+const UpgradeRequest = require("class.UpgradeRequest");
 
-const config = require('config');
 const {roomStage} = require("./config");
 
 function deref(objectID) {
@@ -35,8 +36,6 @@ module.exports = function () {
                 s.structureType === STRUCTURE_CONTAINER
                 && s.store.getUsedCapacity() > s.store.getCapacity() * 0.8
         });
-
-        this.updateMemoryRequests()
     }
 
     Room.prototype.updateMemoryStage = function () {
@@ -175,87 +174,5 @@ module.exports = function () {
             }),
             'all': this.find(FIND_CONSTRUCTION_SITES)
         }
-    }
-
-    Room.prototype.updateMemoryRequests = function () {
-        if (!this.memory.requests) {
-            this.memory.requests = [];
-        }
-        let requests = [];
-        let room_stage = this.memory.stage;
-
-        for (let _request of this.memory.requests) {
-            if (!deref(_request.target)) continue
-            let request = null;
-            switch (_request.type) {
-                case config.BUILD_REQUEST:
-                    request = new BuildRequest(_request.target, _request.priority);
-                    break;
-                case config.REPAIR_REQUEST:
-                    request = new RepairRequest(_request.target, _request.priority);
-                    break;
-            }
-            if (request != null && !request.invalid() && !_.some(requests, req => req.target.id === request.target.id)) {
-                requests.push(request)
-            }
-        }
-
-        // update requests for construction sites
-        for (let construction_site of this.find(FIND_CONSTRUCTION_SITES)) {
-            if (!_.some(requests, req => req.target.id === construction_site.id)) {
-                let priority = 1;
-                if (
-                    construction_site.structureType === STRUCTURE_TOWER ||
-                    construction_site.structureType === STRUCTURE_SPAWN
-                ) {
-                    priority = 9;
-                } else if (
-                    construction_site.structureType === STRUCTURE_EXTENSION ||
-                    construction_site.structureType === STRUCTURE_STORAGE ||
-                    construction_site.structureType === STRUCTURE_LINK ||
-                    construction_site.structureType === STRUCTURE_CONTAINER
-                ) {
-                    priority = 5;
-                } else if (construction_site.structureType !== STRUCTURE_ROAD) {
-                    priority = 2;
-                }
-                if (priority >= 0) {
-                    requests.push(new BuildRequest(construction_site.id, priority));
-                }
-            }
-        }
-
-        // update requests for repair sites
-        for (let repair_site of this.find(FIND_STRUCTURES, {filter: s => s.hits < s.hitsMax * config.repairThreshold})) {
-            if (!_.some(requests, req => req.target.id === repair_site.id)) {
-                let priority = 1;
-                if (repair_site.hits < config.quickRepairThreshold) {
-                    priority = 10;
-                } else if (repair_site.structureType !== STRUCTURE_RAMPART && repair_site.structureType !== STRUCTURE_WALL) {
-                    priority = 4;
-                } else if (
-                    repair_site.structureType === STRUCTURE_RAMPART &&
-                    repair_site.structureType === STRUCTURE_WALL &&
-                    repair_site.hits < config.stageOptions.wallRepairs[room_stage]
-                ) {
-                    priority = 3;
-                } else if (
-                    repair_site.structureType === STRUCTURE_RAMPART &&
-                    repair_site.structureType === STRUCTURE_WALL &&
-                    repair_site.hits >= config.stageOptions.wallRepairs[room_stage]
-                ) {
-                    priority = -1;
-                }
-
-                if (priority >= 0) {
-                    requests.push(new RepairRequest(repair_site.id, priority));
-                }
-            }
-        }
-
-        this.memory.requests = [];
-        requests.sort((a, b) => b.priority - a.priority).forEach(request => {
-            this.memory.requests.push(request.toObj());
-        })
     }
 }

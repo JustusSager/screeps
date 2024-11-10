@@ -25,6 +25,16 @@ class RepairRequest {
         return this.target.hits === this.target.hitsMax;
     }
 
+    switchTask(creep) {
+        creep.say("🛠️");
+        creep.memory.task = {
+            name: 'repair',
+            targetID: this.target.id,
+            targetRange: 2
+        };
+        return 0;
+    }
+
     toObj() {
         return {
             type: config.REPAIR_REQUEST,

@@ -3,6 +3,7 @@ require('prototype.creep')();
 require('prototype.room')();
 require('prototype.tower')();
 const config = require('config');
+const RequestManager = require('class.RequestManager');
 
 function deref(objectID) {
     return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
@@ -14,13 +15,20 @@ module.exports.loop = function () {
     spawn.initMemory();
     let room = spawn.room;
     let room_stage = room.memory.stage;
+
+    let requestManager = new RequestManager(room);
+    requestManager.load_construction_site_requests();
+    requestManager.load_repair_site_requests();
+    requestManager.load_controller_requests();
+    requestManager.toMemory();
+
     room.updateMemory();
 
     let creeps = _.values(Game.creeps);
     for (let creep of creeps) {
         try {
             creep.initTask();
-            creep.run();
+            creep.run(requestManager);
         } catch (e) {
             console.log(e);
         }

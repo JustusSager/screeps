@@ -1,4 +1,7 @@
-const config = require('config');
+const config = require("config");
+const BuildRequest = require("class.BuildRequest");
+const RepairRequest = require("class.RepairRequest");
+const UpgradeRequest = require("class.UpgradeRequest");
 
 function deref(objectID) {
     return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
@@ -19,12 +22,12 @@ module.exports = function () {
     }
 
     // Creep executes task
-    Creep.prototype.run = function () {
+    Creep.prototype.run = function (requestManager) {
         if (this.memory.task) {
             let roomStage = this.room.memory.stage;
             let taskName = this.memory.task.name;
             let target = deref(this.memory.task.targetID);
-            if (!target) this.updateTask();
+            if (!target) this.updateTask(requestManager);
             let targetRange = this.memory.task.targetRange ? this.memory.task.targetRange : 1;
             let options = this.memory.task.options ? this.memory.task.options : {};
             let result = undefined, resource = undefined;
@@ -37,7 +40,7 @@ module.exports = function () {
                         result = this.harvest(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store.getFreeCapacity() === 0) {
-                            this.updateTask(result);
+                            this.updateTask(requestManager);
                         }
                         break;
                     case 'mine':
@@ -82,7 +85,7 @@ module.exports = function () {
                         result = this.transfer(target, resource);
                         // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store.getUsedCapacity(resource) === 0 || !this.store.getUsedCapacity(resource)) {
-                            this.updateTask();
+                            this.updateTask(requestManager);
                         }
                         break;
                     case 'withdraw':
@@ -90,53 +93,53 @@ module.exports = function () {
                         result = this.withdraw(target, resource);
                         // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store.getCapacity() === this.store.getUsedCapacity()) {
-                            this.updateTask();
+                            this.updateTask(requestManager);
                         }
                         break;
                     case 'pickup':
                         result = this.pickup(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store.getFreeCapacity() === 0) {
-                            this.updateTask();
+                            this.updateTask(requestManager);
                         }
                         break;
                     case 'upgrade':
                         result = this.upgradeController(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
-                            this.updateTask();
+                            this.updateTask(requestManager);
                         }
                         break;
                     case 'build':
                         result = this.build(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store[RESOURCE_ENERGY] === 0) {
-                            this.updateTask();
+                            this.updateTask(requestManager);
                         }
                         break;
                     case 'repair':
-                        if (target.hits === target.hitsMax) this.updateTask();
+                        if (target.hits === target.hitsMax) this.updateTask(requestManager);
                         result = this.repair(target);
                         // console.log(this.name, JSON.stringify(this.memory), result);
                         if (result < 0 || this.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
-                            this.updateTask();
+                            this.updateTask(requestManager);
                         }
                         break;
                     case 'moveTo':
                         // console.log(this.name, JSON.stringify(this.memory), result);
-                        this.updateTask();
+                        this.updateTask(requestManager);
                         if (this.pos.getRangeTo(target, targetRange)) {
-                            this.updateTask();
+                            this.updateTask(requestManager);
                         }
                         break;
                     case 'idle':
                         // console.log(this.name, JSON.stringify(this.memory), result);
                         this.say("⚠️");
-                        this.updateTask();
+                        this.updateTask(requestManager);
                         break;
                     default:
                         // console.log(this.name, JSON.stringify(this.memory), result);
-                        this.updateTask();
+                        this.updateTask(requestManager);
                         break;
                 }
             }
@@ -144,7 +147,7 @@ module.exports = function () {
     }
 
     // Creep Task update memory to new Task
-    Creep.prototype.updateTask = function () {
+    Creep.prototype.updateTask = function (requestManager) {
         if (this.memory.role) {
             let target = undefined;
             let roomStage = this.room.memory.stage;
@@ -237,47 +240,13 @@ module.exports = function () {
                     }
                     break;
                 case 'Upgrader':
-                    // upgrade controller
-                    if (this.store[RESOURCE_ENERGY] > 0) {
-                        return this.switchTaskUpgrade();
-                    }
-                    // get dropped energy
-                    target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                    if (target) {
-                        return this.switchTaskPickup(target.id);
-                    }
-                    if (roomStage >= 2) {
-                        // get energy from containers
-                        target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                        if (target) {
-                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
-                        }
-                    }
-                    if (roomStage >= 4) {
-                        // get energy from storage
-                        target = this.findGetStorage(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                        if (target) {
-                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
-                        }
-                    }
-                    // get energy by harvesting
-                    target = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
-                    if (target) {
-                        return this.switchTaskHarvest(target.id);
-                    }
-                    break;
                 case 'Builder':
                 case 'Repairer':
                     if (this.store[RESOURCE_ENERGY] > 0) {
-                        // Work at construction site
-                        let _req = this.findConstructionSite();
-                        if (_req && _req.type === config.BUILD_REQUEST) {
-                            return this.switchTaskBuild(_req.target)
-                        } else if (_req && _req.type === config.REPAIR_REQUEST) {
-                            return this.switchTaskRepair(_req.target)
+                        let request = requestManager.getRequest(this);
+                        if (request && request.prerequisites_fulfilled(this)) {
+                            return request.switchTask(this);
                         }
-                        // upgrade controller
-                        return this.switchTaskUpgrade();
                     } else {
                         // get dropped energy
                         target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
@@ -384,33 +353,6 @@ module.exports = function () {
         };
         return 0;
     }
-    Creep.prototype.switchTaskUpgrade = function () {
-        this.say("🆙");
-        this.memory.task = {
-            name: 'upgrade',
-            targetID: this.room.controller.id,
-            targetRange: 2
-        };
-        return 0;
-    }
-    Creep.prototype.switchTaskBuild = function (targetID) {
-        this.say("🔨");
-        this.memory.task = {
-            name: 'build',
-            targetID: targetID,
-            targetRange: 2
-        };
-        return 0;
-    }
-    Creep.prototype.switchTaskRepair = function (targetID) {
-        this.say("🛠️");
-        this.memory.task = {
-            name: 'repair',
-            targetID: targetID,
-            targetRange: 2
-        };
-        return 0;
-    }
     Creep.prototype.switchTaskTransfer = function (targetID, resource = RESOURCE_ENERGY) {
         this.say("🚋");
         this.memory.task = {
@@ -441,15 +383,6 @@ module.exports = function () {
             options: {
                 resource: resource
             }
-        };
-        return 0;
-    }
-    Creep.prototype.switchTaskMoveTo = function (targetID) {
-        this.say("🥾");
-        this.memory.task = {
-            name: 'moveTo',
-            targetID: targetID,
-            targetRange: 4
         };
         return 0;
     }
@@ -503,15 +436,5 @@ module.exports = function () {
                 s.structureType === STRUCTURE_STORAGE
                 && s.store.getUsedCapacity(resource) > amount
         });
-    }
-
-// Find construction/repair sites --------------------------------------------------------------------------------------
-    Creep.prototype.findConstructionSite = function () {
-        let _req = this.room.memory.requests.filter(req => req.type === config.BUILD_REQUEST || req.type === config.REPAIR_REQUEST);
-        let max_priority = Math.max(..._req.map(_req => _req.priority));
-        _req = _req.filter(req => req.priority === max_priority);
-        if (_req.length > 0) {
-            return this.pos.findClosestByPath(_req);
-        }
     }
 }

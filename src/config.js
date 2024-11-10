@@ -42,6 +42,7 @@ module.exports = {
         ]
     },
     // Constants
+    UPGRADE_REQUEST: 'UpgradeRequest',
     BUILD_REQUEST: 'BuildRequest',
     REPAIR_REQUEST: 'RepairRequest',
 

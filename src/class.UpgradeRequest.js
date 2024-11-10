@@ -4,13 +4,11 @@ function deref(objectID) {
     return Game.getObjectById(objectID) || Game.flags[objectID] || Game.creeps[objectID] || Game.spawns[objectID] || null;
 }
 
-class BuildRequest {
+class UpgradeRequest {
     constructor(targetID, priority = 1) {
         this.target = deref(targetID);
         this.priority = priority;
-        this.structureType = this.target.structureType;
         this.pos = this.target.pos;
-        this.workLeft = this.target.progressTotal - this.target.progress;
     }
 
     prerequisites_fulfilled(creep) {
@@ -22,13 +20,13 @@ class BuildRequest {
     }
 
     invalid() {
-        return this.target === undefined
+        return false
     }
 
     switchTask(creep) {
-        creep.say("🔨");
+        creep.say("🆙");
         creep.memory.task = {
-            name: 'build',
+            name: 'upgrade',
             targetID: this.target.id,
             targetRange: 2
         };
@@ -37,14 +35,12 @@ class BuildRequest {
 
     toObj() {
         return {
-            type: config.BUILD_REQUEST,
+            type: config.UPGRADE_REQUEST,
             target: this.target.id,
             priority: this.priority,
-            structureType: this.structureType,
             pos: this.pos,
-            workLeft: this.workLeft
         }
     }
 }
 
-module.exports = BuildRequest;
+module.exports = UpgradeRequest;
