@@ -194,6 +194,7 @@ module.exports = function () {
             }
         }
 
+        // update requests for construction sites
         for (let construction_site of this.find(FIND_CONSTRUCTION_SITES)) {
             if (!_.some(requests, req => req.target.id === construction_site.id)) {
                 let priority = 1;

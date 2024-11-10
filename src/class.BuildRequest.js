@@ -22,7 +22,7 @@ class BuildRequest {
     }
 
     invalid() {
-        return deref(this.target) === undefined
+        return this.target === undefined
     }
 
     toObj() {
