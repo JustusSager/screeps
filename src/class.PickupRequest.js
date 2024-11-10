@@ -21,7 +21,7 @@ class PickupRequest {
     }
 
     invalid() {
-        return this.target === undefined
+        return this.target === undefined || this.workLeft <= 0;
     }
 
     switchTask(creep) {
