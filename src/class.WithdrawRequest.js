@@ -19,6 +19,7 @@ class WithdrawRequest {
         this.resource = resource;
         this.pos = this.target.pos;
         this.workLeft = this.target.store.getUsedCapacity(resource) - sum(..._.filter(Game.creeps, c =>
+            c.memory.task &&
             c.memory.task.name === 'withdraw' &&
             c.memory.task.target === this.target.id
         ).map(c => c.store.getFreeCapacity()));

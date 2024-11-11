@@ -18,6 +18,7 @@ class HarvestRequest {
         this.priority = priority;
         this.pos = this.target.pos;
         this.workLeft = this.target.energy - sum(..._.filter(Game.creeps, c =>
+            c.memory.task &&
             c.memory.task.name === 'harvest' &&
             c.memory.task.target === this.target.id
         ).map(c => c.store.getFreeCapacity()));

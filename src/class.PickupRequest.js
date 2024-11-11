@@ -18,6 +18,7 @@ class PickupRequest {
         this.priority = priority;
         this.pos = this.target.pos;
         this.workLeft = this.target.amount - sum(..._.filter(Game.creeps, c =>
+            c.memory.task &&
             c.memory.task.name === 'pickup' &&
             c.memory.task.target === this.target.id
         ).map(c => c.store.getFreeCapacity()));
