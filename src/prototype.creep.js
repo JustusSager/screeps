@@ -234,9 +234,6 @@ module.exports = function () {
                     }
                     break;
                 case 'Worker':
-                case 'Upgrader':
-                case 'Builder':
-                case 'Repairer':
                     let request = requestManager.getRequest(this);
                     if (request) {
                         return request.switchTask(this);

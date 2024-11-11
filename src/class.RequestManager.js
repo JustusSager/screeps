@@ -102,7 +102,7 @@ class RequestManager {
         for (let source of this.room.find(FIND_SOURCES_ACTIVE, {
             filter: s => !_.some(Game.creeps, c => c.memory.role === config.CREEP_MINER && c.memory.sourceID === s.id)
         })) {
-            this.requests.push(new HarvestRequest(source.id), 1);
+            this.requests.push(new HarvestRequest(source.id, 1));
         }
     }
 
