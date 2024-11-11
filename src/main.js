@@ -51,10 +51,6 @@ module.exports.loop = function () {
         }
     }
 
-    let harvesters = _.filter(creeps, creep => creep.memory.role === 'Harvester');
-    let max_num_harvesters = _.filter(room.memory.source_metas, s => s['num_containers'] === 0 && s['num_links'] === 0).length +
-        (room_stage < 3 ? 3 : 1);
-
     let miners = _.filter(creeps, creep => creep.memory.role === 'Miner');
 
     let transporters = _.filter(creeps, creep => creep.memory.role === 'Transporter');
@@ -62,7 +58,7 @@ module.exports.loop = function () {
 
     let workers = _.filter(creeps, creep => creep.memory.role === 'Worker' || creep.memory.role === 'Upgrader' || creep.memory.role === 'Builder' || creep.memory.role === 'Repairer');
     let max_num_workers = (room_stage === 8 ? 1 : 3) +
-        Math.min(4, Math.ceil(room.memory.requests.length / 20));
+        Math.min(4, Math.ceil(room.memory.requests.length / 30));
 
     let managers = _.filter(creeps, creep => creep.memory.role === 'Manager');
     let secretaries = _.filter(creeps, creep => creep.memory.role === 'Secretary');
@@ -73,7 +69,7 @@ module.exports.loop = function () {
     let energyAvailable = spawn.room.energyAvailable;
     let spawnResult = undefined;
 
-    if (room_stage >= 4 && room.memory.storage_id !== undefined) {
+    if (room_stage >= 4 && workers.length > 0 && room.memory.storage_id !== undefined) {
         if (managers.length === 0) {
             spawnResult = spawn.createManagerCreep(energyAvailable);
         }
@@ -81,7 +77,7 @@ module.exports.loop = function () {
             spawnResult = spawn.createTransporterCreep(energyAvailable, 'Secretary');
         }
     }
-    if (room_stage >= 2 && harvesters.length > 0) {
+    if (room_stage >= 2 && workers.length > 0) {
         for (const [source_id, source_meta] of Object.entries(room.memory.source_metas)) {
             if (!_.some(miners, m => m.memory.sourceID === source_id)) {
                 if (source_meta.num_links > 0) {
@@ -102,16 +98,13 @@ module.exports.loop = function () {
                 spawnResult = spawn.createTransporterCreep(energyAvailable, 'Transporter');
                 console.log('Spawn microTransporter: ' + spawnResult);
             }
-        } else if (harvesters.length < max_num_harvesters) {
-            spawnResult = spawn.createGenericCreep(energyCapacity, "Harvester");
-            console.log('Spawn Harvester: ' + spawnResult);
-            if (spawnResult === ERR_NOT_ENOUGH_ENERGY && harvesters.length === 0) {
-                spawnResult = spawn.createGenericCreep(energyAvailable, "Harvester");
-                console.log('Spawn microHarvester: ' + spawnResult);
-            }
         } else if (workers.length < max_num_workers) {
             spawnResult = spawn.createGenericCreep(energyCapacity, "Worker");
             console.log('Spawn Worker: ' + spawnResult);
+            if (spawnResult === ERR_NOT_ENOUGH_ENERGY && workers.length === 0) {
+                spawnResult = spawn.createGenericCreep(energyAvailable, "Worker");
+                console.log('Spawn microWorker: ' + spawnResult);
+            }
         }
     }
 
@@ -129,7 +122,6 @@ module.exports.loop = function () {
             v.room + ' (RCL ' + Game.rooms[v.room].controller.level + ' Stage ' + room_stage + ') ' + spawn.name +
             ': Energy: ' + Game.rooms[v.room].energyAvailable + '/' + Game.rooms[v.room].energyCapacityAvailable +
             ' Creeps: ' + creeps_without_role.length + "/" + creeps_without_task.length + "/" + creeps.length +
-            ' H: ' + harvesters.length + '/' + max_num_harvesters +
             ' W: ' + workers.length + '/' + max_num_workers +
             ' TM: ' + transporters.length + "/" + max_num_transporters;
         let text_creeps = 'U: ' + creeps_upgrading + ' B: ' + creeps_building + ' R: ' + creeps_repairing +

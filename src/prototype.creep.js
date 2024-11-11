@@ -186,44 +186,6 @@ module.exports = function () {
                         return this.switchTaskMoveTo(target.id)
                     }*/
                     break;
-                case 'Harvester':
-                    // Transfer energy to Spawn or Extensions
-                    target = this.findStoreSpawnExtension();
-                    if (this.store[RESOURCE_ENERGY] > 0 && target) {
-                        return this.switchTaskTransfer(target.id);
-                    }
-                    if (roomStage >= 3) {
-                        // transfer energy into tower
-                        target = this.findStoreTower();
-                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
-                            return this.switchTaskTransfer(target.id);
-                        }
-                    }
-                    if (roomStage >= 4) {
-                        // transfer energy into storage
-                        target = this.findStoreStorage();
-                        if (this.store[RESOURCE_ENERGY] > 0 && target) {
-                            return this.switchTaskTransfer(target.id);
-                        }
-                    }
-                    // get dropped energy
-                    target = this.findGetDroppedResource(RESOURCE_ENERGY, this.store.getFreeCapacity());
-                    if (target) {
-                        return this.switchTaskPickup(target.id);
-                    }
-                    // get energy from containers
-                    if (roomStage >= 2) {
-                        target = this.findGetContainer(RESOURCE_ENERGY, this.store.getFreeCapacity())
-                        if (target) {
-                            return this.switchTaskWithdraw(target.id, RESOURCE_ENERGY);
-                        }
-                    }
-                    // get energy by harvesting
-                    target = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
-                    if (target) {
-                        return this.switchTaskHarvest(target.id);
-                    }
-                    break;
                 case 'Miner':
                     if (this.memory.sourceID) {
                         this.memory.task = {
@@ -233,6 +195,7 @@ module.exports = function () {
                         }
                     }
                     break;
+                case 'Harvester':
                 case 'Worker':
                     let request = requestManager.getRequest(this);
                     if (request) {
@@ -310,15 +273,6 @@ module.exports = function () {
     }
 
 // Creep Task switching functions ----------------------------------------------------------------------------------
-    Creep.prototype.switchTaskHarvest = function (targetID) {
-        this.say("⛏️");
-        this.memory.task = {
-            name: 'harvest',
-            targetID: targetID,
-            targetRange: 1
-        };
-        return 0;
-    }
     Creep.prototype.switchTaskTransfer = function (targetID, resource = RESOURCE_ENERGY) {
         this.say("🚋");
         this.memory.task = {
