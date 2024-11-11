@@ -3,6 +3,7 @@ const BuildRequest = require("class.BuildRequest");
 const HarvestRequest = require("class.HarvestRequest");
 const PickupRequest = require("class.PickupRequest");
 const RepairRequest = require("class.RepairRequest");
+const TransferRequest = require("class.TransferRequest");
 const UpgradeRequest = require("class.UpgradeRequest");
 const WithdrawRequest = require("class.WithdrawRequest");
 
@@ -18,23 +19,17 @@ class RequestManager {
         this.load_pickup_requests();
         this.load_withdraw_requests();
         this.load_harvest_requests();
+        this.load_transfer_request();
+        this.requests.sort((a, b) => b.priority - a.priority);
     }
 
     load_construction_site_requests() {
         for (let construction_site of this.room.find(FIND_CONSTRUCTION_SITES)) {
             let priority = 1;
-            if (
-                construction_site.structureType === STRUCTURE_TOWER ||
-                construction_site.structureType === STRUCTURE_SPAWN
-            ) {
-                priority = 9;
-            } else if (
-                construction_site.structureType === STRUCTURE_EXTENSION ||
-                construction_site.structureType === STRUCTURE_STORAGE ||
-                construction_site.structureType === STRUCTURE_LINK ||
-                construction_site.structureType === STRUCTURE_CONTAINER
-            ) {
-                priority = 5;
+            if (construction_site.structureType === STRUCTURE_TOWER || construction_site.structureType === STRUCTURE_SPAWN) {
+                priority = 8;
+            } else if (construction_site.structureType === STRUCTURE_EXTENSION || construction_site.structureType === STRUCTURE_STORAGE || construction_site.structureType === STRUCTURE_LINK || construction_site.structureType === STRUCTURE_CONTAINER) {
+                priority = 6;
             } else if (construction_site.structureType !== STRUCTURE_ROAD) {
                 priority = 2;
             }
@@ -51,17 +46,9 @@ class RequestManager {
                 priority = 10;
             } else if (repair_site.structureType !== STRUCTURE_RAMPART && repair_site.structureType !== STRUCTURE_WALL) {
                 priority = 4;
-            } else if (
-                repair_site.structureType === STRUCTURE_RAMPART &&
-                repair_site.structureType === STRUCTURE_WALL &&
-                repair_site.hits < config.stageOptions.wallRepairs[this.room_stage]
-            ) {
+            } else if (repair_site.structureType === STRUCTURE_RAMPART && repair_site.structureType === STRUCTURE_WALL && repair_site.hits < config.stageOptions.wallRepairs[this.room_stage]) {
                 priority = 3;
-            } else if (
-                repair_site.structureType === STRUCTURE_RAMPART &&
-                repair_site.structureType === STRUCTURE_WALL &&
-                repair_site.hits >= config.stageOptions.wallRepairs[this.room_stage]
-            ) {
+            } else if (repair_site.structureType === STRUCTURE_RAMPART && repair_site.structureType === STRUCTURE_WALL && repair_site.hits >= config.stageOptions.wallRepairs[this.room_stage]) {
                 priority = -1;
             }
 
@@ -90,8 +77,7 @@ class RequestManager {
 
     load_withdraw_requests() {
         for (let container of this.room.find(FIND_STRUCTURES, {
-            filter: s => (s.structureType === STRUCTURE_CONTAINER || s.structureType === STRUCTURE_STORAGE) &&
-                s.store.getUsedCapacity() > 100
+            filter: s => (s.structureType === STRUCTURE_CONTAINER || s.structureType === STRUCTURE_STORAGE) && s.store.getUsedCapacity() > 100
         })) {
             let priority = 1 + Math.round((container.store.getUsedCapacity() / container.store.getCapacity()) * 5)
             this.requests.push(new WithdrawRequest(container.id, RESOURCE_ENERGY, priority));
@@ -103,6 +89,18 @@ class RequestManager {
             filter: s => !_.some(Game.creeps, c => c.memory.role === config.CREEP_MINER && c.memory.sourceID === s.id)
         })) {
             this.requests.push(new HarvestRequest(source.id, 1));
+        }
+    }
+
+    load_transfer_request() {
+        for (let structure of this.room.find(FIND_STRUCTURES, {
+            filter: s => (s.structureType === STRUCTURE_SPAWN ||
+                s.structureType === STRUCTURE_EXTENSION ||
+                s.structureType === STRUCTURE_TOWER) &&
+                s.store.getFreeCapacity(RESOURCE_ENERGY) > 10
+        })) {
+            let priority = this.room.energyAvailable < 200 ? 10 : Math.floor((1 - (this.room.energyAvailable / this.room.energyCapacityAvailable)) * 10)
+            this.requests.push(new TransferRequest(structure.id, RESOURCE_ENERGY, priority))
         }
     }
 
@@ -118,8 +116,7 @@ class RequestManager {
         } else if (request instanceof WithdrawRequest) {
             request.workLeft -= creep.store.getFreeCapacity();
         }
-        if (request) creep.memory.request = request.toObj();
-        else creep.memory.request = undefined;
+        if (request) creep.memory.request = request.toObj(); else creep.memory.request = undefined;
         return request
     }
 

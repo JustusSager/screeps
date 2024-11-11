@@ -41,6 +41,7 @@ module.exports = {
     REQUEST_HARVEST: 'HarvestRequest',
     REQUEST_PICKUP: 'PickupRequest',
     REQUEST_REPAIR: 'RepairRequest',
+    REQUEST_TRANSFER: 'TransferRequest',
     REQUEST_UPGRADE: 'UpgradeRequest',
     REQUEST_WITHDRAW: 'WithdrawRequest',
 
