@@ -22,6 +22,7 @@ module.exports.loop = function () {
     for (let i in Game.rooms) {
         try {
             Game.rooms[i].handle_memory();
+            Game.rooms[i].visualize();
         } catch (error) {
             console.log(error);
         }
