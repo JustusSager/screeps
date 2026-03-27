@@ -58,13 +58,13 @@ module.exports.loop = function () {
         creep.run(speak = true);
     }
 
-    /*
+    // Baseplaning and building
     try {
+        basebuilding.baseplaning();
         basebuilding.run();
     } catch (error) {
         console.log(error)
     }
-    */
 
     // clear memory
     for(var i in Memory.creeps) {

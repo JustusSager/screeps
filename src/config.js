@@ -4,8 +4,7 @@ module.exports = {
         printResult: true,
         maxConstructionSites: 3,
         flagNames: [
-            'BunkerFlag',
-            'BunkerFlag1'
+            'BunkerFlag'
         ],
         rampartRCLLevel: 4, // rampartRCLLevel > 8 -> no Rampart construction
         rampartOnRoadsRCLLevel: 8 // rampartOnRoadsRCLLevel > 8 -> no Rampart construction on Roads
