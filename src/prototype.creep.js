@@ -1,4 +1,30 @@
+var roleMiner = require('role.miner');
+var roleWorker = require('role.worker');
+var roleTransporter = require('role.transporter');
+
 module.exports = function() {
+    Creep.prototype.run = function(speak = false) {
+        switch (this.memory.role) {
+            case 'miner':
+                return roleMiner.run(this, speak);
+            case 'worker':
+                return roleWorker.run(this, speak);
+            case 'transporter':
+                return roleTransporter.run(this, speak);
+            default:
+                this.assignRoleByParts(this);
+                return;
+        }
+    }
+
+    Creep.prototype.assignRoleByParts = function(speak = true) {
+        // TODO Bessere zuweisung der Rolle!
+        this.memory.role = 'transporter';
+        if (speak) {
+            this.say("Im a " + this.memory.role + "now!");
+        }
+    }
+    
     Creep.prototype.find_tombstones = 
     function(threshold = 0) {
         return this.pos.findClosestByPath(FIND_TOMBSTONES, {

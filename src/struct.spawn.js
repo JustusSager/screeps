@@ -49,15 +49,9 @@ module.exports = {
     run: function(spawn) {
 
         var numberDefenders = _.sum(Game.creeps, (c) => (c.memory.role == 'defender' && c.memory.room_home == spawn.room.name));
-        var numberExtractors = _.sum(Game.creeps, (c) => (c.memory.role == 'extractor' && c.memory.room_home == spawn.room.name));
+        var numberMiners = _.sum(Game.creeps, (c) => (c.memory.role == 'miner'  && c.memory.room_home == spawn.room.name));
+        var numberWorkers = _.sum(Game.creeps, (c) => (c.memory.role == 'worker' && c.memory.room_home == spawn.room.name));
         var numberTransporters = _.sum(Game.creeps, (c) => (c.memory.role == 'transporter' && c.memory.room_home == spawn.room.name));
-        var numberGenerics = _.sum(Game.creeps, (c) => (c.memory.role == 'generic' && c.memory.room_home == spawn.room.name && c.memory.room_home == c.memory.room_target));
-        var numberRemoteGenerics = _.sum(Game.creeps, (c) => (c.memory.role == 'generic' && c.memory.room_target && c.memory.room_home == spawn.room.name && c.memory.room_home != c.memory.room_target));
-        var numberMiners = _.sum(Game.creeps, (c) => (c.memory.role == 'miner' && c.memory.room_home == spawn.room.name));
-        var numberRepairers = _.sum(Game.creeps, (c) => (c.memory.role == 'repairer' && c.memory.room_home == spawn.room.name));
-        var numberUpgraders = _.sum(Game.creeps, (c) => (c.memory.role == 'upgrader' && c.memory.room_home == spawn.room.name));
-        var numberKings = _.sum(Game.creeps, (c) => (c.memory.role == 'king' && c.memory.room_home == spawn.room.name));
-        var numberQueens = _.sum(Game.creeps, (c) => (c.memory.role == 'queen' && c.memory.room_home == spawn.room.name));
 
         var numHarvest = _.sum(Game.creeps, (c) => (c.memory.task && c.memory.task.name == 'harvest' && c.memory.room_home == spawn.room.name));
         var numUpgrade = _.sum(Game.creeps, (c) => (c.memory.task && c.memory.task.name == 'upgrade' && c.memory.room_home == spawn.room.name));
@@ -85,20 +79,16 @@ module.exports = {
             for (let source of spawn.room.memory.energy_sources) {
                 if (!_.some(creeps_in_room, c => c.memory.role == 'miner' && c.memory.source_id == source.id)) {
                     let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
-                    let containers = Game.getObjectById(source.id).pos.findInRange(FIND_STRUCTURES, 1, {
-                        filter: s => s.structureType == STRUCTURE_CONTAINER
-                    });
                     let links = Game.getObjectById(source.id).pos.findInRange(FIND_STRUCTURES, 2, {
                         filter: s => s.structureType == STRUCTURE_LINK
                     });
-                    if (links.length > 0) {
-                        name = spawn.createMinerCreep(energy, 'miner', source.id, true);
-                        break;
+                    let source_keepers = Game.getObjectById(source.id).pos.findInRange(FIND_STRUCTURES, 10, {
+                        filter: s => s.structureType == STRUCTURE_KEEPER_LAIR
+                    });
+                    if (source_keepers == 0) {
+                        name = spawn.createMinerCreep(energy, 'miner', source.id, (links > 0));
                     }
-                    else if (containers.length > 0) {
-                        name = spawn.createMinerCreep(energy, 'miner', source.id, false);
-                        break;
-                    }
+                    
                 }
             }
             for (let mineral_source_id of spawn.room.memory.mineral_sources) {
@@ -118,69 +108,30 @@ module.exports = {
                 
             }
         }
-
         if (!spawn.spawning && name == undefined) {
+            console.log("Test")
             if ((spawn.room.find(FIND_HOSTILE_CREEPS).length > 0 || !spawn.memory.target_attack) && numberDefenders < spawn.memory.maxDefenders) {
                 let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
                 let target = spawn.memory.target_attack ? spawn.memory.target_attack : spawn.room.name
                 name = spawn.createFighterCreep(energy, 'defender', target);
             }
-            else if (numberGenerics < spawn.memory.maxGenerics) {
-                let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
-                name = spawn.createBalancedCreep(energy, 'generic', spawn.room.name);
-            }
-            else if (numberKings < 1 && spawn.room.controller.level > 4){
-                let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
-                target = _.filter(Game.flags, f => f.room == spawn.room && f.name.includes('BunkerFlag'))[0].name;
-                name = spawn.createKingCreep(energy, target);
-            }
-            else if (numberQueens < 1 && spawn.room.controller.level > 4){
-                let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
-                name = spawn.createCarrierCreep(energy, 'queen');
-            }
-            else if (numberUpgraders < spawn.memory.maxUpgraders){
-                let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
-                name = spawn.createBalancedCreep(energy, 'upgrader', spawn.room.name);
-            }
-            else if (numberTransporters < ((numberMiners - (spawn.room.memory.source_links ? spawn.room.memory.source_links.length : 0)) * config.structureSpawn.transporterMultiplier + Math.floor(spawn.room.memory.amount_dropped_energy / 1000))) {
+            else if (numberTransporters < (1 + numberMiners)) {
                 let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
                 name = spawn.createCarrierCreep(energy, 'transporter');
             }
-            else if (numberRepairers < spawn.memory.maxRepairers){
+            else if (numberWorkers < (1 + Math.floor(spawn.room.memory.amount_dropped_energy / 1000))) {
                 let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
-                name = spawn.createBalancedCreep(energy, 'repairer', spawn.room.name);
-            }
-            else if (numberExtractors < 1 && spawn.room.find(FIND_MY_STRUCTURES, s => s.structureType == STRUCTURE_EXTRACTOR && s.room.name == spawn.room.name).length > 0) {
-                let energy = spawn.room.energyAvailable > 600 ? 600 : spawn.room.energyAvailable;
-                name = spawn.createBalancedCreep(energy, 'extractor', spawn.room.name);
-            }
-            else if (spawn.memory.claim_room != undefined) {
-                if (!(createWorkerCreep(spawn, [CLAIM, MOVE], 'claimer', false, spawn.memory.claim_room) < 0)) {
-                    delete spawn.memory.claim_room;
-                }
-            }
-            else if (numberRemoteGenerics < spawn.memory.maxLongDistanceHarvesters && spawn.memory.target_remote_harvesting.length > 0) {
-                let energy = spawn.room.energyAvailable > spawn.memory.max_spawn_energy ? spawn.memory.max_spawn_energy : spawn.room.energyAvailable;
-                name = spawn.createBalancedCreep(energy, 'generic', spawn.memory.target_remote_harvesting[RemoteHarvesterTargetsCounter%2]);
-                RemoteHarvesterTargetsCounter++;
-                if (RemoteHarvesterTargetsCounter == spawn.memory.target_remote_harvesting.length) {
-                    RemoteHarvesterTargetsCounter = 0;
-                }
+                name = spawn.createBalancedCreep(energy, 'worker');
             }
         }
+        console.log(name);
+
         let text_role = spawn.room.name + ' (' + spawn.room.controller.level + ') ' + spawn.name +
-          ': E' + spawn.room.energyAvailable + '/' + spawn.room.energyCapacityAvailable +
-          ' M' + numberMiners + '/' + spawn.room.memory.energy_sources.length +
-          ' Def' + numberDefenders + '/' + spawn.memory.maxDefenders +
-          ' G' + numberGenerics + '/' + spawn.memory.maxGenerics +
-          ' RG' + numberRemoteGenerics + '/' + spawn.memory.maxLongDistanceHarvesters +
-          ' K' + numberKings + 
-          ' Q' + numberQueens +
-          ' U' + numberUpgraders + '/' + spawn.memory.maxUpgraders +
-          ' T' + numberTransporters + '/' + ((numberMiners - (spawn.room.memory.source_links ? spawn.room.memory.source_links.length : 0)) * config.structureSpawn.transporterMultiplier + Math.floor(spawn.room.memory.amount_dropped_energy / 1000)) +
-          ' R' + numberRepairers + '/' + spawn.memory.maxRepairers +
-          ' Ex' + numberExtractors + '/' + spawn.room.memory.mineral_sources.length
-          
+            ': E' + spawn.room.energyAvailable + '/' + spawn.room.energyCapacityAvailable +
+            ' Def' + numberDefenders + '/' + spawn.memory.maxDefenders +
+            ' M' + numberMiners + '/' + spawn.room.memory.energy_sources.length +
+            ' W' + numberWorkers + '/' + (1 + Math.floor(spawn.room.memory.amount_dropped_energy / 500))  + 
+            ' T' + numberTransporters + '/' + (1 + numberMiners);
 
         let text_task = 'Tasks: ' +
             ' H' + numHarvest + 
