@@ -105,7 +105,6 @@ module.exports = {
             }
         }
         if (!spawn.spawning && name == undefined) {
-            console.log("Test")
             if ((spawn.room.find(FIND_HOSTILE_CREEPS).length > 0 || !target_attack) && numDefenders < maxDefenders) {
                 let energy = energy_available > max_spawn_energy ? max_spawn_energy : energy_available;
                 let target = target_attack ? target_attack : spawn.room.name
@@ -115,7 +114,7 @@ module.exports = {
                 let energy = energy_available > max_spawn_energy ? max_spawn_energy : energy_available;
                 name = spawn.createCarrierCreep(energy, 'transporter');
             }
-            else if (numWorkers < (1 + Math.floor(spawn.room.memory.amount_dropped_energy / 500))) {
+            else if (numWorkers < (1 + Math.floor(spawn.room.memory.amount_dropped_energy / 250))) {
                 let energy = energy_available > max_spawn_energy ? max_spawn_energy : energy_available;
                 name = spawn.createBalancedCreep(energy, 'worker');
             }

@@ -10,8 +10,6 @@ module.exports = {
             terminal_resources[i] = Game.rooms[i].terminal.store;
         }
 
-        console.log(JSON.stringify(terminal_resources))
-
         for (let i in Game.rooms) {
             if (!Game.rooms[i].terminal) continue;
 

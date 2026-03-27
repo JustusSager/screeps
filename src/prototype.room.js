@@ -132,12 +132,12 @@ module.exports = function () {
         const curR = this.memory.creepRoles_current;
         const maxR = this.memory.creepRoles_max;
         const curT = this.memory.creepTasks_current;
-        
+
         let text_role = this.name + ' (' + this.controller.level + ') ' +
             ': E ' + this.energyAvailable + '/' + this.energyCapacityAvailable +
             ' D ' + curR.defenders + '/' + maxR.defenders +
             ' M ' + curR.miners + '/' + this.memory.energy_sources.length +
-            ' W ' + curR.workers + '/' + (1 + Math.floor(this.memory.amount_dropped_energy / 500)) +
+            ' W ' + curR.workers + '/' + (1 + Math.floor(this.memory.amount_dropped_energy / 250)) +
             ' T ' + curR.transporters + '/' + (curR.miners);
 
         let text_task = 'Tasks: ' +

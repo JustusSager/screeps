@@ -13,6 +13,7 @@ module.exports = {
         "defenders": 0
     },
     initalMaxSpawnEnergy: 300,
+    minerCreepMaxWorkParts: 5,
     structureLink: {
         upperThreshold: 50
     },

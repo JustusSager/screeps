@@ -90,8 +90,8 @@ module.exports = function() {
         } else {
             var number_of_parts = Math.floor((energy - 50) / 100);
         }
-        if (number_of_parts > config.structureSpawn.minerCreepMaxWorkParts) {
-            number_of_parts = config.structureSpawn.minerCreepMaxWorkParts;
+        if (number_of_parts > config.minerCreepMaxWorkParts) {
+            number_of_parts = config.minerCreepMaxWorkParts;
         }
         if (number_of_parts > 0) {
             var body = [];

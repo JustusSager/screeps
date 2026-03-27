@@ -36,7 +36,7 @@ module.exports = {
             
             var target_tower = creep.find_towers_not_full();
             if (target_tower) {
-                if(speak){creep.say('Tower');}
+                if(speak){creep.say('🛕');}
                 if (creep.transfer(target_tower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     // move towards the spawn
                     creep.moveTo(target_tower);
@@ -58,7 +58,7 @@ module.exports = {
         else {
             var source_ground = creep.find_dropped_rescources();
             if (source_ground) {
-                if (speak) {creep.say('DroppedItem');}
+                if (speak) {creep.say('🧺');}
                 if (creep.pickup(source_ground) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source_ground);
                 }
@@ -67,7 +67,7 @@ module.exports = {
             
             var source_tombstone = creep.find_tombstones();
             if (source_tombstone != null) {
-                if (speak) {creep.say('Tombstone');}
+                if (speak) {creep.say('🪦');}
                 if (creep.withdraw(source_tombstone, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source_tombstone);
                 }

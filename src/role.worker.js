@@ -29,25 +29,33 @@ Creep.prototype.work = function() {
     if (this.pos.inRangeTo(target, range)) {
         switch (this.memory.task.name) {
             case 'getRenewed':
+                this.say("🔧");
                 if (target.store[RESOURCE_ENERGY] <= 100) {
                     this.transfer(target, resource);
                 }
                 return OK;
             case 'upgrade':
+                this.say("🆙");
                 return this.upgradeController(target);
             case 'build':
+                this.say("🔨");
                 return this.build(target);
             case 'harvest':
+                this.say("⛏️")
                 return this.harvest(target);
             case 'repair':
+                this.say("🔧");
                 return this.repair(target);
             case 'withdraw':
+                this.say("🧺");
                 resource = this.memory.task.resource ? this.memory.task.resource : RESOURCE_ENERGY;
                 // amount = this.memory.task.amount ? this.memory.task.amount : this.store.getFreeCapacity;
                 return this.withdraw(target, resource);
             case 'pickup':
+                this.say("🧺");
                 return this.pickup(target);
             case 'transfer':
+                this.say("🧺");
                 resource = this.memory.task.resource ? this.memory.task.resource : Object.keys(creep.store)[0];
                 // amount = this.memory.task.amount ? this.memory.task.amount : this.store[resource];
                 return this.transfer(target, resource);
@@ -149,13 +157,14 @@ module.exports = {
                     return;
                 }*/
                 target = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL});
-                if (creep.memory.role == 'repairer' && target) {
+                if (target) {
                     creep.memory.task['name'] = "repair";
                     creep.memory.task['target'] = target.id;
                     creep.memory.task['range'] = 3;
                     return;
                 }
-                if (creep.memory.role == 'upgrader') {
+                if (creep.room.memory.creepTasks_current.upgrade.length == 0) {
+                    creep.room.memory.creepTasks_current.upgrade = 1;
                     creep.memory.task['name'] = "upgrade";
                     creep.memory.task['target'] = creep.room.controller.id;
                     creep.memory.task['range'] = 3;
