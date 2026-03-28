@@ -24,7 +24,7 @@ module.exports = {
                 filter: s => s.structureType == STRUCTURE_CONTAINER
             });
             if (containers.length > 0 && !creep.pos.isEqualTo(containers[0])) {
-                creep.moveTo(container.pos);
+                creep.moveTo(containers[0].pos);
             } else {
                 if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source);
