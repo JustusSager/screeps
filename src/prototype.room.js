@@ -104,8 +104,32 @@ module.exports = function () {
                 }
             }
         }
+
+        // repair
+        search_result = this.find(FIND_MY_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL});
+        for (let o of search_result) {
+            if(!open_tasks.repair[o.id]) {
+                open_tasks.repair[o.id] = {
+                    "target_id": o.id,
+                    "resource_type": RESOURCE_ENERGY,
+                    "amount": (o.hitsMax - o.hits)
+                }
+            }
+        }
+
+        // withdraw
+        search_result = this.find(FIND_STRUCTURES, {filter: (s) => ((s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) && s.store[RESOURCE_ENERGY] > 0)});
+        for (let o of search_result) {
+            if(!open_tasks.withdraw[o.id]) {
+                open_tasks.withdraw[o.id] = {
+                    "target_id": o.id,
+                    "resource_type": RESOURCE_ENERGY,
+                    "amount": o.store[RESOURCE_ENERGY]
+                }
+            }
+        }
         
-        // dropped resouces
+        // pickup
         search_result = this.find(FIND_DROPPED_RESOURCES);
         for (let o of search_result) {
             if(!open_tasks.pickup[o.id]) {
@@ -117,8 +141,18 @@ module.exports = function () {
             }
         }
 
-        // 
-
+        // transfer
+        search_result = this.find(FIND_MY_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_SPAWN || s.structureType == STRUCTURE_EXTENSION) && s.store.getFreeCapacity([RESOURCE_ENERGY]) > 0});
+        for (let o of search_result) {
+            if(!open_tasks.transfer[o.id]) {
+                open_tasks.transfer[o.id] = {
+                    "target_id": o.id,
+                    "resource_type": RESOURCE_ENERGY,
+                    "amount": o.store.getFreeCapacity([RESOURCE_ENERGY])
+                }
+            }
+        }
+        
         this.memory.open_tasks = open_tasks;
     }
 
