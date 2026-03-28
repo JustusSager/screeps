@@ -31,7 +31,7 @@ function place_construction_sites(flag, blueprint_type, blueprint_pos) {
   
   // check, if a road is blocking a non-road 
   let check_pos = flag.room.lookAt(pos.x, pos.y);
-  if (check_pos[0].type == 'structure') {
+  if (check_pos[0] && check_pos[0].type == 'structure') {
     if (check_pos[0].structure.structureType == 'road' && blueprint_type != STRUCTURE_ROAD) {
       console.log('Road is blocking non-road');
       Game.getObjectById(check_pos[0].structure.id).destroy();
@@ -86,15 +86,14 @@ module.exports = {
           }
 
           let counter = flags[i].memory.counter;
+          if (counter >= buildplan.length) {
+            counter = 0;
+          }
 
           let rcl_level = flags[i].room.controller.level
           if(flags[i].room.memory.construction_sites.length < config.basebuilding.maxConstructionSites) {
             place_construction_sites(flags[i], buildplan[counter].type, buildplan[counter].pos);
             counter++;
-
-            if (counter > buildplan.length) {
-              counter = 0;
-            }
 
             flags[i].room.memory_construction_sites();
           }
