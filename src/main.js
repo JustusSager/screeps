@@ -21,8 +21,11 @@ module.exports.loop = function () {
     // Room memory
     for (let i in Game.rooms) {
         try {
-            Game.rooms[i].handle_memory();
-            Game.rooms[i].update_tasks();
+            let room = Game.rooms[i];
+            room.handle_memory();
+            room.update_tasks();
+            let idle_creeps = _.filter(Game.creeps, (c) => (c.memory.room_home == room.name && c.memory.role == 'worker' && !c.memory.task));
+            room.assign_tasks(idle_creeps);
             Game.rooms[i].visualize();
         } catch (error) {
             console.log(error);

@@ -142,95 +142,23 @@ Creep.prototype.isValidTarget = function() {
 
 module.exports = {
     run: function (creep) {
-        if (!creep.memory.task || creep.memory.task == {}) {
-            creep.memory.task = {};
-            let target;
-            if (creep.store.getUsedCapacity() > 0) {
-                if (creep.memory.room_home && creep.memory.room_home != creep.room.name) {
-                    creep.memory.task['name'] = "moveToRoom";
-                    creep.memory.task['target'] = creep.memory.room_home;
-                    return;
-                }
-                /*if (creep.ticksToLive < 500 && creep.hitsMax > 1000) {
-                    creep.memory.task['name'] = "getRenewed";
-                    creep.memory.task['target'] = creep.pos.findClosestByPath(FIND_MY_SPAWNS).id;
-                    return;
-                }*/
-                target = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL});
-                if (target) {
-                    creep.memory.task['name'] = "repair";
-                    creep.memory.task['target'] = target.id;
-                    creep.memory.task['range'] = 3;
-                    return;
-                }
-                if (creep.room.memory.creepTasks_current.upgrade.length == 0) {
-                    creep.room.memory.creepTasks_current.upgrade = 1;
-                    creep.memory.task['name'] = "upgrade";
-                    creep.memory.task['target'] = creep.room.controller.id;
-                    creep.memory.task['range'] = 3;
-                    return;
-                }
-                let terminal = creep.room.find(FIND_MY_STRUCTURES, {
-                    filter: s => s.structureType == STRUCTURE_TERMINAL && s.store.getFreeCapacity() > 0
-                })
-                if (creep.memory.role == 'extractor') {
-                    creep.memory.task['name'] = "transfer";
-                    creep.memory.task['target'] = terminal.length > 0 ? terminal[0].id : creep.find_storage_not_full().id;
-                    creep.memory.task['resource'] = Object.keys(creep.store)[0];
-                    return;
-                }
-                if (creep.room.memory.construction_sites && creep.room.memory.construction_sites.length > 0) {
-                    creep.memory.task['name'] = "build";
-                    creep.memory.task['target'] = creep.room.memory.construction_sites[0].id;
-                    creep.memory.task['range'] = 3;
-                    return;
-                }
-                else {
-                    creep.memory.task['name'] = "upgrade";
-                    creep.memory.task['target'] = creep.room.controller.id;
-                    creep.memory.task['range'] = 3;
-                    return;
-                }
-            } 
-            else {
-                if (creep.memory.room_target && creep.memory.room_target != creep.room.name) {
-                    creep.memory.task['name'] = "moveToRoom";
-                    creep.memory.task['target'] = creep.memory.room_target;
-                    return;
-                }
-                if (creep.memory.role == 'extractor') {
-                    creep.memory.task['name'] = "harvest";
-                    creep.memory.task['target'] = creep.pos.findClosestByPath(FIND_MINERALS).id;
-                    return;
-                }
-                if (creep.find_dropped_rescources()) {
-                    creep.memory.task['name'] = "pickup";
-                    creep.memory.task['target'] = creep.find_dropped_rescources().id;
-                    return;
-                }
-                target = creep.find_energy(false, config.structureStorage.genericsEnergyThreshhold);
-                if (target) {
-                    creep.memory.task['name'] = "withdraw";
-                    creep.memory.task['target'] = target.id;
-                    creep.memory.task['resource'] = RESOURCE_ENERGY;
-                    return;
-                }
-                target = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
-                if (target) {
-                    creep.memory.task['name'] = "harvest";
-                    creep.memory.task['target'] = target.id;
-                    return;
-                }
-            }
-            
-        }
         code = creep.work();
         if (code != OK) {
-            creep.say(code);
-            if (code == ERR_NOT_ENOUGH_ENERGY) {
-                creep.memory.task = undefined;
-            } else if (code == ERR_NO_PATH) {
-                creep.memory.task = undefined;
+            switch(code) {
+                case ERR_TIRED:
+                    creep.say('💤');
+                    break;
+                case ERR_NOT_ENOUGH_ENERGY:
+                    creep.say('🪫');
+                    creep.memory.task = undefined
+                    break;
+                case ERR_NO_PATH:
+                    creep.say('⏹️');
+                    creep.memory.task = undefined
+                    break;
+                default:
+                    creep.say(code);
+                    break;
             }
         }
     }

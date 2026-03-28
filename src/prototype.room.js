@@ -156,6 +156,96 @@ module.exports = function () {
         this.memory.open_tasks = open_tasks;
     }
 
+    Room.prototype.assign_tasks = function(creeps) {
+        let open_tasks = this.memory.open_tasks;
+        let target_id;
+
+        let num_upgraders = this.memory.creepTasks_current.upgrade;
+        for (let creep of creeps) {
+            // creep has energy
+            if (creep.store.getUsedCapacity() > 0) {
+                // one creep always upgrades
+                if (num_upgraders == 0) {
+                    target_id = creep.room.controller.id;
+                    creep.memory.task = {
+                        "name": "upgrade",
+                        "target": target_id,
+                        "range": 3
+                    };
+                    open_tasks.upgrade[target_id].amount -= creep.store[RESOURCE_ENERGY];
+                    num_upgraders++;
+                    break;
+                }
+
+                // repair
+                if (Object.keys(open_tasks.repair).length > 0) {
+                    target_id = Object.keys(open_tasks.repair)[0];
+                    creep.memory.task = {
+                        "name": "repair",
+                        "target": target_id,
+                        "range": 3
+                    };
+                    open_tasks.repair[target_id].amount -= creep.store[RESOURCE_ENERGY];
+                    if (open_tasks.repair[target_id].amount <= 0) open_tasks.repair[target_id] = undefined;
+                    break;
+                }
+
+                // build
+                if (Object.keys(open_tasks.build).length > 0) {
+                    target_id = Object.keys(open_tasks.build)[0];
+                    creep.memory.task = {
+                        "name": "build",
+                        "target": target_id,
+                        "range": 3
+                    };
+                    open_tasks.build[target_id].amount -= creep.store[RESOURCE_ENERGY];
+                    if (open_tasks.build[target_id].amount <= 0) open_tasks.build[target_id] = undefined;
+                    break;
+                }
+
+                // else upgrade
+                target_id = creep.room.controller.id;
+                creep.memory.task = {
+                    "name": "upgrade",
+                    "target": target_id,
+                    "range": 3
+                };
+                open_tasks.upgrade[target_id].amount -= creep.store[RESOURCE_ENERGY];
+                num_upgraders++;
+                break;
+            } 
+            // creep does not have energy
+            else {
+                // pickup
+                if (Object.keys(open_tasks.pickup).length > 0) {
+                    target_id = Object.keys(open_tasks.pickup)[0];
+                    creep.memory.task = {
+                        "name": "pickup",
+                        "target": target_id
+                    };
+                    open_tasks.pickup[target_id].amount -= creep.store.getFreeCapacity();
+                    if (open_tasks.pickup[target_id].amount <= 0) open_tasks.pickup[target_id] = undefined;
+                    break;
+                }
+
+                // withdraw
+                if (Object.keys(open_tasks.withdraw).length > 0) {
+                    target_id = Object.keys(open_tasks.withdraw)[0];
+                    creep.memory.task = {
+                        "name": "withdraw",
+                        "target": target_id
+                    };
+                    open_tasks.withdraw[target_id].amount -= creep.store.getFreeCapacity();
+                    if (open_tasks.withdraw[target_id].amount <= 0) open_tasks.withdraw[target_id] = undefined;
+                    break;
+                }
+            }
+            
+            console.log("Assigned Task " + creep.memory.task.name + " (" + target_id + ") to Creep " + creep.name);
+        }
+        this.memory.open_tasks = open_tasks;
+    }
+
     Room.prototype.memory_construction_sites = function () {
         this.memory.construction_sites = this.find(FIND_CONSTRUCTION_SITES);
     }
