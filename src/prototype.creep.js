@@ -165,7 +165,8 @@ module.exports = function() {
             }
             return true;
         }
-        var source_ground = this.find_dropped_rescources();
+        var source_ground = this.find_dropped_rescources(this.store.getFreeCapacity());
+        if (!source_ground) source_ground = this.find_dropped_rescources();
         if (source_ground) {
             if (speak) {this.say('DroppedItem');}
             if (this.pickup(source_ground) == ERR_NOT_IN_RANGE) {
