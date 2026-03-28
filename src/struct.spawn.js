@@ -50,11 +50,8 @@ module.exports = {
         // easiers memory access as constants
         const max_spawn_energy = spawn.room.memory.max_spawn_energy;
         const energy_available = spawn.room.energyAvailable;
-        const numDefenders = spawn.room.memory.creepRoles_current.defenders
-        const numMiners = spawn.room.memory.creepRoles_current.miners
-        const numTransporters = spawn.room.memory.creepRoles_current.transporters;
-        const numWorkers = spawn.room.memory.creepRoles_current.workers;
-        const maxDefenders = spawn.room.memory.creepRoles_max.defenders;
+        const current = spawn.room.memory.creepRoles_current;
+        const max = spawn.room.memory.creepRoles_max;
         const target_attack = spawn.memory.target_attack;
 
         //renew creep
@@ -105,16 +102,16 @@ module.exports = {
             }
         }
         if (!spawn.spawning && name == undefined) {
-            if ((spawn.room.find(FIND_HOSTILE_CREEPS).length > 0 || !target_attack) && numDefenders < maxDefenders) {
+            if (current.defenders < max.defenders) {
                 let energy = energy_available > max_spawn_energy ? max_spawn_energy : energy_available;
                 let target = target_attack ? target_attack : spawn.room.name
                 name = spawn.createFighterCreep(energy, 'defender', target);
             }
-            else if (numTransporters < (numMiners)) {
+            else if (current.transporters < max.transporters) {
                 let energy = energy_available > max_spawn_energy ? max_spawn_energy : energy_available;
                 name = spawn.createCarrierCreep(energy, 'transporter');
             }
-            else if (numWorkers < (1 + Math.floor(spawn.room.memory.amount_dropped_energy / 250))) {
+            else if (current.workers < max.workers) {
                 let energy = energy_available > max_spawn_energy ? max_spawn_energy : energy_available;
                 name = spawn.createBalancedCreep(energy, 'worker');
             }
