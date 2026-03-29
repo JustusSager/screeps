@@ -6,7 +6,6 @@ Creep.prototype.work = function() {
         return -101;
     }
     if (!this.isValidTarget()) {
-        console.log(this.name + ': ' + JSON.stringify(this.memory.task));
         this.memory.task = undefined;
         return -102;
     }
@@ -155,6 +154,12 @@ module.exports = {
                 case ERR_NO_PATH:
                     creep.say('⏹️');
                     creep.memory.task = undefined
+                    break;
+                case -101:
+                    creep.say('InvTask');
+                    break;
+                case -102:
+                    creep.say('InvTarget');
                     break;
                 default:
                     creep.say(code);

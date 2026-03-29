@@ -92,6 +92,7 @@ module.exports = {
 
           let rcl_level = flags[i].room.controller.level
           if(flags[i].room.memory.construction_sites.length < config.basebuilding.maxConstructionSites) {
+            if (flags[i].room.controller.level < 6 && buildplan[counter].type == STRUCTURE_RAMPART) return;
             place_construction_sites(flags[i], buildplan[counter].type, buildplan[counter].pos);
             counter++;
 

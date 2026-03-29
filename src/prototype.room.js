@@ -27,7 +27,7 @@ module.exports = function () {
         this.memory.creepRoles_max = {
             "defenders": ((this.find(FIND_HOSTILE_CREEPS).length > 0) && current.defenders < 2),
             "miners": this.memory.energy_sources.length,
-            "workers": (((current.miners * 2) + Math.floor(this.memory.amount_dropped_energy / 250))),
+            "workers": (((current.miners * 2) + Math.floor(this.memory.amount_dropped_energy / 1000))),
             "transporters": current.miners
         }
     }
@@ -59,14 +59,6 @@ module.exports = function () {
         console.log("Tasks reset");
     }
 
-    Room.prototype.remove_invalid_tasks = function() {
-        let tasks = this.memory.open_tasks;
-        for (const [id, attr] of Object.entries(tasks.pickup)) {
-            if (attr.amount <= 0) this.memory.open_tasks.pickup[id] = undefined;
-            else if (Game.getObjectById(id) == null) this.memory.open_tasks.pickup[id] = undefined;
-        }
-    }
-
     Room.prototype.update_tasks = function() {
         // setup memory
         if (!this.memory.open_tasks) this.reset_tasks();
@@ -77,8 +69,6 @@ module.exports = function () {
         if (!this.memory.open_tasks.withdraw) this.reset_tasks();
         if (!this.memory.open_tasks.pickup) this.reset_tasks();
         if (!this.memory.open_tasks.transfer) this.reset_tasks();
-
-        this.remove_invalid_tasks();
         
         let open_tasks = this.memory.open_tasks;
 
@@ -106,7 +96,7 @@ module.exports = function () {
         }
 
         // repair
-        search_result = this.find(FIND_MY_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL});
+        search_result = this.find(FIND_MY_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL && s.structureType != STRUCTURE_RAMPART});
         for (let o of search_result) {
             if(!open_tasks.repair[o.id]) {
                 open_tasks.repair[o.id] = {
@@ -157,8 +147,8 @@ module.exports = function () {
     }
 
     Room.prototype.assign_tasks = function(creeps) {
-        let open_tasks = this.memory.open_tasks;
-        let target_id;
+        var open_tasks = this.memory.open_tasks;
+        var target_id;
 
         let num_upgraders = this.memory.creepTasks_current.upgrade;
         for (let creep of creeps) {
@@ -166,82 +156,88 @@ module.exports = function () {
             if (creep.store.getUsedCapacity() > 0) {
                 // one creep always upgrades
                 if (num_upgraders == 0) {
+                    console.log("Assigned Task upgrade (" + target_id + ") to Creep " + creep.name);
                     target_id = creep.room.controller.id;
                     creep.memory.task = {
                         "name": "upgrade",
                         "target": target_id,
                         "range": 3
                     };
-                    open_tasks.upgrade[target_id].amount -= creep.store[RESOURCE_ENERGY];
+                    open_tasks.upgrade[target_id]['amount'] -= creep.store[RESOURCE_ENERGY];
                     num_upgraders++;
-                    break;
+                    continue;
                 }
 
                 // repair
-                if (Object.keys(open_tasks.repair).length > 0) {
                     target_id = Object.keys(open_tasks.repair)[0];
+                if (target_id) {
+                    console.log("Assigned Task repair (" + target_id + ") to Creep " + creep.name);
                     creep.memory.task = {
                         "name": "repair",
                         "target": target_id,
                         "range": 3
                     };
-                    open_tasks.repair[target_id].amount -= creep.store[RESOURCE_ENERGY];
-                    if (open_tasks.repair[target_id].amount <= 0) open_tasks.repair[target_id] = undefined;
-                    break;
+                    open_tasks.repair[target_id]['amount'] -= creep.store[RESOURCE_ENERGY];
+                    if (open_tasks.repair[target_id]['amount'] <= 0) open_tasks.repair[target_id] = undefined;
+                    continue;
                 }
 
                 // build
-                if (Object.keys(open_tasks.build).length > 0) {
                     target_id = Object.keys(open_tasks.build)[0];
+                if (target_id) {
+                    console.log("Assigned Task build (" + target_id + ") to Creep " + creep.name);
                     creep.memory.task = {
                         "name": "build",
                         "target": target_id,
                         "range": 3
                     };
-                    open_tasks.build[target_id].amount -= creep.store[RESOURCE_ENERGY];
-                    if (open_tasks.build[target_id].amount <= 0) open_tasks.build[target_id] = undefined;
-                    break;
+                    open_tasks.build[target_id]['amount'] -= creep.store[RESOURCE_ENERGY];
+                    if (open_tasks.build[target_id]['amount'] <= 0) open_tasks.build[target_id] = undefined;
+                    continue;
                 }
 
                 // else upgrade
                 target_id = creep.room.controller.id;
+                console.log("Assigned Task upgrade (" + target_id + ") to Creep " + creep.name);
                 creep.memory.task = {
                     "name": "upgrade",
                     "target": target_id,
                     "range": 3
                 };
-                open_tasks.upgrade[target_id].amount -= creep.store[RESOURCE_ENERGY];
+                open_tasks.upgrade[target_id]['amount'] -= creep.store[RESOURCE_ENERGY];
                 num_upgraders++;
-                break;
+                continue;
             } 
             // creep does not have energy
             else {
                 // pickup
-                if (Object.keys(open_tasks.pickup).length > 0) {
-                    target_id = Object.keys(open_tasks.pickup)[0];
+                target_id = Object.keys(_.filter(open_tasks.pickup, (p) => p.amount > creep.store.getFreeCapacity()))[0];
+                if (target_id) {
+                    console.log("Assigned Task pickup (" + target_id + ") to Creep " + creep.name);
                     creep.memory.task = {
                         "name": "pickup",
-                        "target": target_id
+                        "target": target_id,
+                        "resource": RESOURCE_ENERGY
                     };
-                    open_tasks.pickup[target_id].amount -= creep.store.getFreeCapacity();
-                    if (open_tasks.pickup[target_id].amount <= 0) open_tasks.pickup[target_id] = undefined;
-                    break;
+                    open_tasks.pickup[target_id]['amount'] -= creep.store.getFreeCapacity();
+                    if (open_tasks.pickup[target_id]['amount'] <= 0) open_tasks.pickup[target_id] = undefined;
+                    continue;
                 }
 
                 // withdraw
-                if (Object.keys(open_tasks.withdraw).length > 0) {
                     target_id = Object.keys(open_tasks.withdraw)[0];
+                if (target_id) {
+                    console.log("Assigned Task withdraw (" + target_id + ") to Creep " + creep.name);
                     creep.memory.task = {
                         "name": "withdraw",
-                        "target": target_id
+                        "target": target_id,
+                        "resource": RESOURCE_ENERGY
                     };
-                    open_tasks.withdraw[target_id].amount -= creep.store.getFreeCapacity();
-                    if (open_tasks.withdraw[target_id].amount <= 0) open_tasks.withdraw[target_id] = undefined;
-                    break;
+                    open_tasks.withdraw[target_id]['amount'] -= creep.store.getFreeCapacity();
+                    if (open_tasks.withdraw[target_id]['amount'] <= 0) open_tasks.withdraw[target_id] = undefined;
+                    continue;
                 }
             }
-            
-            console.log("Assigned Task " + creep.memory.task.name + " (" + target_id + ") to Creep " + creep.name);
         }
         this.memory.open_tasks = open_tasks;
     }
@@ -251,15 +247,14 @@ module.exports = function () {
     }
 
     Room.prototype.memory_amount_dropped_energy = function () {
-        let dropped_energy = this.find(FIND_DROPPED_RESOURCES, {
-            filter: (r) => {
-                return r.resourceType == RESOURCE_ENERGY
-
-            }
-        });
+        let dropped_energy = this.find(FIND_DROPPED_RESOURCES, {filter: (r) => r.resourceType == RESOURCE_ENERGY});
+        let stored_energy = this.find(FIND_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE)})
         let sum = 0;
         for (let i of dropped_energy) {
             sum = sum + i.amount;
+        }
+        for (let s of stored_energy) {
+            sum = sum + s.store[RESOURCE_ENERGY];
         }
         this.memory.amount_dropped_energy = sum;
     }
