@@ -1,4 +1,5 @@
 var config = require('config');
+const classes = require('classes');
 
 module.exports = function () {
     Room.prototype.memory_room_properties = function() {
@@ -76,22 +77,15 @@ module.exports = function () {
 
         // upgrade
         if(!open_tasks.upgrade[this.controller.id]) {
-            open_tasks.upgrade[this.controller.id] = {
-                "target_id": this.controller.id,
-                "resource_type": RESOURCE_ENERGY, 
-                "amount": (this.controller.progressTotal - this.controller.progress) // TODO was kommt hier bei RCL 8 raus?
-            }
+            let task = classes.gen_task_upgrade(this.controller.id);
+            open_tasks.upgrade[this.controller.id] = task.to_dict()
         }
 
         // build
         search_result = this.find(FIND_CONSTRUCTION_SITES);
         for (let o of search_result) {
             if(!open_tasks.build[o.id]) {
-                open_tasks.build[o.id] = {
-                    "target_id": o.id,
-                    "resource_type": RESOURCE_ENERGY,
-                    "amount": (o.progressTotal - o.progress)
-                }
+                open_tasks.build[o.id] = classes.gen_task_build(o.id).to_dict()
             }
         }
 
@@ -99,11 +93,7 @@ module.exports = function () {
         search_result = this.find(FIND_MY_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL && s.structureType != STRUCTURE_RAMPART});
         for (let o of search_result) {
             if(!open_tasks.repair[o.id]) {
-                open_tasks.repair[o.id] = {
-                    "target_id": o.id,
-                    "resource_type": RESOURCE_ENERGY,
-                    "amount": (o.hitsMax - o.hits)
-                }
+                open_tasks.repair[o.id] = classes.gen_task_repair(o.id).to_dict()
             }
         }
 
@@ -111,11 +101,7 @@ module.exports = function () {
         search_result = this.find(FIND_STRUCTURES, {filter: (s) => ((s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) && s.store[RESOURCE_ENERGY] > 0)});
         for (let o of search_result) {
             if(!open_tasks.withdraw[o.id]) {
-                open_tasks.withdraw[o.id] = {
-                    "target_id": o.id,
-                    "resource_type": RESOURCE_ENERGY,
-                    "amount": o.store[RESOURCE_ENERGY]
-                }
+                open_tasks.withdraw[o.id] = classes.gen_task_withdraw(o.id, RESOURCE_ENERGY).to_dict()
             }
         }
         
@@ -123,11 +109,7 @@ module.exports = function () {
         search_result = this.find(FIND_DROPPED_RESOURCES);
         for (let o of search_result) {
             if(!open_tasks.pickup[o.id]) {
-                open_tasks.pickup[o.id] = {
-                    "target_id": o.id,
-                    "resource_type": o.type,
-                    "amount": o.amount
-                }
+                open_tasks.pickup[o.id] = classes.gen_task_pickup(o.id).to_dict()
             }
         }
 
@@ -135,11 +117,7 @@ module.exports = function () {
         search_result = this.find(FIND_MY_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_SPAWN || s.structureType == STRUCTURE_EXTENSION) && s.store.getFreeCapacity([RESOURCE_ENERGY]) > 0});
         for (let o of search_result) {
             if(!open_tasks.transfer[o.id]) {
-                open_tasks.transfer[o.id] = {
-                    "target_id": o.id,
-                    "resource_type": RESOURCE_ENERGY,
-                    "amount": o.store.getFreeCapacity([RESOURCE_ENERGY])
-                }
+                open_tasks.transfer[o.id] = classes.gen_task_transfer(o.id, RESOURCE_ENERGY).to_dict()
             }
         }
         
@@ -169,7 +147,7 @@ module.exports = function () {
                 }
 
                 // repair
-                    target_id = Object.keys(open_tasks.repair)[0];
+                target_id = Object.keys(open_tasks.repair)[0];
                 if (target_id) {
                     console.log("Assigned Task repair (" + target_id + ") to Creep " + creep.name);
                     creep.memory.task = {
@@ -183,7 +161,7 @@ module.exports = function () {
                 }
 
                 // build
-                    target_id = Object.keys(open_tasks.build)[0];
+                target_id = Object.keys(open_tasks.build)[0];
                 if (target_id) {
                     console.log("Assigned Task build (" + target_id + ") to Creep " + creep.name);
                     creep.memory.task = {
@@ -225,7 +203,7 @@ module.exports = function () {
                 }
 
                 // withdraw
-                    target_id = Object.keys(open_tasks.withdraw)[0];
+                target_id = Object.keys(open_tasks.withdraw)[0];
                 if (target_id) {
                     console.log("Assigned Task withdraw (" + target_id + ") to Creep " + creep.name);
                     creep.memory.task = {
