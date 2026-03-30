@@ -1,22 +1,28 @@
 const config = require("config");
+const classes = require('classes');
+const { TASK_UPGRADE, TASK_BUILD, TASK_HARVEST, TASK_REPAIR, TASK_WITHDRAW, TASK_PICKUP, TASK_TRANSFER } = require("./classes");
 
 Creep.prototype.work = function() {
-    if (!this.isValidTask()) {
+    let task;
+    try {
+        task = classes.gen_task_from_dict(this.memory.task);
+    } catch {
+        console.log("Something went wrong with creeps " + this.name + " task " + JSON.stringify(this.memory.task))
+        this.memory.task = undefined;
+        return -100;
+    }
+
+    if (!task.is_valid()) {
         this.memory.task = undefined;
         return -101;
     }
-    if (!this.isValidTarget()) {
+    if (!task.is_valid_for_creep(this)) {
         this.memory.task = undefined;
         return -102;
     }
 
-    var target = Game.getObjectById(this.memory.task.target);
-    var range = this.memory.task.range ? this.memory.task.range : 1;
-    var resource;
-    var amount;
-
-    if (this.memory.task.name == 'moveToRoom') {
-        var exit_direction = this.room.findExitTo(this.memory.task.target);
+    if (task.target.room != this.room) {
+        var exit_direction = this.room.findExitTo(task.target);
         return this.moveTo(this.pos.findClosestByPath(exit_direction));
     }
     // Clear the Edge of the Board
@@ -25,45 +31,42 @@ Creep.prototype.work = function() {
     if (this.pos.y == 0) return this.move(BOTTOM);
     if (this.pos.y == 49) return this.move(TOP);
     
-    if (this.pos.inRangeTo(target, range)) {
-        switch (this.memory.task.name) {
-            case 'getRenewed':
+    if (this.pos.inRangeTo(task.target, task.range)) {
+        switch (task.type) {
+            case classes.TASK_GET_RENEWED:
                 this.say("🔧");
-                if (target.store[RESOURCE_ENERGY] <= 100) {
-                    this.transfer(target, resource);
+                if (task.target.store[RESOURCE_ENERGY] <= 100) {
+                    this.transfer(task.target, RESOURCE_ENERGY);
                 }
                 return OK;
-            case 'upgrade':
+            case TASK_UPGRADE:
                 this.say("🆙");
-                return this.upgradeController(target);
-            case 'build':
+                return this.upgradeController(task.target);
+            case TASK_BUILD:
                 this.say("🔨");
-                return this.build(target);
-            case 'harvest':
+                return this.build(task.target);
+            case TASK_HARVEST:
                 this.say("⛏️")
-                return this.harvest(target);
-            case 'repair':
+                return this.harvest(task.target);
+            case TASK_REPAIR:
                 this.say("🔧");
-                return this.repair(target);
-            case 'withdraw':
+                return this.repair(task.target);
+            case TASK_WITHDRAW:
                 this.say("🧺");
-                resource = this.memory.task.resource ? this.memory.task.resource : RESOURCE_ENERGY;
                 // amount = this.memory.task.amount ? this.memory.task.amount : this.store.getFreeCapacity;
-                return this.withdraw(target, resource);
-            case 'pickup':
+                return this.withdraw(task.target, task.resource);
+            case TASK_PICKUP:
                 this.say("🧺");
-                return this.pickup(target);
-            case 'transfer':
+                return this.pickup(task.target);
+            case TASK_TRANSFER:
                 this.say("🧺");
-                resource = this.memory.task.resource ? this.memory.task.resource : Object.keys(creep.store)[0];
                 // amount = this.memory.task.amount ? this.memory.task.amount : this.store[resource];
-                return this.transfer(target, resource);
+                return this.transfer(task.target, task.resource);
             default:
                 return -101;
         }
     } else {
-        target = Game.getObjectById(this.memory.task.target);
-        return this.moveTo(target);
+        return this.moveTo(task.target);
     }
 }
 

@@ -14,6 +14,7 @@ module.exports = {
     },
     initalMaxSpawnEnergy: 300,
     minerCreepMaxWorkParts: 5,
+    dropped_resource_threshold: 50,
     structureLink: {
         upperThreshold: 50
     },
