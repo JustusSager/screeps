@@ -149,7 +149,7 @@ module.exports = function () {
                 let task = gen_task_from_dict(d);
                 if (!open_tasks[task_type]) open_tasks[task_type] = []
 
-                if (task.is_valid) open_tasks[task_type].push(task);
+                if (task.is_valid()) open_tasks[task_type].push(task);
             }
         }
 
@@ -167,7 +167,7 @@ module.exports = function () {
                 }
 
                 // repair
-                if (open_tasks.repair) {
+                if (open_tasks.repair && open_tasks.repair.length > 0) {
                     console.log("Assigned Task repair (" + open_tasks.repair[0].target.id + ") to Creep " + creep.name);
                     open_tasks.repair[0].assign_to_creep(creep);
                     if (open_tasks.repair[0].work_left <= 0) open_tasks.repair.slice(1);
@@ -175,7 +175,7 @@ module.exports = function () {
                 }
 
                 // build
-                if (open_tasks.build) {
+                if (open_tasks.build && open_tasks.build.length > 0) {
                     console.log("Assigned Task build (" + open_tasks.build[0].target.id + ") to Creep " + creep.name);
                     open_tasks.build[0].assign_to_creep(creep);
                     if (open_tasks.build[0].work_left <= 0) open_tasks.build.slice(1);
@@ -191,7 +191,7 @@ module.exports = function () {
             // creep does not have energy
             else {
                 // pickup
-                if (open_tasks.pickup) {
+                if (open_tasks.pickup && open_tasks.pickup.length > 0) {
                     console.log("Assigned Task pickup (" + open_tasks.pickup[0].target.id + ") to Creep " + creep.name);
                     open_tasks.pickup[0].assign_to_creep(creep);
                     if (open_tasks.pickup[0].work_left <= 0) open_tasks.pickup.slice(1);
@@ -199,7 +199,7 @@ module.exports = function () {
                 }
 
                 // withdraw
-                if (open_tasks.withdraw) {
+                if (open_tasks.withdraw && open_tasks.withdraw.length > 0) {
                     console.log("Assigned Task withdraw (" + open_tasks.withdraw[0].target.id + ") to Creep " + creep.name);
                     open_tasks.withdraw[0].assign_to_creep(creep);
                     if (open_tasks.withdraw[0].work_left <= 0) open_tasks.withdraw.slice(1);
