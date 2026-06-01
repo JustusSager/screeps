@@ -56,7 +56,7 @@ module.exports = {
         }
         // if creep is supposed to get energy from target
         else {
-            var source_ground = creep.find_dropped_rescources();
+            var source_ground = creep.find_dropped_rescources(creep.store.getFreeCapacity());
             if (source_ground) {
                 if (speak) {creep.say('🧺');}
                 if (creep.pickup(source_ground) == ERR_NOT_IN_RANGE) {
