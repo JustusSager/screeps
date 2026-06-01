@@ -70,9 +70,10 @@ module.exports = function () {
                 spawn_queu_local.push(...carriers_in_queu)
             }
 
+            console.log(this.energy < energyMax, this.memory.amount_dropped_energy > (energyMax - energy), this.memory.creepRoles_current.miners > 0, this.memory.creepRoles_current.transporters > 0)
             if (
-                this.energy < energyMax &&
-                this.memory.dropped_energy > (energyMax - energy) && 
+                energy < energyMax &&
+                this.memory.amount_dropped_energy > (energyMax - energy) && 
                 this.memory.creepRoles_current.miners > 0 &&
                 this.memory.creepRoles_current.transporters > 0
             ) {
