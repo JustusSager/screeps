@@ -2,12 +2,13 @@
 module.exports = {
     basebuilding: {
         printResult: true,
-        maxConstructionSites: 3,
+        maxConstructionSites: 5,
         flagNames: [
             'BunkerFlag'
         ],
-        rampartRCLLevel: 4, // rampartRCLLevel > 8 -> no Rampart construction
-        rampartOnRoadsRCLLevel: 8 // rampartOnRoadsRCLLevel > 8 -> no Rampart construction on Roads
+        rampartRCLLevel: 6, // rampartRCLLevel > 8 -> no Rampart construction
+        rampartOnRoadsRCLLevel: 8, // rampartOnRoadsRCLLevel > 8 -> no Rampart construction on Roads
+        floodfill: false
     },
     initMaxCreepRoles: {
         "defenders": 0
@@ -37,5 +38,17 @@ module.exports = {
         mineralBuyFactor: 0.1,
         maxTransactionCost: 400,
         transactionVolume: 200
+    },
+    taskGeneration: {
+        repair_hitsMax_multiplier: 0.9
+    },
+    spawning: {
+        critical_ttl_for_miners: 50
+    },
+    roomVisuals: {
+        roomStats: {x: 1, y:1},
+        currentTasks: {x: 44, y: 1},
+        spawnQueu: {x: 7, y: 1},
+        rcl_stats: {x: 44, y: 40}
     }
 }
