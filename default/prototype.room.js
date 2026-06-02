@@ -62,7 +62,6 @@ module.exports = function () {
             let energy = this.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.energyAvailable;
             let energyMax = this.energyCapacityAvailable < this.memory.max_spawn_energy ? this.energyCapacityAvailable : this.memory.max_spawn_energy
 
-            console.log(this.energy < energyMax, this.memory.amount_dropped_energy > (energyMax - energy), this.memory.creepRoles_current.miners > 0, this.memory.creepRoles_current.transporters > 0)
             if (
                 energy < energyMax &&
                 this.memory.amount_dropped_energy > (energyMax - energy) && 
@@ -467,6 +466,7 @@ module.exports = function () {
         if (config.roomVisuals.spawnQueu) {
             let queud_roles = [];
             for(let q in this.memory.spawn_queu) {
+                console.log(JSON.stringify(q))
                 queud_roles.push([
                     q.role, 
                     q.priority

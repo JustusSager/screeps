@@ -132,8 +132,8 @@ module.exports = function() {
             filter: (c) => c.ticksToLive < 1400 &&
                 c.hitsMax > 1000
         })
-        if (creeps_in_range.length > 0 && spawn.energy > 100) {
-            spawn.renewCreep(creeps_in_range[0])
+        if (creeps_in_range.length > 0 && this.energy > 100) {
+            this.renewCreep(creeps_in_range[0])
         }
     }
 };
