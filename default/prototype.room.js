@@ -26,11 +26,9 @@ var basebuilding = require('basebuilding');
 
 
 const CREEP_TYPE_WORKER = "worker"
-const CREEP_COST_WORKER = 100;
 const CREEP_TYPE_CARRIER = "transporter"
-const CREEP_COST_CARRIER = 100;
 const CREEP_TYPE_MINER = "miner"
-const CREEP_COST_MINER = 200;
+const CREEP_TYPE_REMOTE_HARVESTER = "remoteHarvester"
 
 
 
@@ -64,17 +62,6 @@ module.exports = function () {
             let energy = this.energyAvailable > this.memory.max_spawn_energy ? this.memory.max_spawn_energy : this.energyAvailable;
             let energyMax = this.energyCapacityAvailable < this.memory.max_spawn_energy ? this.energyCapacityAvailable : this.memory.max_spawn_energy
 
-            if (this.memory.creepRoles_current.transporters == 0) {
-                let carriers_in_queu = _.filter(spawn_queu_local, (v, i) => v.role == CREEP_TYPE_CARRIER)
-                spawn_queu_local = _.filter(spawn_queu_local, (v, i) => v.role != CREEP_TYPE_CARRIER)
-                spawn_queu_local.push(...carriers_in_queu)
-            }
-            if (this.memory.creepRoles_current.workers == 0) {
-                let workers_in_queu = _.filter(spawn_queu_local, (v, i) => v.role == CREEP_TYPE_WORKER)
-                spawn_queu_local = _.filter(spawn_queu_local, (v, i) => v.role != CREEP_TYPE_WORKER)
-                spawn_queu_local.push(...workers_in_queu)
-            }
-
             console.log(this.energy < energyMax, this.memory.amount_dropped_energy > (energyMax - energy), this.memory.creepRoles_current.miners > 0, this.memory.creepRoles_current.transporters > 0)
             if (
                 energy < energyMax &&
@@ -99,7 +86,8 @@ module.exports = function () {
             "defenders": _.sum(spawn_queu_local, (c) => (c.role == 'defender')),
             "miners": _.sum(spawn_queu_local, (c) => (c.role == CREEP_TYPE_MINER)),
             "workers": _.sum(spawn_queu_local, (c) => (c.role == CREEP_TYPE_WORKER)),
-            "transporters": _.sum(spawn_queu_local, (c) => (c.role == CREEP_TYPE_CARRIER))
+            "transporters": _.sum(spawn_queu_local, (c) => (c.role == CREEP_TYPE_CARRIER)),
+            "remoteHarvesters": _.sum(spawn_queu_local, (c) => (c.role == CREEP_TYPE_REMOTE_HARVESTER))
         }
         const max = this.memory.creepRoles_max;
 
@@ -112,7 +100,7 @@ module.exports = function () {
         for (let source_id of energy_source_ids) {
             if (_.some(spawn_queu_local, s => s.role == CREEP_TYPE_MINER && s.source_id == source_id)) continue;
             if (_.some(creeps_of_room, c => c.memory.role == CREEP_TYPE_MINER && c.memory.source_id == source_id)) continue;
-            if (_.some(Game.spawns, s => s.spawning)) break; //TODO ein sehr grober fix
+            if (_.some(Game.spawns, s => s.spawning)) break; //TODO ein sehr grober fix, damit nicht mehrere miner für eine source gespawnt werden, wenn bereits einer spawnt
             
             let links = Game.getObjectById(source_id).pos.findInRange(FIND_STRUCTURES, 2, {
                 filter: s => s.structureType == STRUCTURE_LINK
@@ -124,37 +112,42 @@ module.exports = function () {
                 spawn_queu_local.push({
                     role: CREEP_TYPE_MINER,
                     source_id: source_id,
-                    link_mining: links.length > 0
+                    link_mining: links.length > 0,
+                    priority: (current.miners == 0 ? 10 : 5)
                 })
             }
         }
 
         if (this.memory.miners_near_death.length == 0) {
+
             // check for free transporter positions
             for (let i = 0; i < (max.transporters - current.transporters - queud.transporters); i++) {
                 spawn_queu_local.push({
-                    role: CREEP_TYPE_CARRIER
+                    role: CREEP_TYPE_CARRIER,
+                    priority: (current.transporters == 0 ? 9 : 4)
                 })
             }
             // check for free worker positions
             for (let i = 0; i < (max.workers - current.workers - queud.workers); i++) {
                 spawn_queu_local.push({
                     role: CREEP_TYPE_WORKER,
-                    room_target: this.name
+                    room_target: this.name,
+                    priority: (current.workers == 0 ? 8 : 3)
                 })
             }
         }
 
-        return spawn_queu_local;
+        return spawn_queu_local.sort((a, b) => a.priority - b.priority);
     }
 
     Room.prototype.memory_roles = function () {
         // update memory of current roles
         let current = {
             "defenders": _.sum(Game.creeps, (c) => (c.memory.role == 'defender' && c.memory.room_home == this.name)),
-            "miners": _.sum(Game.creeps, (c) => (c.memory.role == 'miner' && c.memory.room_home == this.name)),
-            "workers": _.sum(Game.creeps, (c) => (c.memory.role == 'worker' && c.memory.room_home == this.name)),
-            "transporters": _.sum(Game.creeps, (c) => (c.memory.role == 'transporter' && c.memory.room_home == this.name))
+            "miners": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_TYPE_MINER && c.memory.room_home == this.name)),
+            "workers": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_TYPE_WORKER && c.memory.room_home == this.name)),
+            "transporters": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_TYPE_CARRIER && c.memory.room_home == this.name)),
+            "remoteHarvesters": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_TYPE_REMOTE_HARVESTER && c.memory.room_home == this.name))
         }
         this.memory.creepRoles_current = current;
 
@@ -163,7 +156,8 @@ module.exports = function () {
             "defenders": ((this.find(FIND_HOSTILE_CREEPS).length > 0) && current.defenders < 2),
             "miners": this.memory.energy_source_ids.length,
             "workers": ((current.miners + Math.floor(this.memory.amount_dropped_energy / 500))),
-            "transporters": current.miners
+            "transporters": current.miners,
+            "remoteHarvesters": 0
         }
     }
 
@@ -453,6 +447,7 @@ module.exports = function () {
                 ["Miner", curR.miners, maxR.miners],
                 ["Carrier", curR.transporters, maxR.transporters],
                 ["Worker", curR.workers, maxR.workers],
+                ["R.Harv.", curR.remoteHarvesters, maxR.remoteHarvesters]
             ]
             visual.table(["Stats"], [2.6, 1.5, 1], stats, config.roomVisuals.roomStats.x, config.roomVisuals.roomStats.y)
         }
@@ -470,8 +465,14 @@ module.exports = function () {
         }
 
         if (config.roomVisuals.spawnQueu) {
-            let queud_roles = this.memory.spawn_queu.map(q => q.role);
-            visual.list("Spawn Queu", queud_roles, config.roomVisuals.spawnQueu.x, config.roomVisuals.spawnQueu.y)
+            let queud_roles = [];
+            for(let q in this.memory.spawn_queu) {
+                queud_roles.push([
+                    q.role, 
+                    q.priority
+                ]);
+            }
+            visual.table(["Spawn Queu"], [2.6, 1], queud_roles, config.roomVisuals.spawnQueu.x, config.roomVisuals.spawnQueu.y)
         }
 
         if (config.roomVisuals.rcl_stats) {

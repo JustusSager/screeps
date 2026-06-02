@@ -1,16 +1,24 @@
 var roleMiner = require('role.miner');
 var roleWorker = require('role.worker');
 var roleTransporter = require('role.transporter');
+var roleRemoteHarvester = require('role.remoteHarvester');
+
+const CREEP_TYPE_WORKER = "worker"
+const CREEP_TYPE_CARRIER = "transporter"
+const CREEP_TYPE_MINER = "miner"
+const CREEP_TYPE_REMOTE_HARVESTER = "remoteHarvester"
 
 module.exports = function() {
     Creep.prototype.run = function(speak = false) {
         switch (this.memory.role) {
-            case 'miner':
+            case CREEP_TYPE_MINER:
                 return roleMiner.run(this, speak);
-            case 'worker':
+            case CREEP_TYPE_WORKER:
                 return roleWorker.run(this, speak);
-            case 'transporter':
+            case CREEP_TYPE_CARRIER:
                 return roleTransporter.run(this, speak);
+            case CREEP_TYPE_REMOTE_HARVESTER:
+                return roleRemoteHarvester.run(this, speak)
             default:
                 this.assignRoleByParts(this);
                 return;
@@ -19,7 +27,7 @@ module.exports = function() {
 
     Creep.prototype.assignRoleByParts = function(speak = true) {
         // TODO Bessere zuweisung der Rolle!
-        this.memory.role = 'transporter';
+        this.memory.role = CREEP_TYPE_CARRIER;
         if (speak) {
             this.say("Im a " + this.memory.role + "now!");
         }

@@ -3,6 +3,7 @@ var config = require('config');
 const CREEP_TYPE_WORKER = "worker"
 const CREEP_TYPE_CARRIER = "transporter"
 const CREEP_TYPE_MINER = "miner"
+const CREEP_TYPE_REMOTE_HARVESTER = "remoteHarvester"
 
 module.exports = function() {
 
@@ -18,6 +19,8 @@ module.exports = function() {
                 return this.spawn_carrier(energy);
             case CREEP_TYPE_MINER:
                 return this.spawn_miner(energy, sketch.source_id, sketch.link_mining);
+            case CREEP_TYPE_REMOTE_HARVESTER:
+                return this.spawn_worker(energy, sketch.room_target_name)
         }
     }
 
