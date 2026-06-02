@@ -69,6 +69,11 @@ module.exports = function () {
                 spawn_queu_local = _.filter(spawn_queu_local, (v, i) => v.role != CREEP_TYPE_CARRIER)
                 spawn_queu_local.push(...carriers_in_queu)
             }
+            if (this.memory.creepRoles_current.workers == 0) {
+                let workers_in_queu = _.filter(spawn_queu_local, (v, i) => v.role == CREEP_TYPE_WORKER)
+                spawn_queu_local = _.filter(spawn_queu_local, (v, i) => v.role != CREEP_TYPE_WORKER)
+                spawn_queu_local.push(...workers_in_queu)
+            }
 
             console.log(this.energy < energyMax, this.memory.amount_dropped_energy > (energyMax - energy), this.memory.creepRoles_current.miners > 0, this.memory.creepRoles_current.transporters > 0)
             if (
