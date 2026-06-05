@@ -1,6 +1,27 @@
 const config = require('./config')
 
-const { TASK_BUILD, TASK_UPGRADE, TASK_HARVEST, TASK_REPAIR, TASK_WITHDRAW, TASK_PICKUP, TASK_TRANSFER } = require('./constants');
+const { TASK_BUILD, TASK_UPGRADE, TASK_HARVEST, TASK_REPAIR, TASK_WITHDRAW, TASK_PICKUP, TASK_TRANSFER, TASK_GET_RENEWED } = require('./constants');
+
+function gen_task_from_dict(dict) {
+    switch (dict.type) {
+        case TASK_BUILD:
+            return new TaskBuild(Game.getObjectById(dict.target_id))
+        case TASK_HARVEST:
+            return new TaskHarvest(Game.getObjectById(dict.target_id))
+        case TASK_PICKUP:
+            return new TaskPickup(Game.getObjectById(dict.target_id))
+        case TASK_REPAIR:
+            return new TaskRepair(Game.getObjectById(dict.target_id))
+        case TASK_TRANSFER:
+            return new TaskTransfer(Game.getObjectById(dict.target_id))
+        case TASK_UPGRADE:
+            return new TaskUpgrade(Game.getObjectById(dict.target_id))
+        case TASK_WITHDRAW:
+            return new TaskWithdraw(Game.getObjectById(dict.target_id))
+        default:
+            return false;
+    }
+}
 
 
 class TaskManager {
@@ -24,23 +45,48 @@ class TaskManager {
             this.tasks.push(new TaskBuild(construction_site));
         }
 
+        // Pickup
+        result = this.room.find(FIND_DROPPED_RESOURCES, {filter: (r) => r.resourceType == RESOURCE_ENERGY});
+        for (const resource of result) {
+            this.tasks.push(new TaskPickup(resource));
+        }
+
+        // Withdraw
+        result = this.room.find(FIND_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) && s.store[RESOURCE_ENERGY] > 0})
+        for (const structure of result) {
+            this.tasks.push(new TaskWithdraw(structure));
+        }
+
+        // Transfer
+        result = this.room.find(FIND_MY_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_SPAWN || s.structureType == STRUCTURE_EXTENSION) && s.store.getFreeCapacity([RESOURCE_ENERGY]) > 0});
+        for (const structure of result) {
+            this.tasks.push(new TaskTransfer(structure));
+        }
+
         // filter for only valid
         this.tasks = this.tasks.filter(t => t.is_valid())
     }
 
+    create_stats_assigned_tasks() {
+        return [
+            [TASK_BUILD, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_BUILD && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_BUILD)],
+            [TASK_HARVEST, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_HARVEST && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_HARVEST)],
+            [TASK_PICKUP, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_PICKUP && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_PICKUP)],
+            [TASK_REPAIR, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_REPAIR && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_REPAIR)],
+            [TASK_TRANSFER, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_TRANSFER && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_TRANSFER)],
+            [TASK_UPGRADE, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_UPGRADE && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_UPGRADE)],
+            [TASK_WITHDRAW, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_WITHDRAW && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_WITHDRAW)],
+            [TASK_GET_RENEWED, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_GET_RENEWED && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_GET_RENEWED)],
+        ]
+    }
+
     assign_task(creep) {
-        let valid_tasks = this.tasks.filter(t => t.is_valid_for_creep(creep)).sort((a, b) => ((a.target.x - creep.target.x) + (a.target.y - creep.target.y)) - ((b.target.x - creep.target.x) + (b.target.y - creep.target.y)))
+        let valid_tasks = this.tasks.filter(t => t.is_valid_for_creep(creep)).sort(
+            (a, b) => ((a.target.pos.x - creep.pos.x) + (a.target.pos.y - creep.pos.y)) - ((b.target.pos.x - creep.pos.x) + (b.target.pos.y - creep.pos.y))
+        )
         if (valid_tasks.length > 0) {
             valid_tasks[0].assign_to_creep(creep);
         }
-    }
-
-    add_task_upgrade(controller) {
-        this.tasks.push(new TaskUpgrade(controller))
-    }
-
-    add_task_harvest(source) {
-        this.tasks.push(new TaskHarvest(source))
     }
 }
 
@@ -65,8 +111,8 @@ class Task {
     }
 
     assign_to_creep(creep) {
-        console.log("Doing nothing, because im the parent Task")
-        return
+        creep.memory.task = this.to_dict()
+        new RoomVisual(creep.room.name).line(creep, this.target)
     }
 
     to_dict() {
@@ -107,8 +153,8 @@ class TaskUpgrade extends Task {
     }
 
     assign_to_creep(creep) {
-        creep.memory.task = this.to_dict();
-        this.work_left =- creep.store[RESOURCE_ENERGY];
+        super.assign_to_creep(creep);
+        this.work_left -= creep.store[RESOURCE_ENERGY];
     }
 }
 
@@ -139,8 +185,8 @@ class TaskHarvest extends Task {
     }
 
     assign_to_creep(creep) {
-        creep.memory.task = this.to_dict();
-        this.work_left =- creep.store.getFreeCapacity();
+        super.assign_to_creep(creep);
+        this.work_left -= creep.store.getFreeCapacity();
     }
 }
 
@@ -171,8 +217,8 @@ class TaskBuild extends Task {
     }
 
     assign_to_creep(creep) {
-        creep.memory.task = this.to_dict();
-        this.work_left =- creep.store[RESOURCE_ENERGY];
+        super.assign_to_creep(creep);
+        this.work_left -= creep.store[RESOURCE_ENERGY];
     }
 }
 
@@ -203,9 +249,8 @@ class TaskRepair extends Task {
     }
 
     assign_to_creep(creep) {
-        creep.memory.task = this.to_dict();
-        this.work_left =- creep.store[RESOURCE_ENERGY];
-        new RoomVisual(this.room.name).line(creep, this.target)
+        super.assign_to_creep(creep);
+        this.work_left -= creep.store[RESOURCE_ENERGY];
     }
 }
 
@@ -236,9 +281,8 @@ class TaskWithdraw extends Task {
     }
 
     assign_to_creep(creep) {
-        creep.memory.task = this.to_dict();
-        this.work_left =- creep.store.getFreeCapacity();
-        new RoomVisual(this.room.name).line(creep, this.target)
+        super.assign_to_creep(creep);
+        this.work_left -= creep.store.getFreeCapacity();
     }
 }
 
@@ -253,7 +297,7 @@ class TaskPickup extends Task {
             target,  // this.target
             1,  // this.range
             target.resourceType,  // this.resource
-            structure.store[target.resourceType] - work_assigned  // this.work_left
+            target.amount - work_assigned  // this.work_left
         )
     }
 
@@ -269,9 +313,8 @@ class TaskPickup extends Task {
     }
 
     assign_to_creep(creep) {
-        creep.memory.task = this.to_dict();
-        this.work_left =- creep.store.getFreeCapacity();
-        new RoomVisual(this.room.name).line(creep, this.target)
+        super.assign_to_creep(creep);
+        this.work_left -= creep.store.getFreeCapacity();
     }
 }
 
@@ -302,12 +345,12 @@ class TaskTransfer extends Task {
     }
 
     assign_to_creep(creep) {
-        creep.memory.task = this.to_dict();
-        this.work_left =- creep.store.getFreeCapacity();
-        new RoomVisual(this.room.name).line(creep, this.target)
+        super.assign_to_creep(creep);
+        this.work_left -= creep.store[this.resource];
     }
 }
 
 module.exports = {
-    TaskManager
+    TaskManager,
+    gen_task_from_dict
 }

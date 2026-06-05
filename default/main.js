@@ -9,7 +9,7 @@ var structLink = require('struct.link');
 var trading = require('trading');
 const { CREEP_ROLE_WORKER } = require('constants');
 
-const { TaskManager } = require('taskmanager');
+const { TaskManager } = require('./manager.tasks');
 const { TASK_HARVEST, TASK_BUILD, TASK_REPAIR } = require('./constants');
 
 
@@ -18,14 +18,13 @@ module.exports.loop = function () {
     for (let i in Game.rooms) {
         let room = Game.rooms[i];
 
-        try {
-            const tm = new TaskManager(room);
-            tm.find_open_tasks();
+        const tm = new TaskManager(room);
+        tm.find_open_tasks();
 
-        } catch (error) {
-            console.log(error)
+        let idle_creeps = _.filter(Game.creeps, (c) => (c.memory.room_home == room.name && c.memory.role == CREEP_ROLE_WORKER && !c.memory.task));
+        for (const creep of idle_creeps) {
+            tm.assign_task(creep)
         }
-        
 
         room.handle_memory();
 
@@ -35,11 +34,7 @@ module.exports.loop = function () {
 
         spawn_queu = room.fill_spawn_queu(spawn_queu, creeps_of_room, energy_source_ids);
 
-
-        room.update_tasks();
-        let idle_creeps = _.filter(Game.creeps, (c) => (c.memory.room_home == room.name && c.memory.role == CREEP_ROLE_WORKER && !c.memory.task));
-        room.assign_tasks(idle_creeps);
-        Game.rooms[i].visualize();
+        Game.rooms[i].visualize(tm.create_stats_assigned_tasks());
 
         spawn_queu = room.spawn_from_queu(spawn_queu);
 

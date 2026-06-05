@@ -1,11 +1,13 @@
 const config = require("config");
-const classes = require('classes');
-const { TASK_UPGRADE, TASK_BUILD, TASK_HARVEST, TASK_REPAIR, TASK_WITHDRAW, TASK_PICKUP, TASK_TRANSFER } = require("./classes");
+
+const { gen_task_from_dict } = require('./manager.tasks')
+
+const { TASK_UPGRADE, TASK_BUILD, TASK_HARVEST, TASK_REPAIR, TASK_WITHDRAW, TASK_PICKUP, TASK_TRANSFER, TASK_GET_RENEWED } = require("./constants");
 
 Creep.prototype.work = function() {
     let task;
     try {
-        task = classes.gen_task_from_dict(this.memory.task);
+        task = gen_task_from_dict(this.memory.task);
     } catch {
         console.log("Something went wrong with creeps " + this.name + " task " + JSON.stringify(this.memory.task))
         this.memory.task = undefined;
@@ -33,7 +35,7 @@ Creep.prototype.work = function() {
     
     if (this.pos.inRangeTo(task.target, task.range)) {
         switch (task.type) {
-            case classes.TASK_GET_RENEWED:
+            case TASK_GET_RENEWED:
                 this.say("🔧");
                 if (task.target.store[RESOURCE_ENERGY] <= 100) {
                     this.transfer(task.target, RESOURCE_ENERGY);
