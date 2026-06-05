@@ -1,92 +1,14 @@
-const { TASK_HARVEST, TASK_UPGRADE, TASK_BUILD, TASK_REPAIR, TASK_WITHDRAW, TASK_PICKUP, TASK_TRANSFER } = require("./constants");
+class TaskManager {
+    constructor(room) {
+        this.room = room
+        this.tasks = []
+    }
 
-
-// TODO noch umbauen, sodass es mit minerals funktioniert
-function gen_task_harvest(target_id) {
-    let target = Game.getObjectById(target_id);
-    return new Task(
-        TASK_HARVEST,
-        target_id,
-        1,
-        RESOURCE_ENERGY,
-        (target.energyCapacity - target.energy)
-    )
-}
-
-function gen_task_upgrade(target_id) {
-    let target = Game.getObjectById(target_id);
-    return new Task(
-        TASK_UPGRADE,
-        target_id,
-        3,
-        RESOURCE_ENERGY,
-        (target.progressTotal - target.progress)
-    )
-}
-
-function gen_task_build(target_id) {
-    let target = Game.getObjectById(target_id);
-    return new Task(
-        TASK_BUILD,
-        target_id,
-        3,
-        RESOURCE_ENERGY,
-        (target.progressTotal - target.progress)
-    )
-}
-
-function gen_task_repair(target_id) {
-    let target = Game.getObjectById(target_id);
-    return new Task(
-        TASK_REPAIR,
-        target_id,
-        3,
-        RESOURCE_ENERGY,
-        (target.hitsMax - target.hits)
-    )
-}
-
-function gen_task_withdraw(target_id, resource) {
-    let target = Game.getObjectById(target_id);
-    return new Task(
-        TASK_WITHDRAW,
-        target_id,
-        1,
-        resource,
-        target.store[resource]
-    )
-}
-
-function gen_task_pickup(target_id) {
-    let target = Game.getObjectById(target_id);
-    return new Task(
-        TASK_PICKUP,
-        target_id,
-        1,
-        target.resourceType,
-        target.amount
-    )
-}
-
-function gen_task_transfer(target_id, resource) {
-    let target = Game.getObjectById(target_id);
-    return new Task(
-        TASK_TRANSFER,
-        target_id,
-        1,
-        resource,
-        target.store.getFreeCapacity()
-    )
-}
-
-function gen_task_from_dict(dict) {
-    return new Task(
-        dict.type,
-        dict.target_id,
-        dict.range,
-        dict.resource,
-        dict.work_left
-    )
+    add_task_upgrade() {
+        this.tasks.push(Task(
+            
+        ))
+    }
 }
 
 class Task {
@@ -187,15 +109,3 @@ class Task {
         }
     }
 }
-
-module.exports = {
-    gen_task_harvest,
-    gen_task_upgrade,
-    gen_task_build,
-    gen_task_repair,
-    gen_task_withdraw,
-    gen_task_pickup,
-    gen_task_transfer,
-    gen_task_from_dict,
-    Task
-};

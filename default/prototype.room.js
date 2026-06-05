@@ -3,6 +3,11 @@ var config = require('config');
 require('prototype.roomvisual')();
 
 const {
+    CREEP_ROLE_MINER, 
+    CREEP_ROLE_WORKER, 
+    CREEP_ROLE_CARRIER, 
+    CREEP_ROLE_REMOTE_HARVESTER, 
+    CREEP_ROLE_DEFENDER,
     TASK_HARVEST,
     TASK_UPGRADE,
     TASK_BUILD,
@@ -11,6 +16,9 @@ const {
     TASK_PICKUP,
     TASK_TRANSFER,
     TASK_GET_RENEWED,
+} = require('constants');
+
+const {
     gen_task_harvest,
     gen_task_upgrade,
     gen_task_build,
@@ -24,17 +32,6 @@ const {
 
 var basebuilding = require('basebuilding');
 
-
-const CREEP_TYPE_WORKER = "worker"
-const CREEP_TYPE_CARRIER = "transporter"
-const CREEP_TYPE_MINER = "miner"
-const CREEP_TYPE_REMOTE_HARVESTER = "remoteHarvester"
-
-
-
-function get_current_creep_tasks_json() {
-    return 
-}
 
 function get_blank_task_structure_json() {
     return {
@@ -82,11 +79,11 @@ module.exports = function () {
         let spawn_queu_local = spawn_queu
         const current = this.memory.creepRoles_current
         const queud = {
-            "defenders": _.sum(spawn_queu_local, (c) => (c.role == 'defender')),
-            "miners": _.sum(spawn_queu_local, (c) => (c.role == CREEP_TYPE_MINER)),
-            "workers": _.sum(spawn_queu_local, (c) => (c.role == CREEP_TYPE_WORKER)),
-            "transporters": _.sum(spawn_queu_local, (c) => (c.role == CREEP_TYPE_CARRIER)),
-            "remoteHarvesters": _.sum(spawn_queu_local, (c) => (c.role == CREEP_TYPE_REMOTE_HARVESTER))
+            "defenders": _.sum(spawn_queu_local, (c) => (c.role == CREEP_ROLE_DEFENDER)),
+            "miners": _.sum(spawn_queu_local, (c) => (c.role == CREEP_ROLE_MINER)),
+            "workers": _.sum(spawn_queu_local, (c) => (c.role == CREEP_ROLE_WORKER)),
+            "transporters": _.sum(spawn_queu_local, (c) => (c.role == CREEP_ROLE_CARRIER)),
+            "remoteHarvesters": _.sum(spawn_queu_local, (c) => (c.role == CREEP_ROLE_REMOTE_HARVESTER))
         }
         const max = this.memory.creepRoles_max;
 
@@ -97,8 +94,8 @@ module.exports = function () {
         
         // check for free mining positions 
         for (let source_id of energy_source_ids) {
-            if (_.some(spawn_queu_local, s => s.role == CREEP_TYPE_MINER && s.source_id == source_id)) continue;
-            if (_.some(creeps_of_room, c => c.memory.role == CREEP_TYPE_MINER && c.memory.source_id == source_id)) continue;
+            if (_.some(spawn_queu_local, s => s.role == CREEP_ROLE_MINER && s.source_id == source_id)) continue;
+            if (_.some(creeps_of_room, c => c.memory.role == CREEP_ROLE_MINER && c.memory.source_id == source_id)) continue;
             if (_.some(Game.spawns, s => s.spawning)) break; //TODO ein sehr grober fix, damit nicht mehrere miner für eine source gespawnt werden, wenn bereits einer spawnt
             
             let links = Game.getObjectById(source_id).pos.findInRange(FIND_STRUCTURES, 2, {
@@ -109,7 +106,7 @@ module.exports = function () {
             });
             if (source_keepers == 0) {
                 spawn_queu_local.push({
-                    role: CREEP_TYPE_MINER,
+                    role: CREEP_ROLE_MINER,
                     source_id: source_id,
                     link_mining: links.length > 0,
                     priority: (current.miners == 0 ? 10 : 5)
@@ -122,14 +119,14 @@ module.exports = function () {
             // check for free transporter positions
             for (let i = 0; i < (max.transporters - current.transporters - queud.transporters); i++) {
                 spawn_queu_local.push({
-                    role: CREEP_TYPE_CARRIER,
+                    role: CREEP_ROLE_CARRIER,
                     priority: (current.transporters == 0 ? 9 : 4)
                 })
             }
             // check for free worker positions
             for (let i = 0; i < (max.workers - current.workers - queud.workers); i++) {
                 spawn_queu_local.push({
-                    role: CREEP_TYPE_WORKER,
+                    role: CREEP_ROLE_WORKER,
                     room_target: this.name,
                     priority: (current.workers == 0 ? 8 : 3)
                 })
@@ -142,19 +139,19 @@ module.exports = function () {
     Room.prototype.memory_roles = function () {
         // update memory of current roles
         let current = {
-            "defenders": _.sum(Game.creeps, (c) => (c.memory.role == 'defender' && c.memory.room_home == this.name)),
-            "miners": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_TYPE_MINER && c.memory.room_home == this.name)),
-            "workers": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_TYPE_WORKER && c.memory.room_home == this.name)),
-            "transporters": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_TYPE_CARRIER && c.memory.room_home == this.name)),
-            "remoteHarvesters": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_TYPE_REMOTE_HARVESTER && c.memory.room_home == this.name))
+            "defenders": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_ROLE_DEFENDER && c.memory.room_home == this.name)),
+            "miners": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_ROLE_MINER && c.memory.room_home == this.name)),
+            "workers": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_ROLE_WORKER && c.memory.room_home == this.name)),
+            "transporters": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_ROLE_CARRIER && c.memory.room_home == this.name)),
+            "remoteHarvesters": _.sum(Game.creeps, (c) => (c.memory.role == CREEP_ROLE_REMOTE_HARVESTER && c.memory.room_home == this.name))
         }
         this.memory.creepRoles_current = current;
 
         // update memory of target number of roles
         this.memory.creepRoles_max = {
-            "defenders": ((this.find(FIND_HOSTILE_CREEPS).length > 0) && current.defenders < 2),
+            "defenders": ((this.find(FIND_HOSTILE_CREEPS).length > 0) && current.defenders < config.spawning.max_defenders),
             "miners": this.memory.energy_source_ids.length,
-            "workers": ((current.miners + Math.floor(this.memory.amount_dropped_energy / 500))),
+            "workers": ((current.miners + Math.floor(this.memory.amount_dropped_energy / config.spawning.max_workers_energy_divider))),
             "transporters": current.miners,
             "remoteHarvesters": 0
         }
@@ -390,7 +387,7 @@ module.exports = function () {
 
         // miner near death
         if (!this.memory.miners_near_death || Game.time % 10 == 3) {
-            let miners_near_death = _.filter(Game.creeps, c => c.memory.room_home == this.name && c.memory.role == CREEP_TYPE_MINER && c.ticksToLive < config.spawning.critical_ttl_for_miners);
+            let miners_near_death = _.filter(Game.creeps, c => c.memory.room_home == this.name && c.memory.role == CREEP_ROLE_MINER && c.ticksToLive < config.spawning.critical_ttl_for_miners);
             this.memory.miners_near_death = miners_near_death.map(c => c.id)
         }
 

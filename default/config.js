@@ -39,11 +39,18 @@ module.exports = {
         maxTransactionCost: 400,
         transactionVolume: 200
     },
+    remote_targets: {
+        harvest: [
+            'E22S12'
+        ]
+    },
     taskGeneration: {
-        repair_hitsMax_multiplier: 0.9
+        repair_hitsMax_multiplier: 0.9 // ab wann soll repariert werden
     },
     spawning: {
-        critical_ttl_for_miners: 50
+        critical_ttl_for_miners: 50, // wenn die time-to-live eines miners < critical_ttl_for_miners -> nichts anderes mehr spawnen
+        max_workers_energy_divider: 500, // dropped-energy-im-raum / max_workers_energy_divider = anzahl-der-worker 
+        max_defenders: 2 // max anzahl an defendern, wenn Gegner im Raum sind
     },
     roomVisuals: {
         roomStats: {x: 1, y:1},

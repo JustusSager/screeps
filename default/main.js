@@ -7,6 +7,7 @@ var structTower = require('struct.tower');
 var structLink = require('struct.link');
 
 var trading = require('trading');
+const { CREEP_ROLE_WORKER } = require('constants');
 
 
 module.exports.loop = function () {
@@ -23,7 +24,7 @@ module.exports.loop = function () {
 
 
         room.update_tasks();
-        let idle_creeps = _.filter(Game.creeps, (c) => (c.memory.room_home == room.name && c.memory.role == 'worker' && !c.memory.task));
+        let idle_creeps = _.filter(Game.creeps, (c) => (c.memory.room_home == room.name && c.memory.role == CREEP_ROLE_WORKER && !c.memory.task));
         room.assign_tasks(idle_creeps);
         Game.rooms[i].visualize();
 

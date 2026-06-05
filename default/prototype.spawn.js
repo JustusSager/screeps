@@ -1,9 +1,7 @@
 var config = require('config');
 
-const CREEP_TYPE_WORKER = "worker"
-const CREEP_TYPE_CARRIER = "transporter"
-const CREEP_TYPE_MINER = "miner"
-const CREEP_TYPE_REMOTE_HARVESTER = "remoteHarvester"
+const { CREEP_ROLE_CARRIER, CREEP_ROLE_WORKER, CREEP_ROLE_MINER, CREEP_ROLE_REMOTE_HARVESTER } = require('./constants');
+
 
 module.exports = function() {
 
@@ -13,13 +11,13 @@ module.exports = function() {
 
     StructureSpawn.prototype.spawn_from_sketch = function(sketch, energy) {
         switch (sketch.role) {
-            case CREEP_TYPE_WORKER:
+            case CREEP_ROLE_WORKER:
                 return this.spawn_worker(energy, this.name);
-            case CREEP_TYPE_CARRIER:
+            case CREEP_ROLE_CARRIER:
                 return this.spawn_carrier(energy);
-            case CREEP_TYPE_MINER:
+            case CREEP_ROLE_MINER:
                 return this.spawn_miner(energy, sketch.source_id, sketch.link_mining);
-            case CREEP_TYPE_REMOTE_HARVESTER:
+            case CREEP_ROLE_REMOTE_HARVESTER:
                 return this.spawn_worker(energy, sketch.room_target_name)
         }
     }
@@ -39,7 +37,7 @@ module.exports = function() {
             }
 
             return this.spawnCreep(body, "PAWN" + Game.time, { memory: {
-                role: CREEP_TYPE_WORKER,
+                role: CREEP_ROLE_WORKER,
                 working: true,
                 room_home: this.room.name,
                 room_target: room_target
@@ -85,7 +83,7 @@ module.exports = function() {
             }
 
             return this.spawnCreep(body, "BISHOP" + Game.time, { memory: {
-                role: CREEP_TYPE_CARRIER,
+                role: CREEP_ROLE_CARRIER,
                 working: true,
                 room_home: this.room.name,
                 room_target: this.room.name
@@ -114,7 +112,7 @@ module.exports = function() {
             }
             body.push(MOVE);
             return this.spawnCreep(body, "ROOK" + Game.time, { memory: {
-                role: CREEP_TYPE_MINER,
+                role: CREEP_ROLE_MINER,
                 room_home: this.room.name,
                 source_id: source_id,
                 link_mining: link_mining
