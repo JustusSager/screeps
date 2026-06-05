@@ -463,10 +463,9 @@ module.exports = function () {
         if (config.roomVisuals.spawnQueu) {
             let queud_roles = [];
             for(let q in this.memory.spawn_queu) {
-                console.log(JSON.stringify(q))
                 queud_roles.push([
-                    q.role, 
-                    q.priority
+                    this.memory.spawn_queu[q].role, 
+                    this.memory.spawn_queu[q].priority
                 ]);
             }
             visual.table(["Spawn Queu"], [2.6, 1], queud_roles, config.roomVisuals.spawnQueu.x, config.roomVisuals.spawnQueu.y)
