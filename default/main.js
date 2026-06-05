@@ -9,11 +9,24 @@ var structLink = require('struct.link');
 var trading = require('trading');
 const { CREEP_ROLE_WORKER } = require('constants');
 
+const { TaskManager } = require('taskmanager');
+const { TASK_HARVEST, TASK_BUILD, TASK_REPAIR } = require('./constants');
+
 
 module.exports.loop = function () {
     // Room memory
     for (let i in Game.rooms) {
         let room = Game.rooms[i];
+
+        try {
+            const tm = new TaskManager(room);
+            tm.find_open_tasks();
+
+        } catch (error) {
+            console.log(error)
+        }
+        
+
         room.handle_memory();
 
         let spawn_queu = room.memory.spawn_queu;
