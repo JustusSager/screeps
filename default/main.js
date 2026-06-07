@@ -35,6 +35,7 @@ module.exports.loop = function () {
         spawn_queu = room.fill_spawn_queu(spawn_queu, creeps_of_room, energy_source_ids);
 
         Game.rooms[i].visualize(tm.create_stats_assigned_tasks());
+        tm.visulize()
 
         spawn_queu = room.spawn_from_queu(spawn_queu);
 

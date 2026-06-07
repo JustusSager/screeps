@@ -38,4 +38,15 @@ module.exports = function () {
         }
     }
 
+    RoomVisual.prototype.circle_with_text = function(text, x, y, radius, fill, opacity) {
+        this.circle(x, y, {
+            radius: radius,
+            fill: fill,
+            opacity: opacity
+        })
+        this.text(text, x, y+0.2, {
+            color: '#000000',
+            font: 0.7
+        })
+    }
 }
