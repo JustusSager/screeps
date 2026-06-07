@@ -12,5 +12,10 @@ module.exports = {
     TASK_WITHDRAW: "withdraw",
     TASK_PICKUP: "pickup",
     TASK_TRANSFER: "transfer",
-    TASK_GET_RENEWED: "getRenewed"
+    TASK_GET_RENEWED: "getRenewed",
+
+    ROOM_STATUS_UNAVAILABLE: "unavailable",
+    ROOM_STATUS_AVAILABLE: "available",
+    ROOM_STATUS_RESERVED: "reserved",
+    ROOM_STATUS_TAKEN: "taken"
 }

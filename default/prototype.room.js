@@ -20,6 +20,7 @@ const {
 
 
 var basebuilding = require('basebuilding');
+const { ROOM_STATUS_MY_ROOM, ROOM_STATUS_UNAVAILABLE, ROOM_STATUS_TAKEN, ROOM_STATUS_RESERVED, ROOM_STATUS_AVAILABLE } = require('./constants');
 
 
 module.exports = function () {
@@ -133,6 +134,10 @@ module.exports = function () {
             "remoteHarvesters": 0
         }
     }
+
+    Room.prototype.find_accessible_neighbors = function() {
+        return Game.map.describeExits(this.name)
+    }
     
 
     Room.prototype.base_planing = function() {
@@ -150,6 +155,32 @@ module.exports = function () {
         }
     }
 
+    Room.prototype.memory_into_worldmap = function() {
+        if (!Memory.worldmap) Memory.worldmap = {};
+        if (!Memory.worldmap[this.name]) Memory.worldmap[this.name] = {};
+
+        // memory sources and minerals
+        Memory.worldmap[this.name]['sources'] = this.find(FIND_SOURCES).map(s => { return {id: s.id }});
+        Memory.worldmap[this.name]['minerals'] = this.find(FIND_MINERALS).map(m => { return {id: m.id, type: m.mineralType }});
+        Memory.worldmap[this.name]['exits'] = this.find_accessible_neighbors();
+
+
+        if (this.controller) {
+            if (this.controller.reservation) {
+                Memory.worldmap[this.name]['ownership'] = { type: ROOM_STATUS_RESERVED, by: this.controller.reservation.username };
+            } 
+            else if (this.controller.owner) {
+                Memory.worldmap[this.name]['ownership'] = { type: ROOM_STATUS_TAKEN, by: this.controller.owner.username };
+            } 
+            else {
+                Memory.worldmap[this.name]['ownership'] = { type: ROOM_STATUS_AVAILABLE };
+            }
+        } 
+        else {
+            Memory.worldmap[this.name]['ownership'] = { type: ROOM_STATUS_UNAVAILABLE };
+        }
+    }
+
     Room.prototype.handle_memory = function () {
         // inital room configuration values -----------------------------------------------------------------
 
@@ -158,15 +189,6 @@ module.exports = function () {
         }
         if (!this.memory.spawn_queu) this.memory.spawn_queu = [];
 
-
-        // static resources of the room ---------------------------------------------------------------------
-
-        if (!this.memory.energy_source_ids || Game.time % 10000 == 0) {
-            this.memory.energy_source_ids = this.find(FIND_SOURCES).map(s => s.id);
-        }
-        if (!this.memory.mineral_source_ids || Game.time % 10000 == 0) {
-            this.memory.mineral_source_ids = this.find(FIND_MINERALS).map(m => m.id);
-        }
 
         // RCL statistics -----------------------------------------------------------------------------------
 

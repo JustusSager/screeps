@@ -10,12 +10,16 @@ var trading = require('trading');
 
 const { TaskManager } = require('./manager.tasks');
 const { TASK_HARVEST, TASK_BUILD, TASK_REPAIR, CREEP_ROLE_CARRIER, CREEP_ROLE_WORKER } = require('./constants');
+const { ExplorationManager } = require('./manager.exploration');
 
 
 module.exports.loop = function () {
     // Room memory
     for (let i in Game.rooms) {
         let room = Game.rooms[i];
+        if (!Memory.worldmap || !Memory.worldmap[this.name] || Game.time % 1000 == 0) {
+            room.memory_into_worldmap();
+        }
 
         const tm = new TaskManager(room);
         tm.find_open_tasks();
@@ -29,7 +33,7 @@ module.exports.loop = function () {
 
         let spawn_queu = room.memory.spawn_queu;
         let creeps_of_room = _.filter(Game.creeps, c => c.memory.room_home == room.name);
-        let energy_source_ids = room.memory.energy_source_ids
+        let energy_source_ids = Memory.worldmap[room.name].sources.map(s => s.id)
 
         spawn_queu = room.fill_spawn_queu(spawn_queu, creeps_of_room, energy_source_ids);
 
@@ -68,6 +72,9 @@ module.exports.loop = function () {
         var creep = Game.creeps[name];
         creep.run(speak = true);
     }
+
+    const explorationmanager = new ExplorationManager()
+    console.log(explorationmanager.find_unexplored_neighbors())
 
     // clear memory
     for(var i in Memory.creeps) {
