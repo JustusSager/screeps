@@ -184,17 +184,6 @@ module.exports = function () {
 
         // dynamic room statistics --------------------------------------------------------------------------
 
-        // memory how many creeps are currently doing what
-        this.memory.creepTasks_current = {
-            "harvest": _.filter(Game.creeps, (c) => (c.memory.task && c.memory.task.type == TASK_HARVEST && c.memory.room_home == this.name)).length,
-            "upgrade": _.filter(Game.creeps, (c) => (c.memory.task && c.memory.task.type == TASK_UPGRADE && c.memory.room_home == this.name)).length,
-            "build": _.filter(Game.creeps, (c) => (c.memory.task && c.memory.task.type == TASK_BUILD && c.memory.room_home == this.name)).length,
-            "repair": _.filter(Game.creeps, (c) => (c.memory.task && c.memory.task.type == TASK_REPAIR && c.memory.room_home == this.name)).length,
-            "withdraw": _.filter(Game.creeps, (c) => (c.memory.task && c.memory.task.type == TASK_WITHDRAW && c.memory.room_home == this.name)).length,
-            "pickup": _.filter(Game.creeps, (c) => (c.memory.task && c.memory.task.type == TASK_PICKUP && c.memory.room_home == this.name)).length,
-            "transfer": _.filter(Game.creeps, (c) => (c.memory.task && c.memory.task.type == TASK_TRANSFER && c.memory.room_home == this.name)).length,
-        };
-
         // dropped resources
         if (!this.memory.amount_dropped_energy || Game.time % 10 == 2) {
             let dropped_energy = this.find(FIND_DROPPED_RESOURCES, {filter: (r) => r.resourceType == RESOURCE_ENERGY});

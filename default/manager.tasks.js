@@ -87,19 +87,19 @@ class TaskManager {
 
     create_stats_assigned_tasks() {
         return [
-            [TASK_BUILD, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_BUILD && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_BUILD)],
-            [TASK_HARVEST, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_HARVEST && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_HARVEST)],
-            [TASK_PICKUP, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_PICKUP && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_PICKUP)],
-            [TASK_REPAIR, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_REPAIR && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_REPAIR)],
-            [TASK_TRANSFER, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_TRANSFER && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_TRANSFER)],
-            [TASK_UPGRADE, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_UPGRADE && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_UPGRADE)],
-            [TASK_WITHDRAW, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_WITHDRAW && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_WITHDRAW)],
-            [TASK_GET_RENEWED, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_GET_RENEWED && c.memory.room_home && this.room.name), _.sum(this.tasks, t => t.type == TASK_GET_RENEWED)],
+            [TASK_BUILD, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_BUILD && c.memory.room_home == this.room.name), _.sum(this.tasks, t => t.type == TASK_BUILD)],
+            [TASK_HARVEST, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_HARVEST && c.memory.room_home == this.room.name), _.sum(this.tasks, t => t.type == TASK_HARVEST)],
+            [TASK_PICKUP, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_PICKUP && c.memory.room_home == this.room.name), _.sum(this.tasks, t => t.type == TASK_PICKUP)],
+            [TASK_REPAIR, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_REPAIR && c.memory.room_home == this.room.name), _.sum(this.tasks, t => t.type == TASK_REPAIR)],
+            [TASK_TRANSFER, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_TRANSFER && c.memory.room_home == this.room.name), _.sum(this.tasks, t => t.type == TASK_TRANSFER)],
+            [TASK_UPGRADE, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_UPGRADE && c.memory.room_home == this.room.name), _.sum(this.tasks, t => t.type == TASK_UPGRADE)],
+            [TASK_WITHDRAW, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_WITHDRAW && c.memory.room_home == this.room.name), _.sum(this.tasks, t => t.type == TASK_WITHDRAW)],
+            [TASK_GET_RENEWED, _.sum(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_GET_RENEWED && c.memory.room_home == this.room.name), _.sum(this.tasks, t => t.type == TASK_GET_RENEWED)],
         ]
     }
 
     assign_task(creep, sort_by_distance=false) {
-        let valid_tasks = this.tasks.filter(t => t.is_valid_for_creep(creep))
+        let valid_tasks = this.tasks.filter(t => t.work_left > t.work_assigned && t.is_valid_for_creep(creep))
         if (sort_by_distance) {
             valid_tasks.sort(
                 (a, b) => ((a.target.pos.x - creep.pos.x) + (a.target.pos.y - creep.pos.y)) - ((b.target.pos.x - creep.pos.x) + (b.target.pos.y - creep.pos.y))
@@ -136,12 +136,13 @@ class TaskManager {
 }
 
 class Task {
-    constructor(type, target, range, resource, work_left, priority) {
+    constructor(type, target, range, resource, work_left, work_assigned, priority) {
         this.type = type;
         this.target = target;
         this.range = range;
         this.resource = resource;
         this.work_left = work_left;
+        this.work_assigned = work_assigned;
         this.priority = priority;
     }
 
@@ -156,8 +157,9 @@ class Task {
     }
 
     assign_to_creep(creep) {
+        console.log("Assigning " + this.toString() + " to creep " + creep.name)
         creep.memory.task = this.to_dict()
-        new RoomVisual(creep.room.name).line(creep, this.target)
+        new RoomVisual(creep.room.name).line(creep.pos.x, creep.pos.y, this.target.pos.x, this.target.pos.y, {fill: '#ffffff', opasity: 1})
     }
 
     do(creep) {
@@ -170,9 +172,12 @@ class Task {
             "type": this.type,
             "target_id": this.target.id,
             "range": this.range,
-            "resource": this.resource,
-            "work_left": this.work_left
+            "resource": this.resource
         }
+    }
+
+    toString() {
+        return "Task " + this.type + "{ target: " + this.target.id + " - " + this.work_assigned + "/" + this.work_left + " - (" + this.priority + ") }"
     }
 }
 
@@ -187,7 +192,8 @@ class TaskUpgrade extends Task {
             controller,  // this.target
             3,  // this.range
             RESOURCE_ENERGY,  // this.resource
-            controller.progressTotal - controller.progress - work_assigned,  // this.work_left
+            controller.progressTotal - controller.progress,  // this.work_left
+            work_assigned,
             _.some(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_UPGRADE) ? config.taskPrio.upgrade : config.taskPrio.upgrade_crit
         )
     }
@@ -226,7 +232,8 @@ class TaskHarvest extends Task {
             source,  // this.target
             1,  // this.range
             RESOURCE_ENERGY,  // this.resource
-            source.energy - work_assigned, // this.work_left
+            source.energy, // this.work_left
+            work_assigned,
             config.taskPrio.harvest
         )
     }
@@ -264,7 +271,8 @@ class TaskBuild extends Task {
             construction_site,  // this.target
             3,  // this.range
             RESOURCE_ENERGY,  // this.resource
-            construction_site.progressTotal - construction_site.progress - work_assigned,  // this.work_left
+            construction_site.progressTotal - construction_site.progress,  // this.work_left
+            work_assigned,
             config.taskPrio.build
         )
     }
@@ -302,7 +310,8 @@ class TaskRepair extends Task {
             structure,  // this.target
             3,  // this.range
             RESOURCE_ENERGY,  // this.resource
-            structure.hitsMax - structure.hits - work_assigned,  // this.work_left
+            structure.hitsMax - structure.hits,  // this.work_left
+            work_assigned,
             config.taskPrio.repair
         )
     }
@@ -340,7 +349,8 @@ class TaskWithdraw extends Task {
             structure,  // this.target
             1,  // this.range
             resource,  // this.resource
-            structure.store[resource] - work_assigned,  // this.work_left
+            structure.store[resource],  // this.work_left
+            work_assigned,
             priority // this.priority
         )
     }
@@ -352,7 +362,7 @@ class TaskWithdraw extends Task {
     is_valid_for_creep(creep) {
         return (
             creep.getActiveBodyparts(CARRY) > 0 &&
-            creep.store.getFreeCapacity() > 0
+            creep.store.getFreeCapacity(this.resource) > 0
         )
     }
 
@@ -379,7 +389,8 @@ class TaskPickup extends Task {
             target,  // this.target
             1,  // this.range
             target.resourceType,  // this.resource
-            target.amount - work_assigned,  // this.work_left
+            target.amount,  // this.work_left
+            work_assigned,
             config.taskPrio.pickup
         )
     }
@@ -391,7 +402,7 @@ class TaskPickup extends Task {
     is_valid_for_creep(creep) {
         return (
             creep.getActiveBodyparts(CARRY) > 0 &&
-            creep.store.getFreeCapacity() > 0
+            creep.store.getFreeCapacity(this.resource) > 0
         )
     }
 
@@ -417,7 +428,8 @@ class TaskTransfer extends Task {
             structure,  // this.target
             1,  // this.range
             resource,  // this.resource
-            structure.store.getFreeCapacity(resource) - work_assigned,  // this.work_left
+            structure.store.getFreeCapacity(resource),  // this.work_left
+            work_assigned,
             priority
         )
     }

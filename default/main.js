@@ -7,10 +7,9 @@ var structTower = require('struct.tower');
 var structLink = require('struct.link');
 
 var trading = require('trading');
-const { CREEP_ROLE_WORKER } = require('constants');
 
 const { TaskManager } = require('./manager.tasks');
-const { TASK_HARVEST, TASK_BUILD, TASK_REPAIR } = require('./constants');
+const { TASK_HARVEST, TASK_BUILD, TASK_REPAIR, CREEP_ROLE_CARRIER, CREEP_ROLE_WORKER } = require('./constants');
 
 
 module.exports.loop = function () {
@@ -21,7 +20,7 @@ module.exports.loop = function () {
         const tm = new TaskManager(room);
         tm.find_open_tasks();
 
-        let idle_creeps = _.filter(Game.creeps, (c) => (c.memory.room_home == room.name && c.memory.role == CREEP_ROLE_WORKER && !c.memory.task));
+        let idle_creeps = _.filter(Game.creeps, (c) => (c.memory.room_home == room.name && (c.memory.role == CREEP_ROLE_WORKER || c.memory.role == CREEP_ROLE_CARRIER) && !c.memory.task));
         for (const creep of idle_creeps) {
             tm.assign_task(creep)
         }

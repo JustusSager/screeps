@@ -48,19 +48,19 @@ module.exports = {
         repair_hitsMax_multiplier: 0.9 // ab wann soll repariert werden
     },
     taskPrio: {
+        harvest: 1,
+        pickup: 4,
+        withdraw_default: 3,
+        withdraw_storage: 2,
+        withdraw_container: 3,
         upgrade: 5,
         upgrade_crit: 10,
-        harvest: 1,
-        build: 6,
-        repair: 7,
-        pickup: 5,
-        withdraw_default: 4,
-        withdraw_container: 4,
-        withdraw_storage: 3,
-        transfer_default: 4,
-        transfer_tower: 4,
-        transfer_spawn_extensions: 3,
-        transfer_storage: 1
+        build: 8,
+        repair: 9,
+        transfer_default: 2,
+        transfer_tower: 7,
+        transfer_spawn_extensions: 6,
+        transfer_storage: 2
     },
     spawning: {
         critical_ttl_for_miners: 50, // wenn die time-to-live eines miners < critical_ttl_for_miners -> nichts anderes mehr spawnen
