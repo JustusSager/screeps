@@ -57,25 +57,25 @@ class TaskManager {
         // Withdraw
         result = this.room.find(FIND_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_CONTAINER) && s.store[RESOURCE_ENERGY] > 0})
         for (const structure of result) {
-            this.tasks.push(new TaskWithdraw(structure, 4));
+            this.tasks.push(new TaskWithdraw(structure, config.taskPrio.withdraw_container));
         }
         result = this.room.find(FIND_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_STORAGE) && s.store[RESOURCE_ENERGY] > 0})
         for (const structure of result) {
-            this.tasks.push(new TaskWithdraw(structure, 3));
+            this.tasks.push(new TaskWithdraw(structure, config.taskPrio.withdraw_storage));
         }
 
         // Transfer
         result = this.room.find(FIND_MY_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_TOWER) && s.store.getFreeCapacity([RESOURCE_ENERGY]) > 0});
         for (const structure of result) {
-            this.tasks.push(new TaskTransfer(structure, 4));
+            this.tasks.push(new TaskTransfer(structure, config.taskPrio.transfer_tower));
         }
         result = this.room.find(FIND_MY_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_SPAWN || s.structureType == STRUCTURE_EXTENSION) && s.store.getFreeCapacity([RESOURCE_ENERGY]) > 0});
         for (const structure of result) {
-            this.tasks.push(new TaskTransfer(structure, 3));
+            this.tasks.push(new TaskTransfer(structure, config.taskPrio.transfer_spawn_extensions));
         }
         result = this.room.find(FIND_MY_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_STORAGE) && s.store.getFreeCapacity([RESOURCE_ENERGY]) > 0});
         for (const structure of result) {
-            this.tasks.push(new TaskTransfer(structure, 1));
+            this.tasks.push(new TaskTransfer(structure, config.taskPrio.transfer_storage));
         }
 
         // filter for only valid
@@ -188,7 +188,7 @@ class TaskUpgrade extends Task {
             3,  // this.range
             RESOURCE_ENERGY,  // this.resource
             controller.progressTotal - controller.progress - work_assigned,  // this.work_left
-            _.some(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_UPGRADE) ? 5 : 10
+            _.some(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_UPGRADE) ? config.taskPrio.upgrade : config.taskPrio.upgrade_crit
         )
     }
 
@@ -227,7 +227,7 @@ class TaskHarvest extends Task {
             1,  // this.range
             RESOURCE_ENERGY,  // this.resource
             source.energy - work_assigned, // this.work_left
-            1
+            config.taskPrio.harvest
         )
     }
 
@@ -265,7 +265,7 @@ class TaskBuild extends Task {
             3,  // this.range
             RESOURCE_ENERGY,  // this.resource
             construction_site.progressTotal - construction_site.progress - work_assigned,  // this.work_left
-            6
+            config.taskPrio.build
         )
     }
 
@@ -303,7 +303,7 @@ class TaskRepair extends Task {
             3,  // this.range
             RESOURCE_ENERGY,  // this.resource
             structure.hitsMax - structure.hits - work_assigned,  // this.work_left
-            7
+            config.taskPrio.repair
         )
     }
 
@@ -330,7 +330,7 @@ class TaskRepair extends Task {
 }
 
 class TaskWithdraw extends Task {
-    constructor(structure, priority=4, resource=RESOURCE_ENERGY) {
+    constructor(structure, priority=config.taskPrio.withdraw_default, resource=RESOURCE_ENERGY) {
         let work_assigned = 0;
         for (const creep of _.filter(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_WITHDRAW && c.memory.task.target_id == structure.id)) {
             work_assigned += creep.store.getFreeCapacity();
@@ -380,7 +380,7 @@ class TaskPickup extends Task {
             1,  // this.range
             target.resourceType,  // this.resource
             target.amount - work_assigned,  // this.work_left
-            5
+            config.taskPrio.pickup
         )
     }
 
@@ -407,7 +407,7 @@ class TaskPickup extends Task {
 }
 
 class TaskTransfer extends Task {
-    constructor(structure, priority=4, resource=RESOURCE_ENERGY) {
+    constructor(structure, priority=config.taskPrio.transfer_default, resource=RESOURCE_ENERGY) {
         let work_assigned = 0;
         for (const creep of _.filter(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_TRANSFER && c.memory.task.target_id == structure.id)) {
             work_assigned += creep.store[resource];

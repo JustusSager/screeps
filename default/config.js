@@ -47,6 +47,21 @@ module.exports = {
     taskGeneration: {
         repair_hitsMax_multiplier: 0.9 // ab wann soll repariert werden
     },
+    taskPrio: {
+        upgrade: 5,
+        upgrade_crit: 10,
+        harvest: 1,
+        build: 6,
+        repair: 7,
+        pickup: 5,
+        withdraw_default: 4,
+        withdraw_container: 4,
+        withdraw_storage: 3,
+        transfer_default: 4,
+        transfer_tower: 4,
+        transfer_spawn_extensions: 3,
+        transfer_storage: 1
+    },
     spawning: {
         critical_ttl_for_miners: 50, // wenn die time-to-live eines miners < critical_ttl_for_miners -> nichts anderes mehr spawnen
         max_workers_energy_divider: 500, // dropped-energy-im-raum / max_workers_energy_divider = anzahl-der-worker 
