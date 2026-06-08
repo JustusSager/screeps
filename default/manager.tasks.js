@@ -184,7 +184,7 @@ class Task {
 class TaskUpgrade extends Task {
     constructor(controller) {
         let work_assigned = 0;
-        for (const creep of _.filter(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_BUILD && c.memory.task.target_id == construction_site.id)) {
+        for (const creep of _.filter(Game.creeps, c => c.memory.task && c.memory.task.type == TASK_BUILD && c.memory.task.target_id == controller.id)) {
             work_assigned += creep.store[RESOURCE_ENERGY];
         }
         super(
