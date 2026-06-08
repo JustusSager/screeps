@@ -1,4 +1,5 @@
 import spawningManager from './manager.spawning'
+import basebuildingManager from './manager.basebuilding'
 import { SpawnRequest } from './manager.spawning';
 import roleMiner from './role.miner';
 import roleHauler from './role.hauler';
@@ -52,6 +53,13 @@ module.exports.loop = function(): void {
         }
 
         spawningManager.visualize(roomvisual, spawn_queu, 1, 1)
+
+        if (room.controller && room.controller.level > 1) {
+            basebuildingManager.build_spawner_blueprint(
+                _.filter(Game.spawns, s => s.room === room && s.name.endsWith('w'))[0],
+                room.controller.level
+            )
+        }
     }
 
 
