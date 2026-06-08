@@ -4,7 +4,9 @@ import { SpawnRequest } from './manager.spawning';
 import roleMiner from './role.miner';
 import roleHauler from './role.hauler';
 import roleUpgrader from './role.upgrader';
+import roleManager from './role.manager';
 import _ from 'lodash';
+import roleBuilder from './role.builder';
 
 
 function clear_memory(): void {
@@ -60,6 +62,12 @@ module.exports.loop = function(): void {
                 room.controller.level
             )
         }
+
+        const western_spawn = _.filter(Game.spawns, s => s.room === room && s.name.endsWith('w'))[0]
+        room.memory.spawner_base_centroid_pos = {
+            x: western_spawn.pos.x + 2, y: western_spawn.pos.y + 1
+        }
+        roomvisual.circle(room.memory.spawner_base_centroid_pos.x, room.memory.spawner_base_centroid_pos.y)
     }
 
 
@@ -73,6 +81,12 @@ module.exports.loop = function(): void {
         }
         else if (creep.memory.role === 'upgrader') {
             roleUpgrader.run(creep);
+        }
+        else if (creep.memory.role === 'manager') {
+            roleManager.run(creep);
+        }
+        else if (creep.memory.role === 'builder') {
+            roleBuilder.run(creep);
         }
     }
 }

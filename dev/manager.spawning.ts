@@ -3,7 +3,7 @@ import _ from "lodash";
 
 export interface SpawnRequest {
     name: string;
-    type: 'upgrader' | 'hauler' | 'miner';
+    body: BodyPartConstant[];
     memory: CreepMemory;
     priority: number;
 }
@@ -28,13 +28,16 @@ export default managerSpawning = {
         const num_miners = _.filter(Game.creeps, (c) => c.memory.role === 'miner').length;
         const num_haulers = _.filter(Game.creeps, (c) => c.memory.role === 'hauler').length;
         const num_upgrader = _.filter(Game.creeps, (c) => c.memory.role === 'upgrader').length;
+        const num_builders = _.filter(Game.creeps, (c) => c.memory.role === 'builder').length;
+
+        const manager_nw = _.some(Game.creeps, (c) => c.memory.role === 'manager' && c.memory.manager_position === 'nw');
 
 
         for (const sourceMeta of Memory.worldmap[room.name].sources.filter(s => !s.guarded)) {
             if (!_.some(Game.creeps, (c) => c.memory.role === 'miner' && c.memory.source_id === sourceMeta.id)) {
                 spawn_queu.push({
                     name: 'miner' + Game.time,
-                    type: 'miner',
+                    body: [WORK, WORK, MOVE],
                     memory: {
                         role: 'miner',
                         source_id: sourceMeta.id,
@@ -50,7 +53,7 @@ export default managerSpawning = {
         if (num_haulers < num_miners * 2) {
             spawn_queu.push({
                 name: 'hauler' + Game.time,
-                type: 'hauler',
+                body: [CARRY, CARRY, MOVE, MOVE, MOVE],
                 memory: {
                     role: 'hauler',
                     aquire_state: true
@@ -62,7 +65,7 @@ export default managerSpawning = {
         if (num_upgrader < 2) {
             spawn_queu.push({
                 name: 'upgrader' + Game.time,
-                type: 'upgrader',
+                body: [WORK, CARRY, MOVE, MOVE],
                 memory: {
                     role: 'upgrader',
                     aquire_state: true
@@ -70,6 +73,34 @@ export default managerSpawning = {
                 priority: num_upgrader === 0 ? 8 : 3
             })
         }
+
+        if (num_builders < 2) {
+            spawn_queu.push({
+                name: 'builder' + Game.time,
+                body: [WORK, CARRY, MOVE, MOVE],
+                memory: {
+                    role: 'builder',
+                    aquire_state: true
+                },
+                priority: num_upgrader === 0 ? 8 : 3
+            })
+        }
+
+        const num_extensions = room.find(FIND_MY_STRUCTURES, {filter: s => s.structureType === STRUCTURE_EXTENSION}).length
+        if (!manager_nw && num_extensions >= 5) {
+            spawn_queu.push({
+                name: 'manager_nw',
+                body: [CARRY, CARRY, CARRY, CARRY, MOVE],
+                memory: {
+                    role: 'manager',
+                    aquire_state: true,
+                    manager_position: 'nw'
+                },
+                priority: 11
+            })
+        }
+
+
         return spawn_queu;
     },
 
@@ -78,32 +109,14 @@ export default managerSpawning = {
     },
 
     spawn_request(request, spawn) {
-        let name: string;
-        let body: BodyPartConstant[] = [];
-        switch(request.type) {
-            case "upgrader":
-                name = 'worker' + Game.time;
-                body = [WORK, CARRY, MOVE];
-                break;
-            case "hauler":
-                name = 'hauler' + Game.time;
-                body = [CARRY, CARRY, MOVE, MOVE];
-                break;
-            case "miner":
-                name = 'miner' + Game.time;
-                body = [WORK, WORK, MOVE];
-                break;
-            default:
-                return -1
-        }
-        return spawn.spawnCreep(body, name, {memory: request.memory})
+        return spawn.spawnCreep(request.body, request.name, {memory: request.memory})
     },
 
     visualize(roomvisual, spawn_queu, left_x, top_y) {
 
         roomvisual.text("Spawn Queu", left_x, top_y, {color: '#ffffff'})
         for (let i = 0; i < spawn_queu.length; i++) {
-            roomvisual.text(spawn_queu[i].type, left_x, top_y+i+1);
+            roomvisual.text(spawn_queu[i].memory.role, left_x, top_y+i+1);
         }
     }
 }
