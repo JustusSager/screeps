@@ -2,10 +2,13 @@ import spawningManager from './manager.spawning'
 import { SpawnRequest } from './manager.spawning';
 import roleMiner from './role.miner';
 import roleHauler from './role.hauler';
+import roleUpgrader from './role.upgrader';
 import _ from 'lodash';
 
 
 function clear_memory(): void {
+    if (!Memory.worldmap) Memory.worldmap = {}
+
     for (const name in Memory.creeps) {
         if (!Game.creeps[name]) delete Memory.creeps[name];
     }
@@ -18,28 +21,37 @@ function clear_memory(): void {
 }
 
 module.exports.loop = function(): void {
-    console.log("Test")
-
     // clear memory
-    //clear_memory();
-    
-    // count the number of roler
-    const miners = _.filter(Game.creeps, (c: Creep) => c.memory.role === 'miner')
-    const haulers = _.filter(Game.creeps, (c: Creep) => c.memory.role === 'hauler')
-
-    console.log(`Time ${Game.time}`);
-
+    clear_memory();
     
     for (const roomname in Game.rooms) {
         const room = Game.rooms[roomname];
-        console.log(`Spawnlogik für raum ${roomname}`);
+        const roomvisual = new RoomVisual(roomname);
+
+        Memory.worldmap[roomname] = {
+            sources: room.find(FIND_SOURCES).map((s) => {return { 
+                id: s.id,
+                guarded: (s.pos.findInRange(FIND_HOSTILE_STRUCTURES, 5).length > 0 || s.pos.findInRange(FIND_HOSTILE_CREEPS, 5).length > 0) 
+            }}),
+            minerals: room.find(FIND_MINERALS).map((m) => {return {
+                id: m.id,
+                type: m.mineralType,
+                guarded: (m.pos.findInRange(FIND_HOSTILE_STRUCTURES, 5).length > 0 || m.pos.findInRange(FIND_HOSTILE_CREEPS, 5).length > 0) 
+            }}),
+            exits: Game.map.describeExits(roomname)
+        }
 
         let spawn_queu: SpawnRequest[] = spawningManager.create_spawn_queu(room)
+        spawn_queu = spawningManager.order_by_priority(spawn_queu);
+        console.log(JSON.stringify(spawn_queu))
 
         const spawns = _.filter(Game.spawns, (spawn: StructureSpawn) => spawn.room.name === roomname)
         for (const spawn of spawns) {
+            if (spawn_queu.length === 0) break;
             spawningManager.spawn_request(spawn_queu[0], spawn)
         }
+
+        spawningManager.visualize(roomvisual, spawn_queu, 1, 1)
     }
 
 
@@ -50,6 +62,9 @@ module.exports.loop = function(): void {
         }
         else if (creep.memory.role === 'hauler') {
             roleHauler.run(creep);
+        }
+        else if (creep.memory.role === 'upgrader') {
+            roleUpgrader.run(creep);
         }
     }
 }

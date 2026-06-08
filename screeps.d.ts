@@ -1,7 +1,8 @@
 declare global {
     interface CreepMemory {
         [name: string]: any;
-        role: 'worker' | 'hauler' | 'miner';
+        role: 'upgrader' | 'hauler' | 'miner';
+        aquire_state: boolean
 
         // Für role worker
         task?: Task;
@@ -17,26 +18,25 @@ declare global {
     }
 
     interface Task {
-        type:string;
-        target_id: string;
+        type: 'harvest' | 'withdraw' | 'pickup' | 'upgrade' | 'transfer' | 'build' | 'repair';
+        target: any;
         range: number;
-        resource?: string;
-        work_left?: number;
-        work_assigned?: number;
-        priority?: number;
+        resource: ResourceConstant;
     }
 
     interface RoomMeta {
         sources: {
-            id: string
+            id: string,
+            guarded: boolean
         }[];
         minerals: {
             id: string,
-            type: string
+            type: string,
+            guarded: boolean
         }[]
         exits: {
-            [direction: string]: string
-        }
+            [exitkey: string]: string
+        } | null
     }
 }
 
