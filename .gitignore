@@ -1,3 +1,5 @@
 /node_modules/
 .sync
 package-lock.json
+*.js
+*.js.map

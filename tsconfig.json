@@ -4,13 +4,14 @@
     "lib": ["es6"],
     "target": "es6",
     "moduleResolution": "Node",
+    "ignoreDeprecations": "6.0",
     "sourceMap": true,
     "strict": true,
     "experimentalDecorators": true,
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
-    "types": ["node", "screeps"]
+    "types": ["node", "screeps", "lodash"]
   },
   "include": ["./**/*.ts", "./**/*.d.ts"],
   "exclude": ["node_modules", "dist", ".git"]
