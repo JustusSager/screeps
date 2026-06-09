@@ -8,14 +8,14 @@ let roleHauler: {
 export default roleHauler = {
     run(creep) {
         if (creep.store.getFreeCapacity() > 0) {
-            const dropped = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {filter: d => d.resourceType === RESOURCE_ENERGY});
+            const dropped = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {filter: d => d.resourceType === RESOURCE_ENERGY && d.amount > creep.store.getFreeCapacity(RESOURCE_ENERGY)});
             if(dropped && creep.pickup(dropped) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(dropped)
                 return;
             }
 
             const container_near_souce = creep.pos.findClosestByRange(FIND_STRUCTURES, {
-                filter: s => s.structureType === STRUCTURE_CONTAINER && s.pos.findInRange(FIND_SOURCES, 1).length > 0 && s.store[RESOURCE_ENERGY] > 0
+                filter: s => s.structureType === STRUCTURE_CONTAINER && s.pos.findInRange(FIND_SOURCES, 1).length > 0 && s.store[RESOURCE_ENERGY] > creep.store.getFreeCapacity(RESOURCE_ENERGY)
             });
             if(container_near_souce && creep.withdraw(container_near_souce, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(container_near_souce)

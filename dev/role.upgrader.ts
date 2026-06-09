@@ -15,7 +15,7 @@ export default roleUpgrader = {
         }
 
         if (creep.memory.aquire_state) {
-            const dropped = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES)
+            const dropped = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {filter: d => d.resourceType === RESOURCE_ENERGY && d.amount > creep.store.getFreeCapacity(RESOURCE_ENERGY)})
             if (dropped) {
                 if (creep.pickup(dropped) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(dropped)
@@ -23,7 +23,7 @@ export default roleUpgrader = {
                 return
             }
 
-            const container = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 0})
+            const container = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > creep.store.getFreeCapacity(RESOURCE_ENERGY)})
             if (container) {
                 if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(container)
@@ -31,7 +31,7 @@ export default roleUpgrader = {
                 return
             }
 
-            const storage = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0})
+            const storage = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > creep.store.getFreeCapacity(RESOURCE_ENERGY)})
             if (storage) {
                 if (creep.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(storage)

@@ -10,9 +10,52 @@ export interface SpawnRequest {
 
 let managerSpawning: {
     /**
-     * @param {Room} room
+     * Erstellt die spawn queu für einen bestimmten Raum. Hier liegt die höhere Logik wann eine 
+     * bestimmte Creep Rolle gespawnt werden soll.
+     * @param room Der Raum zu dem der Spawn Manager gehört.
+     * @returns Die spawn queu.
      */
     create_spawn_queu(room: Room): SpawnRequest[]
+
+    /**
+     * Erstellt eine Spawn Request für einen Upgrader. Hier liegt die Logik wie ein bestimmter Creep aufgebaut sein soll und 
+     * wie wichtig dieser Creep ist.
+     * @param room Der Raum zu dem der Spawn Manager gehört.
+     * @param num_upgraders die aktuelle Anzahl an Upgradern.
+     * @param max_upgraders Die maximale Anzahl der Upgrader.
+     * @returns Ein Array mit der Spawn Request oder ein leeres Array.
+     */
+    create_spawn_request_upgrader(room: Room, num_upgraders: number, max_upgraders: number): SpawnRequest[]
+
+    /**
+     * Erstellt eine Spawn Request für einen Hauler. Hier liegt die Logik wie ein bestimmter Creep aufgebaut sein soll und 
+     * wie wichtig dieser Creep ist.
+     * @param room Der Raum zu dem der Spawn Manager gehört.
+     * @param num_haulers die aktuelle Anzahl an Haulern.
+     * @param max_haulers Die maximale Anzahl an Haulern.
+     * @returns Ein Array mit der Spawn Request oder ein leeres Array.
+     */
+    create_spawn_request_hauler(room: Room, num_haulers: number, max_haulers: number): SpawnRequest[]
+
+    /**
+     * Erstellt eine Spawn Request für einen Builder. Hier liegt die Logik wie ein bestimmter Creep aufgebaut sein soll und 
+     * wie wichtig dieser Creep ist.
+     * @param room Der Raum zu dem der Spawn Manager gehört.
+     * @param num_builders die aktuelle Anzahl an Buildern.
+     * @param max_builders Die maximale Anzahl an Buildern.
+     * @returns Ein Array mit der Spawn Request oder ein leeres Array.
+     */
+    create_spawn_request_builder(room: Room, num_builders: number, max_builders: number): SpawnRequest[]
+
+    /**
+     * Erstellt eine Spawn Request für einen Explorer Creep für jeden Zielraum. Hier liegt die Logik wie ein bestimmter Creep 
+     * aufgebaut sein soll und wie wichtig dieser Creep ist.
+     * @param room Der Raum zu dem der Spawn Manager gehört.
+     * @param num_upgraders die aktuelle Anzahl an Buildern.
+     * @param max_upgraders Die maximale Anzahl an Buildern.
+     * @returns Ein Array mit der Spawn Request oder ein leeres Array.
+     */
+    create_spawn_requests_exploration(room: Room, exploration_targets: string[]): SpawnRequest[]
 
     order_by_priority(spawn_queu: SpawnRequest[]): SpawnRequest[]
 
@@ -41,7 +84,8 @@ export default managerSpawning = {
                     memory: {
                         role: 'miner',
                         source_id: sourceMeta.id,
-                        aquire_state: true
+                        aquire_state: true,
+                        room_home: room.name
                     },
                     priority: num_miners === 0 ? 10 : 5
                 })
@@ -50,40 +94,18 @@ export default managerSpawning = {
         }
 
         
-        if (num_haulers < num_miners * 2) {
-            spawn_queu.push({
-                name: 'hauler' + Game.time,
-                body: [CARRY, CARRY, MOVE, MOVE, MOVE],
-                memory: {
-                    role: 'hauler',
-                    aquire_state: true
-                },
-                priority: num_haulers === 0 ? 9 : 4
-            })
+        spawn_queu.push(...this.create_spawn_request_hauler(room, num_haulers, num_miners * 2))
+
+        // Upgrader
+        if (room.controller && room.controller.level < 8) {
+            spawn_queu.push(...this.create_spawn_request_upgrader(room, num_upgrader, 3))
+        } else if(room.controller && room.controller.level == 8) {
+            spawn_queu.push(...this.create_spawn_request_upgrader(room, num_upgrader, 1))
         }
 
-        if (num_upgrader < 2) {
-            spawn_queu.push({
-                name: 'upgrader' + Game.time,
-                body: [WORK, CARRY, MOVE, MOVE],
-                memory: {
-                    role: 'upgrader',
-                    aquire_state: true
-                },
-                priority: num_upgrader === 0 ? 8 : 3
-            })
-        }
-
-        if (num_builders < 2) {
-            spawn_queu.push({
-                name: 'builder' + Game.time,
-                body: [WORK, CARRY, MOVE, MOVE],
-                memory: {
-                    role: 'builder',
-                    aquire_state: true
-                },
-                priority: num_upgrader === 0 ? 8 : 3
-            })
+        // Builder
+        if (room.find(FIND_CONSTRUCTION_SITES).length > 0) {
+            spawn_queu.push(...this.create_spawn_request_builder(room, num_builders, 2))
         }
 
         const num_extensions = room.find(FIND_MY_STRUCTURES, {filter: s => s.structureType === STRUCTURE_EXTENSION}).length
@@ -94,7 +116,8 @@ export default managerSpawning = {
                 memory: {
                     role: 'manager',
                     aquire_state: true,
-                    manager_position: 'nw'
+                    manager_position: 'nw',
+                    room_home: room.name
                 },
                 priority: 11
             })
@@ -102,6 +125,78 @@ export default managerSpawning = {
 
 
         return spawn_queu;
+    },
+
+    create_spawn_request_upgrader(room, num_upgraders, max_upgraders) {
+        let spawn_queu: SpawnRequest[] = []
+        if (num_upgraders < max_upgraders) {
+            spawn_queu.push({
+                name: 'upgrader' + Game.time,
+                body: [WORK, CARRY, MOVE, MOVE],
+                memory: {
+                    role: 'upgrader',
+                    aquire_state: true,
+                    room_home: room.name
+                },
+                priority: num_upgraders === 0 ? 8 : 3
+            })
+        }
+        return spawn_queu
+    },
+
+    create_spawn_request_hauler(room, num_haulers, max_haulers) {
+        let spawn_queu: SpawnRequest[] = []
+        if (num_haulers < max_haulers) {
+            spawn_queu.push({
+                name: 'hauler' + Game.time,
+                body: [CARRY, CARRY, MOVE, MOVE, MOVE],
+                memory: {
+                    role: 'hauler',
+                    aquire_state: true,
+                    room_home: room.name
+                },
+                priority: num_haulers === 0 ? 9 : 4
+            })
+        }
+        return spawn_queu
+    },
+
+    create_spawn_request_builder(room, num_builders, max_builders) {
+        let spawn_queu: SpawnRequest[] = []
+        if (num_builders < max_builders) {
+            spawn_queu.push({
+                name: 'builder' + Game.time,
+                body: [WORK, CARRY, MOVE, MOVE],
+                memory: {
+                    role: 'builder',
+                    aquire_state: true,
+                    room_home: room.name
+                },
+                priority: num_builders === 0 ? 8 : 3
+            })
+        }
+        return spawn_queu
+    },
+
+    create_spawn_requests_exploration(room, exploration_targets) {
+        let spawn_queu: SpawnRequest[] = []
+        for (const target_name of exploration_targets) {
+            if (_.some(Game.creeps, c => c.memory.role === 'explorer' && c.memory.room_target === target_name)) continue;
+            if (Game.map.getRoomStatus(target_name) !== undefined && Game.map.getRoomStatus(target_name).status === 'normal') {
+                spawn_queu.push({
+                    name: 'explorer'+target_name,
+                    body: [MOVE],
+                    memory: {
+                        role: 'explorer',
+                        aquire_state: true,
+                        room_home: room.name,
+                        room_target: target_name
+                    },
+                    priority: 2
+                })
+            }
+        }
+        return spawn_queu
     },
 
     order_by_priority(spawn_queu) {

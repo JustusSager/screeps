@@ -1,13 +1,15 @@
 declare global {
     interface CreepMemory {
         [name: string]: any;
-        role: 'upgrader' | 'hauler' | 'miner' | 'manager' | 'builder';
+        role: 'upgrader' | 'hauler' | 'miner' | 'manager' | 'builder' | 'explorer';
         aquire_state: boolean
+        room_home: string
 
+        // Für den Manager
         manager_position?: 'nw' | 'ne' | 'sw' | 'se' // die Zielposition des Managers
 
-        // Für role worker
-        task?: Task;
+        // Für den explorer
+        room_target?: string 
 
         // Für role miner
         source_id?: string
@@ -46,6 +48,7 @@ declare global {
         exits: {
             [exitkey: string]: string
         } | null
+        owned_by_me: boolean
     }
 }
 
