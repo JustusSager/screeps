@@ -4,6 +4,13 @@ declare global {
         role: 'upgrader' | 'hauler' | 'miner' | 'manager' | 'builder' | 'explorer';
         aquire_state: boolean
         room_home: string
+        
+        hauler_task?: {
+            type: 'pickup' | 'withdraw' | 'transfer'
+            room_target: string
+            target_id: string
+            resource: ResourceConstant,
+        }
 
         // Für den Manager
         manager_position?: 'nw' | 'ne' | 'sw' | 'se' // die Zielposition des Managers
@@ -36,19 +43,25 @@ declare global {
     }
 
     interface RoomMeta {
-        sources: {
-            id: string,
-            guarded: boolean
-        }[];
-        minerals: {
-            id: string,
-            type: string,
-            guarded: boolean
-        }[]
+        sources: SourceMeta[]
+        minerals: MineralMeta[]
         exits: {
             [exitkey: string]: string
         } | null
         owned_by_me: boolean
+    }
+
+    interface SourceMeta {
+        id: string
+        pos: {x: number, y: number, roomName: string}
+        guarded: boolean
+    }
+
+    interface MineralMeta {
+        id: string
+        pos: {x: number, y: number, roomName: string}
+        type: MineralConstant
+        guarded: boolean
     }
 }
 

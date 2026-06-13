@@ -1,6 +1,7 @@
 import spawningManager from './manager.spawning'
 import basebuildingManager from './manager.basebuilding'
 import explorationManager from './manager.exploration'
+import economyManager from './manager.economy';
 import { SpawnRequest } from './manager.spawning';
 import roleMiner from './role.miner';
 import roleHauler from './role.hauler';
@@ -25,44 +26,42 @@ function clear_memory(): void {
     }
 }
 
-function init_room_in_worldmap(room: Room): void {
-    Memory.worldmap[room.name] = {
-        sources: room.find(FIND_SOURCES).map((s) => {return { 
-            id: s.id,
-            guarded: (s.pos.findInRange(FIND_HOSTILE_STRUCTURES, 5).length > 0 || s.pos.findInRange(FIND_HOSTILE_CREEPS, 5).length > 0) 
-        }}),
-        minerals: room.find(FIND_MINERALS).map((m) => {return {
-            id: m.id,
-            type: m.mineralType,
-            guarded: (m.pos.findInRange(FIND_HOSTILE_STRUCTURES, 5).length > 0 || m.pos.findInRange(FIND_HOSTILE_CREEPS, 5).length > 0) 
-        }}),
-        exits: Game.map.describeExits(room.name),
-        owned_by_me: (room.controller !== undefined && room.controller.my)
-    }
+function init_room_memory(room: Room): void {
+
 }
 
 module.exports.loop = function(): void {
     // clear memory
     clear_memory();
+
     
-    for (const roomname in Game.rooms) {
-        const room = Game.rooms[roomname];
-        const roomvisual = new RoomVisual(roomname);
+    
+    for (const roomName in Game.rooms) {
+        const room = Game.rooms[roomName];
+        const roomvisual = new RoomVisual(roomName);
 
-        init_room_in_worldmap(room);
+        if (!Memory.worldmap[roomName] || Game.time % 10 == 0) {
+            explorationManager.add_room_to_worldmap(room);
+        }
+        
 
-        if (Memory.worldmap[roomname].owned_by_me === true) {
+        if (Memory.worldmap[roomName].owned_by_me === true) {
 
             let spawn_queu: SpawnRequest[] = spawningManager.create_spawn_queu(room)
 
+            const num_miners = _.filter(Game.creeps, (c) => c.memory.role === 'miner').length;
+            const source_targets = economyManager.get_sources_to_mine(roomName, 0)
+            spawn_queu.push(
+                ...spawningManager.create_spawn_request_miner(room, source_targets, num_miners)
+            )
+
             const exploration_targets = explorationManager.find_exploration_targets()
-            console.log(JSON.stringify(exploration_targets))
             spawn_queu.push(...spawningManager.create_spawn_requests_exploration(room, exploration_targets))
 
             spawn_queu = spawningManager.order_by_priority(spawn_queu);
             console.log(JSON.stringify(spawn_queu))
 
-            const spawns = _.filter(Game.spawns, (spawn: StructureSpawn) => spawn.room.name === roomname)
+            const spawns = _.filter(Game.spawns, (spawn: StructureSpawn) => spawn.room.name === roomName)
             for (const spawn of spawns) {
                 if (spawn_queu.length === 0) break;
                 spawningManager.spawn_request(spawn_queu[0], spawn)
@@ -70,31 +69,33 @@ module.exports.loop = function(): void {
 
             spawningManager.visualize(roomvisual, spawn_queu, 1, 1)
 
-            if (room.controller && room.controller.level > 1) {
+            if (Game.time % 10 == 0) { 
+                const western_spawn = _.filter(Game.spawns, s => s.room === room && s.name.endsWith('w'))[0]
+                if (western_spawn) {
+                    room.memory.spawner_base_centroid_pos = {
+                        x: western_spawn.pos.x + 2, y: western_spawn.pos.y + 1
+                    }
+                    roomvisual.circle(room.memory.spawner_base_centroid_pos.x, room.memory.spawner_base_centroid_pos.y)
+                }
+            }
+
+            if (Game.time % 10 == 1 && room.controller && room.controller.level > 1) {
                 basebuildingManager.build_spawner_blueprint(
                     _.filter(Game.spawns, s => s.room === room && s.name.endsWith('w'))[0],
                     room.controller.level
                 )
             }
-
-            const western_spawn = _.filter(Game.spawns, s => s.room === room && s.name.endsWith('w'))[0]
-            if (western_spawn) {
-                room.memory.spawner_base_centroid_pos = {
-                    x: western_spawn.pos.x + 2, y: western_spawn.pos.y + 1
-                }
-                roomvisual.circle(room.memory.spawner_base_centroid_pos.x, room.memory.spawner_base_centroid_pos.y)
-            }
         }
     }
 
-
+    const pickupTargets = economyManager.find_pickup_targets_in_rooms(Game.rooms)
     for (const name in Game.creeps) {
         const creep = Game.creeps[name]
         if (creep.memory.role === 'miner') {
             roleMiner.run(creep);
         }
         else if (creep.memory.role === 'hauler') {
-            roleHauler.run(creep);
+            roleHauler.run(creep, pickupTargets);
         }
         else if (creep.memory.role === 'upgrader') {
             roleUpgrader.run(creep);

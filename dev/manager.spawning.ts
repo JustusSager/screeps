@@ -28,6 +28,16 @@ let managerSpawning: {
     create_spawn_request_upgrader(room: Room, num_upgraders: number, max_upgraders: number): SpawnRequest[]
 
     /**
+     * Erstellt eine Spawn Request für einen Miner. Hier liegt die Logik wie ein bestimmter Creep aufgebaut sein soll und 
+     * wie wichtig dieser Creep ist.
+     * @param room Der Raum zu dem der Spawn Manager gehört.
+     * @param num_haulers die aktuelle Anzahl an Haulern.
+     * @param max_haulers Die maximale Anzahl an Haulern.
+     * @returns Ein Array mit der Spawn Request oder ein leeres Array.
+     */
+    create_spawn_request_miner(room: Room, target_sources: SourceMeta[], current_num_miners: number): SpawnRequest[]
+
+    /**
      * Erstellt eine Spawn Request für einen Hauler. Hier liegt die Logik wie ein bestimmter Creep aufgebaut sein soll und 
      * wie wichtig dieser Creep ist.
      * @param room Der Raum zu dem der Spawn Manager gehört.
@@ -74,24 +84,6 @@ export default managerSpawning = {
         const num_builders = _.filter(Game.creeps, (c) => c.memory.role === 'builder').length;
 
         const manager_nw = _.some(Game.creeps, (c) => c.memory.role === 'manager' && c.memory.manager_position === 'nw');
-
-
-        for (const sourceMeta of Memory.worldmap[room.name].sources.filter(s => !s.guarded)) {
-            if (!_.some(Game.creeps, (c) => c.memory.role === 'miner' && c.memory.source_id === sourceMeta.id)) {
-                spawn_queu.push({
-                    name: 'miner' + Game.time,
-                    body: [WORK, WORK, MOVE],
-                    memory: {
-                        role: 'miner',
-                        source_id: sourceMeta.id,
-                        aquire_state: true,
-                        room_home: room.name
-                    },
-                    priority: num_miners === 0 ? 10 : 5
-                })
-                break;
-            }
-        }
 
         
         spawn_queu.push(...this.create_spawn_request_hauler(room, num_haulers, num_miners * 2))
@@ -141,6 +133,29 @@ export default managerSpawning = {
                 priority: num_upgraders === 0 ? 8 : 3
             })
         }
+        return spawn_queu
+    },
+
+    create_spawn_request_miner(room, target_sources, current_num_miners) {
+        let spawn_queu: SpawnRequest[] = []
+
+        for (const sourceMeta of target_sources) {
+            if (!_.some(Game.creeps, (c) => c.memory.role === 'miner' && c.memory.source_id === sourceMeta.id)) {
+                spawn_queu.push({
+                    name: 'miner' + Game.time,
+                    body: [WORK, WORK, MOVE],
+                    memory: {
+                        role: 'miner',
+                        source_id: sourceMeta.id,
+                        aquire_state: true,
+                        room_home: room.name
+                    },
+                    priority: current_num_miners === 0 ? 10 : 5
+                })
+                break;
+            }
+        }
+
         return spawn_queu
     },
 
