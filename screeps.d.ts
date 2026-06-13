@@ -7,8 +7,8 @@ declare global {
         
         hauler_task?: {
             type: 'pickup' | 'withdraw' | 'transfer'
-            room_target: string
             target_id: string
+            pos_target: {x: number, y: number, roomName: string}
             resource: ResourceConstant,
         }
 

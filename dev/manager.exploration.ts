@@ -5,19 +5,6 @@ interface ExplorationTargets {
     roomname: string
 }
 
-export interface PickupTarget {
-    id: string
-    type: 'withdraw' | 'pickup'
-    resourceType: ResourceConstant
-    amount: number
-    pos: {
-        x: number
-        y: number
-        roomName: string
-    }
-}
-
-
 let managerExploration: {
 
     find_exploration_targets(): string[]

@@ -89,7 +89,7 @@ module.exports.loop = function(): void {
         }
     }
 
-    const pickupTargets = economyManager.find_pickup_targets_in_rooms(Game.rooms)
+    const pickupTargets = economyManager.find_pickup_targets_near_source(Game.rooms)
     for (const name in Game.creeps) {
         const creep = Game.creeps[name]
         if (creep.memory.role === 'miner') {

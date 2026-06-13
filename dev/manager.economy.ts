@@ -13,10 +13,22 @@ export interface PickupTarget {
     }
 }
 
+export interface TransferTarget {
+    id: string
+    type: 'transfer'
+    resourceType: ResourceConstant
+    amount: number
+    pos: {
+        x: number
+        y: number
+        roomName: string
+    }
+}
+
 
 let managerEconomy: {
 
-    find_pickup_targets_in_rooms(rooms: {[roomname: string]: Room}): PickupTarget[]
+    find_pickup_targets_near_source(rooms: {[roomname: string]: Room}): PickupTarget[]
 
     get_sources_to_mine(roomName: string, max_distance: number): SourceMeta[]
 
@@ -24,7 +36,7 @@ let managerEconomy: {
 
 export default managerEconomy = {
 
-    find_pickup_targets_in_rooms(rooms) {
+    find_pickup_targets_near_source(rooms) {
         let result: PickupTarget[] = []
         for (const roomname in rooms) {
             const room = Game.rooms[roomname]
@@ -40,7 +52,9 @@ export default managerEconomy = {
                 })
             }
 
-            const withdraws = room.find(FIND_STRUCTURES, {filter: s => s.structureType === STRUCTURE_CONTAINER})
+            const withdraws = room.find(FIND_STRUCTURES, {filter: 
+                s => s.structureType === STRUCTURE_CONTAINER && s.pos.findInRange(FIND_SOURCES, 1).length > 0
+            }) as StructureContainer[]
             for (const w of withdraws) {
                 for (const type of Object.keys(w.store)) {
                     result.push({
