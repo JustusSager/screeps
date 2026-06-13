@@ -74,6 +74,51 @@ let managerSpawning: {
     visualize(roomvisual: RoomVisual, spawn_queu:SpawnRequest[], left_x: number, top_y: number): void
 }
 
+function get_worker_body(availableEnergy: number): BodyPartConstant[] {
+    let body: BodyPartConstant[] = []
+    let lvl = Math.floor(availableEnergy / 200)
+    for (let i = 0; i < lvl; i++) {
+        body.push(WORK)
+    }
+    for (let i = 0; i < lvl; i++) {
+        body.push(CARRY)
+    }
+    for (let i = 0; i < lvl; i++) {
+        body.push(MOVE)
+    }
+    return body
+}
+
+function get_miner_body(availableEnergy: number, link_mining: boolean): BodyPartConstant[] {
+    let body: BodyPartConstant[] = []
+    let lvl = 0
+    if (link_mining) {
+        lvl = Math.floor((availableEnergy - 100) / 100)
+    } else {
+        lvl = Math.floor((availableEnergy - 50) / 100)
+    }
+    if (lvl > 5) lvl = 5
+    for (let i = 0; i < lvl; i++) {
+        body.push(WORK)
+    }
+    if (link_mining) body.push(CARRY)
+    body.push(MOVE)
+    return body
+}
+
+function get_hauler_body(availableEnergy: number): BodyPartConstant[] {
+    let body: BodyPartConstant[] = []
+    let lvl = Math.floor(availableEnergy / 100)
+    for (let i = 0; i < lvl; i++) {
+        body.push(CARRY)
+    }
+    for (let i = 0; i < lvl; i++) {
+        body.push(MOVE)
+    }
+    return body
+}
+
+
 export default managerSpawning = {
     create_spawn_queu(room) {
         let spawn_queu: SpawnRequest[] = [];
@@ -124,7 +169,7 @@ export default managerSpawning = {
         if (num_upgraders < max_upgraders) {
             spawn_queu.push({
                 name: 'upgrader' + Game.time,
-                body: [WORK, CARRY, MOVE, MOVE],
+                body: get_worker_body(room.energyAvailable),
                 memory: {
                     role: 'upgrader',
                     aquire_state: true,
@@ -143,7 +188,7 @@ export default managerSpawning = {
             if (!_.some(Game.creeps, (c) => c.memory.role === 'miner' && c.memory.source_id === sourceMeta.id)) {
                 spawn_queu.push({
                     name: 'miner' + Game.time,
-                    body: [WORK, WORK, MOVE],
+                    body: get_miner_body(room.energyAvailable > 600 ? 600 : room.energyAvailable, false),
                     memory: {
                         role: 'miner',
                         source_id: sourceMeta.id,
@@ -164,7 +209,7 @@ export default managerSpawning = {
         if (num_haulers < max_haulers) {
             spawn_queu.push({
                 name: 'hauler' + Game.time,
-                body: [CARRY, CARRY, MOVE, MOVE, MOVE],
+                body: get_hauler_body(room.energyAvailable),
                 memory: {
                     role: 'hauler',
                     aquire_state: true,
@@ -181,7 +226,7 @@ export default managerSpawning = {
         if (num_builders < max_builders) {
             spawn_queu.push({
                 name: 'builder' + Game.time,
-                body: [WORK, CARRY, MOVE, MOVE],
+                body: get_worker_body(room.energyAvailable),
                 memory: {
                     role: 'builder',
                     aquire_state: true,
