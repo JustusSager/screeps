@@ -11,13 +11,13 @@ function get_target_pos(creep: Creep) : RoomPosition | undefined {
 
     switch (creep.memory.manager_position) {
         case 'nw':
-            return RoomPosition(spawner_base_centroid_pos.x - 1, spawner_base_centroid_pos.y - 1, creep.room.name);
+            return new RoomPosition(spawner_base_centroid_pos.x - 1, spawner_base_centroid_pos.y - 1, creep.room.name);
         case 'ne':
-            return RoomPosition(spawner_base_centroid_pos.x + 1, spawner_base_centroid_pos.y - 1, creep.room.name)
+            return new RoomPosition(spawner_base_centroid_pos.x + 1, spawner_base_centroid_pos.y - 1, creep.room.name)
         case 'sw':
-            return RoomPosition(spawner_base_centroid_pos.x - 1, spawner_base_centroid_pos.y + 1, creep.room.name)
+            return new RoomPosition(spawner_base_centroid_pos.x - 1, spawner_base_centroid_pos.y + 1, creep.room.name)
         case 'se':
-            return RoomPosition(spawner_base_centroid_pos.x + 1, spawner_base_centroid_pos.y + 1, creep.room.name)
+            return new RoomPosition(spawner_base_centroid_pos.x + 1, spawner_base_centroid_pos.y + 1, creep.room.name)
         default:
             return;
     }
@@ -26,7 +26,8 @@ function get_target_pos(creep: Creep) : RoomPosition | undefined {
 export default roleHauler = {
     run(creep) {
         const target_pos = get_target_pos(creep);
-        if (target_pos && creep.pos !== target_pos) {
+        if (target_pos && (creep.pos.x !== target_pos.x || creep.pos.y !== target_pos.y || creep.pos.roomName !== target_pos.roomName)) {
+            creep.say("move")
             return creep.moveTo(target_pos);
         }
 
