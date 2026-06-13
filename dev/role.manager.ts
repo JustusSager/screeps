@@ -45,11 +45,17 @@ export default roleHauler = {
             }
         }
         else {
-            const targets = creep.pos.findInRange(FIND_MY_STRUCTURES, 1, {
+            const targets_spawn_extension = creep.pos.findInRange(FIND_MY_STRUCTURES, 1, {
                 filter: (s: AnyOwnedStructure) => ((s.structureType === STRUCTURE_SPAWN || s.structureType === STRUCTURE_EXTENSION) && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0)
             })
-            if (targets.length > 0) {
-                return creep.transfer(targets[0], RESOURCE_ENERGY);
+            if (targets_spawn_extension.length > 0) {
+                return creep.transfer(targets_spawn_extension[0], RESOURCE_ENERGY);
+            }
+            const targets_tower = creep.pos.findInRange(FIND_MY_STRUCTURES, 1, {
+                filter: (s: AnyOwnedStructure) => (s.structureType === STRUCTURE_TOWER && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0)
+            })
+            if (targets_tower.length > 0) {
+                return creep.transfer(targets_tower[0], RESOURCE_ENERGY);
             }
         }
         return -1

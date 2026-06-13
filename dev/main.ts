@@ -2,6 +2,7 @@ import spawningManager from './manager.spawning'
 import basebuildingManager from './manager.basebuilding'
 import explorationManager from './manager.exploration'
 import economyManager from './manager.economy';
+import structureManager from './manager.structures';
 import { SpawnRequest } from './manager.spawning';
 import roleMiner from './role.miner';
 import roleHauler from './role.hauler';
@@ -111,4 +112,6 @@ module.exports.loop = function(): void {
             roleExplorer.run(creep);
         }
     }
+
+    structureManager.run_towers()
 }
