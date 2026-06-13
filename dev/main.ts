@@ -84,6 +84,7 @@ module.exports.loop = function(): void {
                     _.filter(Game.spawns, s => s.room === room && s.name.endsWith('w'))[0],
                     room.controller.level
                 )
+                basebuildingManager.build_container_near_controller(room);
             }
         }
     }

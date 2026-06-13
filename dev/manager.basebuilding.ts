@@ -58,6 +58,7 @@ let managerBasebuilding: {
 
     build_spawner_blueprint(spawn:StructureSpawn, rcl:number): void
 
+    build_container_near_controller(room: Room): ScreepsReturnCode
 }
 
 export default managerBasebuilding = {
@@ -93,6 +94,56 @@ export default managerBasebuilding = {
                 }
             }
         }
+    },
+
+    build_container_near_controller(room) {
+        if (!room.controller) return ERR_NOT_FOUND
+        const controller_pos = room.controller.pos
+        if (controller_pos.findInRange(FIND_STRUCTURES, 4, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length > 0) return ERR_INVALID_TARGET
+        if (controller_pos.findInRange(FIND_CONSTRUCTION_SITES, 4, {filter: s => s.structureType === STRUCTURE_CONTAINER}).length > 0) return ERR_INVALID_TARGET
+        if (!room.memory.spawner_base_centroid_pos) return ERR_INVALID_TARGET
+
+        const radius = 2;
+
+        let possiblePositions = []
+        let goodPositions = []
+
+        for (let dx = -radius; dx <= radius; dx++) {
+            for (let dy = -radius; dy <= radius; dy++) {
+                const x = controller_pos.x + dx;
+                const y = controller_pos.y + dy;
+
+                const lookAtResult = room.lookAt(x, y).filter(l => l.type === 'constructionSite' || l.type === 'structure' || l.type === 'terrain')
+                if (lookAtResult && lookAtResult.length == 1 && lookAtResult[0].type === 'terrain' && lookAtResult[0].terrain !== 'wall') {
+                    possiblePositions.push({x: x, y: y})
+                }
+            }
+        }
+
+        for (const possiblePosition of possiblePositions) {
+            let isGood = true
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    const x = possiblePosition.x + dx;
+                    const y = possiblePosition.y + dy;
+
+                    const lookAtResult = room.lookAt(x, y).filter(l => l.type === 'constructionSite' || l.type === 'structure' || l.type === 'terrain')
+                    if (!(lookAtResult && lookAtResult.length == 1 && lookAtResult[0].type === 'terrain' && lookAtResult[0].terrain !== 'wall')) {
+                        isGood = false
+                    }
+                }
+            }
+            if (isGood) goodPositions.push({x: possiblePosition.x, y: possiblePosition.y})
+        }
+
+        const distTarget = room.memory.spawner_base_centroid_pos
+        goodPositions.sort((a, b) => {
+            const dist_a = Math.abs(a.x - distTarget.x) + Math.abs(a.y - distTarget.y)
+            const dist_b = Math.abs(b.x - distTarget.x) + Math.abs(b.y - distTarget.y)
+            return dist_a - dist_b
+        })
+
+        return room.createConstructionSite(goodPositions[0].x, goodPositions[0].y, STRUCTURE_CONTAINER)
     }
 
 }
