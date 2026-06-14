@@ -86,6 +86,10 @@ module.exports.loop = function(): void {
                     room.controller.level
                 )
                 basebuildingManager.build_container_near_controller(room);
+
+                if (room.controller.level > 2) {
+                    basebuildingManager.build_road_network(room, true, true)
+                }
             }
         }
     }

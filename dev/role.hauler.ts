@@ -84,8 +84,9 @@ function find_closest_transfer_target(minAmountThreshold: number, targetRoom: Ro
 }
 
 function get_new_task(creep: Creep, pickupTargets: PickupTarget[]): ScreepsReturnCode {
-    if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-        const target = find_closest_pickup_target(creep, 50, pickupTargets)
+    if (creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
+        const roomHome = Game.rooms[creep.memory.room_home]
+        const target = find_closest_transfer_target(50, roomHome)
         if (target == null) {
             return ERR_INVALID_ARGS
         }
@@ -97,10 +98,9 @@ function get_new_task(creep: Creep, pickupTargets: PickupTarget[]): ScreepsRetur
             resource: target.resourceType
         }
         return OK
-    }
+    } 
     else {
-        const roomHome = Game.rooms[creep.memory.room_home]
-        const target = find_closest_transfer_target(50, roomHome)
+        const target = find_closest_pickup_target(creep, 50, pickupTargets)
         if (target == null) {
             return ERR_INVALID_ARGS
         }
@@ -165,7 +165,12 @@ export default roleHauler = {
                 creep.memory.hauler_task = undefined
                 return ERR_INVALID_TARGET
             }
-            return creep.pickup(dropped)
+            const result = creep.pickup(dropped)
+            if (result !== OK) {
+                creep.say("ERROR")
+                creep.memory.hauler_task = undefined
+                return result
+            }
         }
         else if (creep.memory.hauler_task.type === 'withdraw') {
             if (creep.store.getFreeCapacity(creep.memory.hauler_task.resource) == 0) {
@@ -179,7 +184,12 @@ export default roleHauler = {
                 creep.memory.hauler_task = undefined
                 return ERR_NOT_FOUND
             }
-            return creep.withdraw(structure, creep.memory.hauler_task.resource)
+            const result = creep.withdraw(structure, creep.memory.hauler_task.resource)
+            if (result !== OK) {
+                creep.say("ERROR")
+                creep.memory.hauler_task = undefined
+                return result
+            }
         }
         else if (creep.memory.hauler_task.type === 'transfer') {
             if (creep.store.getUsedCapacity(creep.memory.hauler_task.resource) == 0) {
@@ -193,7 +203,12 @@ export default roleHauler = {
                 creep.memory.hauler_task = undefined
                 return ERR_NOT_FOUND
             }
-            return creep.transfer(structure, creep.memory.hauler_task.resource)
+            const result = creep.transfer(structure, creep.memory.hauler_task.resource)
+            if (result !== OK) {
+                creep.say("ERROR")
+                creep.memory.hauler_task = undefined
+                return result
+            }
         }
         creep.memory.hauler_task = undefined
         return ERR_INVALID_ARGS

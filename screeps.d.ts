@@ -27,6 +27,8 @@ declare global {
         spawner_base_centroid_pos?: {
             x:number, y: number
         }
+        spawn_controller_path_exists?: boolean
+        spawn_exits_path_exists?: boolean
     }
 
     interface Memory {

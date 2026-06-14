@@ -59,6 +59,10 @@ let managerBasebuilding: {
     build_spawner_blueprint(spawn:StructureSpawn, rcl:number): void
 
     build_container_near_controller(room: Room): ScreepsReturnCode
+
+    build_road_network(room: Room, spawn_to_controller: boolean, spawn_to_exits: boolean): ScreepsReturnCode
+
+    build_path(room: Room, from_pos: RoomPosition, to_pos: RoomPosition): ScreepsReturnCode
 }
 
 export default managerBasebuilding = {
@@ -144,6 +148,39 @@ export default managerBasebuilding = {
         })
 
         return room.createConstructionSite(goodPositions[0].x, goodPositions[0].y, STRUCTURE_CONTAINER)
+    },
+
+    build_road_network(room, spawn_to_controller, spawn_to_exits) {
+        const spawns = room.find(FIND_MY_SPAWNS)
+        const controller = room.controller
+        const exits = Memory.worldmap[room.name].exits
+
+        if (spawn_to_controller && (Memory.rooms[room.name].spawn_controller_path_exists === undefined || Memory.rooms[room.name].spawn_controller_path_exists === false)&& spawns.length > 0 && controller) {
+            this.build_path(room, spawns[0].pos, controller.pos)
+            Memory.rooms[room.name].spawn_controller_path_exists = true
+        }
+
+        if (spawn_to_exits && (Memory.rooms[room.name].spawn_exits_path_exists === undefined || Memory.rooms[room.name].spawn_exits_path_exists === false)&& spawns.length > 0 && controller) {
+            for (const neighborDirection in exits) {
+                const neighborRoomName = exits[neighborDirection]
+                const route = Game.map.findRoute(room.name, neighborRoomName);
+                if(route !== -2 && route.length > 0) {
+                    const exitPosition = room.find(route[0].exit)[0]
+                    this.build_path(room, spawns[0].pos, exitPosition)
+                }
+            }
+            Memory.rooms[room.name].spawn_exits_path_exists = true
+        }
+        return OK
+    },
+
+    build_path(room, from_pos, to_pos) {
+        const path = room.findPath(from_pos, to_pos)
+        if (path.length === 0) return ERR_NO_PATH
+        for (const step of path) {
+            room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD)
+        }
+        return OK
     }
 
 }
