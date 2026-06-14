@@ -51,7 +51,7 @@ module.exports.loop = function(): void {
             let spawn_queu: SpawnRequest[] = spawningManager.create_spawn_queu(room)
 
             const num_miners = _.filter(Game.creeps, (c) => c.memory.role === 'miner').length;
-            const source_targets = economyManager.get_sources_to_mine(roomName, 0)
+            const source_targets = economyManager.get_sources_to_mine(roomName, 1)
             spawn_queu.push(
                 ...spawningManager.create_spawn_request_miner(room, source_targets, num_miners)
             )
@@ -91,6 +91,7 @@ module.exports.loop = function(): void {
     }
 
     const pickupTargets = economyManager.find_pickup_targets_near_source(Game.rooms)
+    console.log(JSON.stringify(pickupTargets, null, 2))
     for (const name in Game.creeps) {
         const creep = Game.creeps[name]
         if (creep.memory.role === 'miner') {

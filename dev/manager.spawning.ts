@@ -207,7 +207,8 @@ export default managerSpawning = {
                         role: 'miner',
                         source_id: sourceMeta.id,
                         aquire_state: true,
-                        room_home: room.name
+                        room_home: room.name,
+                        room_target: sourceMeta.pos.roomName
                     },
                     priority: current_num_miners === 0 ? 10 : 5
                 })

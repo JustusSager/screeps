@@ -14,7 +14,24 @@ export default roleUpgrader = {
             creep.memory.aquire_state = true;
         }
 
+        const controller = creep.room.controller
+        if (controller === undefined) {
+            creep.say("Error!")
+            return
+        }
+
         if (creep.memory.aquire_state) {
+
+            const container_near_controller = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: 
+                (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > creep.store.getFreeCapacity(RESOURCE_ENERGY) && s.pos.inRangeTo(controller.pos.x, controller.pos.y, 4)
+            })
+            if (container_near_controller) {
+                if (creep.withdraw(container_near_controller, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(container_near_controller)
+                }
+                return
+            }
+
             const dropped = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {filter: d => d.resourceType === RESOURCE_ENERGY && d.amount > creep.store.getFreeCapacity(RESOURCE_ENERGY)})
             if (dropped) {
                 if (creep.pickup(dropped) == ERR_NOT_IN_RANGE) {
@@ -40,7 +57,6 @@ export default roleUpgrader = {
             }
         }
         else {
-            const controller = creep.room.controller
             if (controller) {
                 if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(controller)
