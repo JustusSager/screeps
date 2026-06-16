@@ -5,6 +5,7 @@ let managerStructures: {
 
     run_towers(): void
 
+    spawn_renew_creeps_in_range(): void
 }
 
 export default managerStructures = {
@@ -26,6 +27,18 @@ export default managerStructures = {
             if (tower.store[RESOURCE_ENERGY] > 700) {
                 const closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {filter: s => s.hits < s.hitsMax})
                 if (closestDamagedStructure) tower.repair(closestDamagedStructure)
+            }
+        }
+    },
+
+    spawn_renew_creeps_in_range() {
+        for (const i in Game.spawns) {
+            const spawn = Game.spawns[i]
+
+            const creeps = spawn.pos.findInRange(FIND_MY_CREEPS, 1, {filter: c => c.ticksToLive && c.ticksToLive < 1400 && (c.body.length >= 9 || c.memory.role === 'manager')})
+
+            if (creeps.length > 0) {
+                spawn.renewCreep(creeps[0])
             }
         }
     }

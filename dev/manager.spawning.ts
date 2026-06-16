@@ -130,6 +130,8 @@ export default managerSpawning = {
 
         const manager_nw = _.some(Game.creeps, (c) => c.memory.role === 'manager' && c.memory.manager_position === 'nw');
         const manager_sw = _.some(Game.creeps, (c) => c.memory.role === 'manager' && c.memory.manager_position === 'sw');
+        const manager_ne = _.some(Game.creeps, (c) => c.memory.role === 'manager' && c.memory.manager_position === 'ne');
+        const manager_se = _.some(Game.creeps, (c) => c.memory.role === 'manager' && c.memory.manager_position === 'se');
 
         
         spawn_queu.push(...this.create_spawn_request_hauler(room, num_haulers, num_miners * 2))
@@ -168,6 +170,32 @@ export default managerSpawning = {
                     role: 'manager',
                     aquire_state: true,
                     manager_position: 'sw',
+                    room_home: room.name
+                },
+                priority: 11
+            })
+        }
+        if (!manager_ne && num_extensions >= 14) {
+            spawn_queu.push({
+                name: 'manager_ne',
+                body: [CARRY, CARRY, CARRY, CARRY, MOVE],
+                memory: {
+                    role: 'manager',
+                    aquire_state: true,
+                    manager_position: 'ne',
+                    room_home: room.name
+                },
+                priority: 11
+            })
+        }
+        if (!manager_se && num_extensions >= 14) {
+            spawn_queu.push({
+                name: 'manager_se',
+                body: [CARRY, CARRY, CARRY, CARRY, MOVE],
+                memory: {
+                    role: 'manager',
+                    aquire_state: true,
+                    manager_position: 'se',
                     room_home: room.name
                 },
                 priority: 11

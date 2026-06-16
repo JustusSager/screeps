@@ -119,4 +119,6 @@ module.exports.loop = function(): void {
     }
 
     structureManager.run_towers()
+
+    structureManager.spawn_renew_creeps_in_range()
 }
