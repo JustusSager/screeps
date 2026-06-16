@@ -3,15 +3,18 @@ import basebuildingManager from './manager.basebuilding'
 import explorationManager from './manager.exploration'
 import economyManager from './manager.economy';
 import structureManager from './manager.structures';
+import { TaskManager } from './manager.tasks'
 import { SpawnRequest } from './manager.spawning';
 import roleMiner from './role.miner';
 import roleHauler from './role.hauler';
-import roleUpgrader from './role.upgrader';
 import roleManager from './role.manager';
-import roleBuilder from './role.builder';
 import roleExplorer from './role.explorer';
+import roleWorker from './role.worker';
 import _ from 'lodash';
 
+require('./prototype.RoomPosition')()
+require('./prototype.RoomVisual')()
+require('./prototype.creep')()
 
 function clear_memory(): void {
     if (!Memory.worldmap) Memory.worldmap = {}
@@ -27,19 +30,35 @@ function clear_memory(): void {
     }
 }
 
-function init_room_memory(room: Room): void {
-
+function init_memory(): void {
+    if (!Memory.debug) Memory.debug = {
+        creepSaysErrorCode: false,
+        creepSaysTask: false
+    }
 }
 
 module.exports.loop = function(): void {
     // clear memory
     clear_memory();
+    init_memory()
 
+    const taskmanager = new TaskManager();
+
+    for (const roomname in Game.rooms) {
+        taskmanager.find_open_tasks(Game.rooms[roomname])
+        taskmanager.visulize()
+    }
+
+    const idle_creeps = _.filter(Game.creeps, c => c.memory.task == undefined)
+
+    for (const creep of idle_creeps) {
+        taskmanager.assign_task(creep)
+    }
     
     
     for (const roomName in Game.rooms) {
-        const room = Game.rooms[roomName];
-        const roomvisual = new RoomVisual(roomName);
+        const room = Game.rooms[roomName]
+        const roomvisual = room.visual
 
         if (!Memory.worldmap[roomName] || Game.time % 10 == 0) {
             explorationManager.add_room_to_worldmap(room);
@@ -104,21 +123,33 @@ module.exports.loop = function(): void {
         else if (creep.memory.role === 'hauler') {
             roleHauler.run(creep, pickupTargets);
         }
-        else if (creep.memory.role === 'upgrader') {
-            roleUpgrader.run(creep);
-        }
         else if (creep.memory.role === 'manager') {
             roleManager.run(creep);
         }
-        else if (creep.memory.role === 'builder') {
-            roleBuilder.run(creep);
-        }
         else if (creep.memory.role === 'explorer') {
             roleExplorer.run(creep);
+        }
+        else if (creep.memory.role === 'upgrader') {
+            creep.memory.role = 'worker'
+            creep.memory.task = undefined
+        }
+        else if (creep.memory.role === 'builder') {
+            creep.memory.role = 'worker'
+            creep.memory.task = undefined
+        }
+        else if (creep.memory.role === 'worker') {
+            roleWorker.run(creep);
         }
     }
 
     structureManager.run_towers()
 
     structureManager.spawn_renew_creeps_in_range()
+
+    for (const roomname in Game.rooms) {
+        const room = Game.rooms[roomname]
+        room.visual.table(["Tasks"], [2.7, 2, 2], taskmanager.create_stats_assigned_tasks(), 35, 1)
+        
+    }
+    taskmanager.visulize()
 }

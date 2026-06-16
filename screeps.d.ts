@@ -1,16 +1,24 @@
 declare global {
+    type CreepRole = 'upgrader' | 'hauler' | 'miner' | 'manager' | 'builder' | 'explorer' | 'worker'
+    type TaskType = 'upgrade' | 'harvest' | 'build' | 'repair' | 'withdraw' | 'pickup' | 'transfer'
+    type TaskTargetType = Structure | Resource | ConstructionSite | Source
+
+    interface IRoomPosition {x: number, y:number, roomName: string}
+
     interface CreepMemory {
         [name: string]: any;
-        role: 'upgrader' | 'hauler' | 'miner' | 'manager' | 'builder' | 'explorer';
+        role: CreepRole;
         aquire_state: boolean
         room_home: string
         
         hauler_task?: {
             type: 'pickup' | 'withdraw' | 'transfer'
             target_id: string
-            pos_target: {x: number, y: number, roomName: string}
+            pos_target: IRoomPosition
             resource: ResourceConstant,
         }
+
+        task?: CreepTask
 
         // Für den Manager
         manager_position?: 'nw' | 'ne' | 'sw' | 'se' // die Zielposition des Managers
@@ -21,6 +29,14 @@ declare global {
         // Für role miner
         source_id?: string
         link_id?: string
+    }
+
+    interface CreepTask {
+        type: TaskType
+        target_id: string
+        target_pos: IRoomPosition
+        range: number
+        resource: ResourceConstant
     }
 
     interface RoomMemory {
@@ -35,13 +51,10 @@ declare global {
         creeps: {[name: string]: CreepMemory};
         rooms: {[name: string]: RoomMemory};
         worldmap: {[name: string]: RoomMeta}
-    }
-
-    interface Task {
-        type: 'harvest' | 'withdraw' | 'pickup' | 'upgrade' | 'transfer' | 'build' | 'repair';
-        target: any;
-        range: number;
-        resource: ResourceConstant;
+        debug: {
+            creepSaysTask: boolean
+            creepSaysErrorCode: boolean
+        }
     }
 
     interface RoomMeta {
@@ -64,6 +77,18 @@ declare global {
         pos: {x: number, y: number, roomName: string}
         type: MineralConstant
         guarded: boolean
+    }
+
+    interface RoomVisual {
+        list(title: string, items: [], top_left_x: number, top_left_y: number): void
+
+        table(headers: string[], column_widths: number[], items: (string | number)[][], top_left_x: number, top_left_y: number): void
+
+        circle_with_text(text: string, x: number, y: number, radius: number, fill:string, opacity: number): void
+    }
+
+    interface Creep {
+        moveToRoom(roomName: string): ScreepsReturnCode | undefined
     }
 }
 

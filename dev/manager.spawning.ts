@@ -18,16 +18,6 @@ let managerSpawning: {
     create_spawn_queu(room: Room): SpawnRequest[]
 
     /**
-     * Erstellt eine Spawn Request für einen Upgrader. Hier liegt die Logik wie ein bestimmter Creep aufgebaut sein soll und 
-     * wie wichtig dieser Creep ist.
-     * @param room Der Raum zu dem der Spawn Manager gehört.
-     * @param num_upgraders die aktuelle Anzahl an Upgradern.
-     * @param max_upgraders Die maximale Anzahl der Upgrader.
-     * @returns Ein Array mit der Spawn Request oder ein leeres Array.
-     */
-    create_spawn_request_upgrader(room: Room, num_upgraders: number, max_upgraders: number): SpawnRequest[]
-
-    /**
      * Erstellt eine Spawn Request für einen Miner. Hier liegt die Logik wie ein bestimmter Creep aufgebaut sein soll und 
      * wie wichtig dieser Creep ist.
      * @param room Der Raum zu dem der Spawn Manager gehört.
@@ -55,7 +45,7 @@ let managerSpawning: {
      * @param max_builders Die maximale Anzahl an Buildern.
      * @returns Ein Array mit der Spawn Request oder ein leeres Array.
      */
-    create_spawn_request_builder(room: Room, num_builders: number, max_builders: number): SpawnRequest[]
+    create_spawn_request_worker(room: Room, num_builders: number, max_builders: number): SpawnRequest[]
 
     /**
      * Erstellt eine Spawn Request für einen Explorer Creep für jeden Zielraum. Hier liegt die Logik wie ein bestimmter Creep 
@@ -125,8 +115,7 @@ export default managerSpawning = {
 
         const num_miners = _.filter(Game.creeps, (c) => c.memory.role === 'miner').length;
         const num_haulers = _.filter(Game.creeps, (c) => c.memory.role === 'hauler').length;
-        const num_upgrader = _.filter(Game.creeps, (c) => c.memory.role === 'upgrader').length;
-        const num_builders = _.filter(Game.creeps, (c) => c.memory.role === 'builder').length;
+        const num_worker = _.filter(Game.creeps, (c) => c.memory.role === 'worker').length;
 
         const manager_nw = _.some(Game.creeps, (c) => c.memory.role === 'manager' && c.memory.manager_position === 'nw');
         const manager_sw = _.some(Game.creeps, (c) => c.memory.role === 'manager' && c.memory.manager_position === 'sw');
@@ -136,17 +125,8 @@ export default managerSpawning = {
         
         spawn_queu.push(...this.create_spawn_request_hauler(room, num_haulers, num_miners * 2))
 
-        // Upgrader
-        if (room.controller && room.controller.level < 8) {
-            spawn_queu.push(...this.create_spawn_request_upgrader(room, num_upgrader, 3))
-        } else if(room.controller && room.controller.level == 8) {
-            spawn_queu.push(...this.create_spawn_request_upgrader(room, num_upgrader, 1))
-        }
-
-        // Builder
-        if (room.find(FIND_CONSTRUCTION_SITES).length > 0) {
-            spawn_queu.push(...this.create_spawn_request_builder(room, num_builders, 2))
-        }
+        // Worker
+        spawn_queu.push(...this.create_spawn_request_worker(room, num_worker, 4))
 
         const num_extensions = room.find(FIND_MY_STRUCTURES, {filter: s => s.structureType === STRUCTURE_EXTENSION}).length
         if (!manager_nw && num_extensions >= 5) {
@@ -206,23 +186,6 @@ export default managerSpawning = {
         return spawn_queu;
     },
 
-    create_spawn_request_upgrader(room, num_upgraders, max_upgraders) {
-        let spawn_queu: SpawnRequest[] = []
-        if (num_upgraders < max_upgraders) {
-            spawn_queu.push({
-                name: 'upgrader' + Game.time,
-                body: get_worker_body(room.energyAvailable),
-                memory: {
-                    role: 'upgrader',
-                    aquire_state: true,
-                    room_home: room.name
-                },
-                priority: num_upgraders === 0 ? 8 : 3
-            })
-        }
-        return spawn_queu
-    },
-
     create_spawn_request_miner(room, target_sources, current_num_miners) {
         let spawn_queu: SpawnRequest[] = []
 
@@ -264,14 +227,14 @@ export default managerSpawning = {
         return spawn_queu
     },
 
-    create_spawn_request_builder(room, num_builders, max_builders) {
+    create_spawn_request_worker(room, num_builders, max_builders) {
         let spawn_queu: SpawnRequest[] = []
         if (num_builders < max_builders) {
             spawn_queu.push({
-                name: 'builder' + Game.time,
+                name: 'worker' + Game.time,
                 body: get_worker_body(room.energyAvailable),
                 memory: {
-                    role: 'builder',
+                    role: 'worker',
                     aquire_state: true,
                     room_home: room.name
                 },

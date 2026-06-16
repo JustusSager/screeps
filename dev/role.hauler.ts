@@ -122,22 +122,22 @@ export default roleHauler = {
         if (creep.memory.hauler_task === undefined) {
             const result = get_new_task(creep, pickupTargets)
             if (result !== OK) {
-                creep.say(result.toString())
+                if (Memory.debug.creepSaysErrorCode) creep.say(result.toString())
                 return ERR_INVALID_ARGS
             }
         }
         if (creep.memory.hauler_task === undefined) {
-            creep.say("-3")
+            if (Memory.debug.creepSaysErrorCode) creep.say("-3")
             return ERR_INVALID_TARGET
         }
 
-        creep.say(creep.memory.hauler_task.type)
+        if (Memory.debug.creepSaysTask) creep.say(creep.memory.hauler_task.type)
 
         // Zu dem target room gehen
         if (creep.room.name !== creep.memory.hauler_task.pos_target.roomName) {
             const route = Game.map.findRoute(creep.room.name, creep.memory.hauler_task.pos_target.roomName);
             if(route !== -2 && route.length > 0) {
-                creep.say(route[0].room);
+                if (Memory.debug.creepSaysTask) creep.say(route[0].room);
                 const exit = creep.pos.findClosestByRange(route[0].exit);
                 if (exit === null) return -1
                 return creep.moveTo(exit);
@@ -163,13 +163,13 @@ export default roleHauler = {
 
             const dropped = Game.getObjectById(creep.memory.hauler_task.target_id) as Resource | null
             if (dropped === null) {
-                creep.say("TargetNotFound")
+                if (Memory.debug.creepSaysErrorCode) creep.say("TargetNotFound")
                 creep.memory.hauler_task = undefined
                 return ERR_INVALID_TARGET
             }
             const result = creep.pickup(dropped)
             if (result !== OK) {
-                creep.say("ERROR")
+                if (Memory.debug.creepSaysErrorCode) creep.say("ERROR")
                 creep.memory.hauler_task = undefined
                 return result
             }
@@ -182,13 +182,13 @@ export default roleHauler = {
 
             const structure = Game.getObjectById(creep.memory.hauler_task.target_id) as Structure | null
             if (structure === null) {
-                creep.say("TargetNotFound")
+                if (Memory.debug.creepSaysErrorCode) creep.say("TargetNotFound")
                 creep.memory.hauler_task = undefined
                 return ERR_NOT_FOUND
             }
             const result = creep.withdraw(structure, creep.memory.hauler_task.resource)
             if (result !== OK) {
-                creep.say("ERROR")
+                if (Memory.debug.creepSaysErrorCode) creep.say("ERROR")
                 creep.memory.hauler_task = undefined
                 return result
             }
@@ -201,13 +201,13 @@ export default roleHauler = {
 
             const structure = Game.getObjectById(creep.memory.hauler_task.target_id) as Structure | null
             if (structure === null) {
-                creep.say("TargetNotFound")
+                if (Memory.debug.creepSaysErrorCode) creep.say("TargetNotFound")
                 creep.memory.hauler_task = undefined
                 return ERR_NOT_FOUND
             }
             const result = creep.transfer(structure, creep.memory.hauler_task.resource)
             if (result !== OK) {
-                creep.say("ERROR")
+                if (Memory.debug.creepSaysErrorCode) creep.say("ERROR")
                 creep.memory.hauler_task = undefined
                 return result
             }
