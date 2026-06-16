@@ -28,17 +28,19 @@ function find_closest_pickup_target(creep: Creep, minAmountThreshold: number, pi
 }
 
 function find_closest_transfer_target(minAmountThreshold: number, targetRoom: Room): TransferTarget | null {
-
-    const containers_near_spawn = targetRoom.find(FIND_STRUCTURES, {
-        filter: (s) => ((s.structureType === STRUCTURE_CONTAINER) && s.pos.findInRange(FIND_MY_SPAWNS, 1).length > 0 && s.store.getFreeCapacity(RESOURCE_ENERGY) > minAmountThreshold)
-    }) as StructureContainer[]
-    if (containers_near_spawn.length > 0) {
-        return {
-            id: containers_near_spawn[0].id,
-            type: 'transfer',
-            resourceType: RESOURCE_ENERGY,
-            amount: containers_near_spawn[0].store.getFreeCapacity(RESOURCE_ENERGY),
-            pos: containers_near_spawn[0].pos
+    const spawner_base_pos = targetRoom.memory.spawner_base_centroid_pos
+    if (spawner_base_pos) {
+        const containers_near_spawn = targetRoom.find(FIND_STRUCTURES, {
+            filter: (s) => ((s.structureType === STRUCTURE_CONTAINER) && s.pos.inRangeTo(spawner_base_pos.x, spawner_base_pos.y, 2) && s.store.getFreeCapacity(RESOURCE_ENERGY) > minAmountThreshold)
+        }) as StructureContainer[]
+        if (containers_near_spawn.length > 0) {
+            return {
+                id: containers_near_spawn[0].id,
+                type: 'transfer',
+                resourceType: RESOURCE_ENERGY,
+                amount: containers_near_spawn[0].store.getFreeCapacity(RESOURCE_ENERGY),
+                pos: containers_near_spawn[0].pos
+            }
         }
     }
 
